@@ -84,6 +84,9 @@ subjectSchema.pre("findOneAndDelete", async function () {
       const DefinitionDetails = mongoose.models.DefinitionDetails || mongoose.model("DefinitionDetails");
       const SubjectDetails =
         mongoose.models.SubjectDetails || mongoose.model("SubjectDetails");
+      const PracticeCategory = mongoose.models.PracticeCategory || mongoose.model("PracticeCategory");
+      const PracticeSubCategory = mongoose.models.PracticeSubCategory || mongoose.model("PracticeSubCategory");
+      const PracticeQuestion = mongoose.models.PracticeQuestion || mongoose.model("PracticeQuestion");
 
       // Delete subject details first
       const subjectDetailsResult = await SubjectDetails.deleteMany({
@@ -176,6 +179,54 @@ subjectSchema.pre("findOneAndDelete", async function () {
       const unitsResult = await Unit.deleteMany({ subjectId: subject._id });
       console.log(
         `🗑️ Cascading delete: Deleted ${unitsResult.deletedCount} Units for subject ${subject._id}`
+      );
+
+      // Find all practice categories for this subject
+      const practiceCategories = await PracticeCategory.find({ subjectId: subject._id });
+      const practiceCategoryIds = practiceCategories.map((category) => category._id);
+      console.log(
+        `🗑️ Found ${practiceCategories.length} practice categories for subject ${subject._id}`
+      );
+
+      // Find all practice subcategories in these categories
+      const practiceSubCategories = await PracticeSubCategory.find({
+        categoryId: { $in: practiceCategoryIds },
+      });
+      const practiceSubCategoryIds = practiceSubCategories.map(
+        (subCategory) => subCategory._id
+      );
+      console.log(
+        `🗑️ Found ${practiceSubCategories.length} practice subcategories for subject ${subject._id}`
+      );
+
+      // Delete all practice questions in these subcategories
+      let practiceQuestionsResult = { deletedCount: 0 };
+      if (practiceSubCategoryIds.length > 0) {
+        practiceQuestionsResult = await PracticeQuestion.deleteMany({
+          subCategoryId: { $in: practiceSubCategoryIds },
+        });
+      }
+      console.log(
+        `🗑️ Cascading delete: Deleted ${practiceQuestionsResult.deletedCount} PracticeQuestions for subject ${subject._id}`
+      );
+
+      // Delete all practice subcategories
+      let practiceSubCategoriesResult = { deletedCount: 0 };
+      if (practiceCategoryIds.length > 0) {
+        practiceSubCategoriesResult = await PracticeSubCategory.deleteMany({
+          categoryId: { $in: practiceCategoryIds },
+        });
+      }
+      console.log(
+        `🗑️ Cascading delete: Deleted ${practiceSubCategoriesResult.deletedCount} PracticeSubCategories for subject ${subject._id}`
+      );
+
+      // Delete all practice categories
+      const practiceCategoriesResult = await PracticeCategory.deleteMany({
+        subjectId: subject._id,
+      });
+      console.log(
+        `🗑️ Cascading delete: Deleted ${practiceCategoriesResult.deletedCount} PracticeCategories for subject ${subject._id}`
       );
     }
   } catch (error) {

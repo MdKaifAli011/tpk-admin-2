@@ -93,6 +93,33 @@ practiceSubCategorySchema.index(
   { unique: true, partialFilterExpression: { orderNumber: { $exists: true } } }
 );
 
+// Cascading delete: When a PracticeSubCategory is deleted, delete all related PracticeQuestions
+practiceSubCategorySchema.pre("findOneAndDelete", async function () {
+  try {
+    const subCategory = await this.model.findOne(this.getQuery());
+    if (subCategory) {
+      console.log(
+        `🗑️ Cascading delete: Deleting practice subcategory ${subCategory._id}`
+      );
+      // Delete all related practice questions
+      const PracticeQuestion =
+        mongoose.models.PracticeQuestion || mongoose.model("PracticeQuestion");
+      const result = await PracticeQuestion.deleteMany({
+        subCategoryId: subCategory._id,
+      });
+      console.log(
+        `🗑️ Cascading delete: Deleted ${result.deletedCount} PracticeQuestions for subcategory ${subCategory._id}`
+      );
+    }
+  } catch (error) {
+    console.error(
+      "❌ Error in PracticeSubCategory cascading delete middleware:",
+      error
+    );
+    // Don't throw - allow the delete to continue even if cascading fails
+  }
+});
+
 // Ensure the latest schema is used during dev hot-reload
 if (mongoose.connection?.models?.PracticeSubCategory) {
   delete mongoose.connection.models.PracticeSubCategory;

@@ -92,10 +92,70 @@ subTopicSchema.pre("findOneAndDelete", async function () {
 
       // Get model - use mongoose.model() to ensure model is loaded
       const SubTopicDetails = mongoose.models.SubTopicDetails || mongoose.model("SubTopicDetails");
+      const PracticeSubCategory = mongoose.models.PracticeSubCategory || mongoose.model("PracticeSubCategory");
+      const PracticeQuestion = mongoose.models.PracticeQuestion || mongoose.model("PracticeQuestion");
+      const Definition = mongoose.models.Definition || mongoose.model("Definition");
+      const DefinitionDetails = mongoose.models.DefinitionDetails || mongoose.model("DefinitionDetails");
 
       const result = await SubTopicDetails.deleteMany({ subTopicId: subTopic._id });
       console.log(
         `🗑️ Cascading delete: Deleted ${result.deletedCount} SubTopicDetails for subtopic ${subTopic._id}`
+      );
+
+      // Find all definitions for this subtopic
+      const definitions = await Definition.find({ subTopicId: subTopic._id });
+      const definitionIds = definitions.map((definition) => definition._id);
+      console.log(
+        `🗑️ Found ${definitions.length} definitions for subtopic ${subTopic._id}`
+      );
+
+      // Delete all definition details
+      let definitionDetailsResult = { deletedCount: 0 };
+      if (definitionIds.length > 0) {
+        definitionDetailsResult = await DefinitionDetails.deleteMany({
+          definitionId: { $in: definitionIds },
+        });
+      }
+      console.log(
+        `🗑️ Cascading delete: Deleted ${definitionDetailsResult.deletedCount} DefinitionDetails for subtopic ${subTopic._id}`
+      );
+
+      // Delete all definitions
+      const definitionsResult = await Definition.deleteMany({
+        subTopicId: subTopic._id,
+      });
+      console.log(
+        `🗑️ Cascading delete: Deleted ${definitionsResult.deletedCount} Definitions for subtopic ${subTopic._id}`
+      );
+
+      // Find all practice subcategories for this subtopic
+      const practiceSubCategories = await PracticeSubCategory.find({
+        subTopicId: subTopic._id,
+      });
+      const practiceSubCategoryIds = practiceSubCategories.map(
+        (subCategory) => subCategory._id
+      );
+      console.log(
+        `🗑️ Found ${practiceSubCategories.length} practice subcategories for subtopic ${subTopic._id}`
+      );
+
+      // Delete all practice questions in these subcategories
+      let practiceQuestionsResult = { deletedCount: 0 };
+      if (practiceSubCategoryIds.length > 0) {
+        practiceQuestionsResult = await PracticeQuestion.deleteMany({
+          subCategoryId: { $in: practiceSubCategoryIds },
+        });
+      }
+      console.log(
+        `🗑️ Cascading delete: Deleted ${practiceQuestionsResult.deletedCount} PracticeQuestions for subtopic ${subTopic._id}`
+      );
+
+      // Delete all practice subcategories
+      const practiceSubCategoriesResult = await PracticeSubCategory.deleteMany({
+        subTopicId: subTopic._id,
+      });
+      console.log(
+        `🗑️ Cascading delete: Deleted ${practiceSubCategoriesResult.deletedCount} PracticeSubCategories for subtopic ${subTopic._id}`
       );
     }
   } catch (error) {

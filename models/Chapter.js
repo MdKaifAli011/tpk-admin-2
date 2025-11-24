@@ -101,6 +101,8 @@ chapterSchema.pre("findOneAndDelete", async function () {
       const Definition = mongoose.models.Definition || mongoose.model("Definition");
       const DefinitionDetails = mongoose.models.DefinitionDetails || mongoose.model("DefinitionDetails");
       const ChapterDetails = mongoose.models.ChapterDetails || mongoose.model("ChapterDetails");
+      const PracticeSubCategory = mongoose.models.PracticeSubCategory || mongoose.model("PracticeSubCategory");
+      const PracticeQuestion = mongoose.models.PracticeQuestion || mongoose.model("PracticeQuestion");
 
       // Delete chapter details first
       const chapterDetailsResult = await ChapterDetails.deleteMany({ chapterId: chapter._id });
@@ -154,6 +156,36 @@ chapterSchema.pre("findOneAndDelete", async function () {
       const topicsResult = await Topic.deleteMany({ chapterId: chapter._id });
       console.log(
         `🗑️ Cascading delete: Deleted ${topicsResult.deletedCount} Topics for chapter ${chapter._id}`
+      );
+
+      // Find all practice subcategories for this chapter
+      const practiceSubCategories = await PracticeSubCategory.find({
+        chapterId: chapter._id,
+      });
+      const practiceSubCategoryIds = practiceSubCategories.map(
+        (subCategory) => subCategory._id
+      );
+      console.log(
+        `🗑️ Found ${practiceSubCategories.length} practice subcategories for chapter ${chapter._id}`
+      );
+
+      // Delete all practice questions in these subcategories
+      let practiceQuestionsResult = { deletedCount: 0 };
+      if (practiceSubCategoryIds.length > 0) {
+        practiceQuestionsResult = await PracticeQuestion.deleteMany({
+          subCategoryId: { $in: practiceSubCategoryIds },
+        });
+      }
+      console.log(
+        `🗑️ Cascading delete: Deleted ${practiceQuestionsResult.deletedCount} PracticeQuestions for chapter ${chapter._id}`
+      );
+
+      // Delete all practice subcategories
+      const practiceSubCategoriesResult = await PracticeSubCategory.deleteMany({
+        chapterId: chapter._id,
+      });
+      console.log(
+        `🗑️ Cascading delete: Deleted ${practiceSubCategoriesResult.deletedCount} PracticeSubCategories for chapter ${chapter._id}`
       );
     }
   } catch (error) {

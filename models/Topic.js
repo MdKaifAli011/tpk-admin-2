@@ -88,6 +88,8 @@ topicSchema.pre("findOneAndDelete", async function () {
       // Get models - use mongoose.model() to ensure models are loaded
       const SubTopic = mongoose.models.SubTopic || mongoose.model("SubTopic");
       const TopicDetails = mongoose.models.TopicDetails || mongoose.model("TopicDetails");
+      const PracticeSubCategory = mongoose.models.PracticeSubCategory || mongoose.model("PracticeSubCategory");
+      const PracticeQuestion = mongoose.models.PracticeQuestion || mongoose.model("PracticeQuestion");
 
       // Delete topic details first
       const topicDetailsResult = await TopicDetails.deleteMany({ topicId: topic._id });
@@ -98,6 +100,36 @@ topicSchema.pre("findOneAndDelete", async function () {
       const result = await SubTopic.deleteMany({ topicId: topic._id });
       console.log(
         `🗑️ Cascading delete: Deleted ${result.deletedCount} SubTopics for topic ${topic._id}`
+      );
+
+      // Find all practice subcategories for this topic
+      const practiceSubCategories = await PracticeSubCategory.find({
+        topicId: topic._id,
+      });
+      const practiceSubCategoryIds = practiceSubCategories.map(
+        (subCategory) => subCategory._id
+      );
+      console.log(
+        `🗑️ Found ${practiceSubCategories.length} practice subcategories for topic ${topic._id}`
+      );
+
+      // Delete all practice questions in these subcategories
+      let practiceQuestionsResult = { deletedCount: 0 };
+      if (practiceSubCategoryIds.length > 0) {
+        practiceQuestionsResult = await PracticeQuestion.deleteMany({
+          subCategoryId: { $in: practiceSubCategoryIds },
+        });
+      }
+      console.log(
+        `🗑️ Cascading delete: Deleted ${practiceQuestionsResult.deletedCount} PracticeQuestions for topic ${topic._id}`
+      );
+
+      // Delete all practice subcategories
+      const practiceSubCategoriesResult = await PracticeSubCategory.deleteMany({
+        topicId: topic._id,
+      });
+      console.log(
+        `🗑️ Cascading delete: Deleted ${practiceSubCategoriesResult.deletedCount} PracticeSubCategories for topic ${topic._id}`
       );
     }
   } catch (error) {

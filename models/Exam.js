@@ -77,6 +77,9 @@ examSchema.pre("findOneAndDelete", async function () {
       const Definition = mongoose.models.Definition || mongoose.model("Definition");
       const DefinitionDetails = mongoose.models.DefinitionDetails || mongoose.model("DefinitionDetails");
       const ExamDetails = mongoose.models.ExamDetails || mongoose.model("ExamDetails");
+      const PracticeCategory = mongoose.models.PracticeCategory || mongoose.model("PracticeCategory");
+      const PracticeSubCategory = mongoose.models.PracticeSubCategory || mongoose.model("PracticeSubCategory");
+      const PracticeQuestion = mongoose.models.PracticeQuestion || mongoose.model("PracticeQuestion");
 
       // Delete exam details first
       const examDetailsResult = await ExamDetails.deleteMany({ examId: exam._id });
@@ -133,6 +136,54 @@ examSchema.pre("findOneAndDelete", async function () {
       const subjectsResult = await Subject.deleteMany({ examId: exam._id });
       console.log(
         `🗑️ Cascading delete: Deleted ${subjectsResult.deletedCount} Subjects for exam ${exam._id}`
+      );
+
+      // Find all practice categories for this exam
+      const practiceCategories = await PracticeCategory.find({ examId: exam._id });
+      const practiceCategoryIds = practiceCategories.map((category) => category._id);
+      console.log(
+        `🗑️ Found ${practiceCategories.length} practice categories for exam ${exam._id}`
+      );
+
+      // Find all practice subcategories in these categories
+      const practiceSubCategories = await PracticeSubCategory.find({
+        categoryId: { $in: practiceCategoryIds },
+      });
+      const practiceSubCategoryIds = practiceSubCategories.map(
+        (subCategory) => subCategory._id
+      );
+      console.log(
+        `🗑️ Found ${practiceSubCategories.length} practice subcategories for exam ${exam._id}`
+      );
+
+      // Delete all practice questions in these subcategories
+      let practiceQuestionsResult = { deletedCount: 0 };
+      if (practiceSubCategoryIds.length > 0) {
+        practiceQuestionsResult = await PracticeQuestion.deleteMany({
+          subCategoryId: { $in: practiceSubCategoryIds },
+        });
+      }
+      console.log(
+        `🗑️ Cascading delete: Deleted ${practiceQuestionsResult.deletedCount} PracticeQuestions for exam ${exam._id}`
+      );
+
+      // Delete all practice subcategories
+      let practiceSubCategoriesResult = { deletedCount: 0 };
+      if (practiceCategoryIds.length > 0) {
+        practiceSubCategoriesResult = await PracticeSubCategory.deleteMany({
+          categoryId: { $in: practiceCategoryIds },
+        });
+      }
+      console.log(
+        `🗑️ Cascading delete: Deleted ${practiceSubCategoriesResult.deletedCount} PracticeSubCategories for exam ${exam._id}`
+      );
+
+      // Delete all practice categories
+      const practiceCategoriesResult = await PracticeCategory.deleteMany({
+        examId: exam._id,
+      });
+      console.log(
+        `🗑️ Cascading delete: Deleted ${practiceCategoriesResult.deletedCount} PracticeCategories for exam ${exam._id}`
       );
     }
   } catch (error) {

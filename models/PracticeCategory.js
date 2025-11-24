@@ -78,7 +78,7 @@ practiceCategorySchema.index(
   { unique: true, partialFilterExpression: { orderNumber: { $exists: true } } }
 );
 
-// Cascading delete: When a PracticeCategory is deleted, delete all related PracticeSubCategories
+// Cascading delete: When a PracticeCategory is deleted, delete all related PracticeSubCategories and PracticeQuestions
 practiceCategorySchema.pre("findOneAndDelete", async function () {
   try {
     const category = await this.model.findOne(this.getQuery());
@@ -86,10 +86,34 @@ practiceCategorySchema.pre("findOneAndDelete", async function () {
       console.log(
         `🗑️ Cascading delete: Deleting practice category ${category._id}`
       );
-      // Delete all related subcategories
+      // Get models
       const PracticeSubCategory =
         mongoose.models.PracticeSubCategory ||
         mongoose.model("PracticeSubCategory");
+      const PracticeQuestion =
+        mongoose.models.PracticeQuestion || mongoose.model("PracticeQuestion");
+
+      // Find all subcategories for this category
+      const subCategories = await PracticeSubCategory.find({
+        categoryId: category._id,
+      });
+      const subCategoryIds = subCategories.map((sub) => sub._id);
+      console.log(
+        `🗑️ Found ${subCategories.length} practice subcategories for category ${category._id}`
+      );
+
+      // Delete all practice questions in these subcategories
+      let practiceQuestionsResult = { deletedCount: 0 };
+      if (subCategoryIds.length > 0) {
+        practiceQuestionsResult = await PracticeQuestion.deleteMany({
+          subCategoryId: { $in: subCategoryIds },
+        });
+      }
+      console.log(
+        `🗑️ Cascading delete: Deleted ${practiceQuestionsResult.deletedCount} PracticeQuestions for category ${category._id}`
+      );
+
+      // Delete all related subcategories
       const result = await PracticeSubCategory.deleteMany({
         categoryId: category._id,
       });

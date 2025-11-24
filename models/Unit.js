@@ -84,6 +84,8 @@ unitSchema.pre("findOneAndDelete", async function () {
       const Definition = mongoose.models.Definition || mongoose.model("Definition");
       const DefinitionDetails = mongoose.models.DefinitionDetails || mongoose.model("DefinitionDetails");
       const UnitDetails = mongoose.models.UnitDetails || mongoose.model("UnitDetails");
+      const PracticeSubCategory = mongoose.models.PracticeSubCategory || mongoose.model("PracticeSubCategory");
+      const PracticeQuestion = mongoose.models.PracticeQuestion || mongoose.model("PracticeQuestion");
 
       // Delete unit details first
       const unitDetailsResult = await UnitDetails.deleteMany({ unitId: unit._id });
@@ -154,6 +156,34 @@ unitSchema.pre("findOneAndDelete", async function () {
       const chaptersResult = await Chapter.deleteMany({ unitId: unit._id });
       console.log(
         `🗑️ Cascading delete: Deleted ${chaptersResult.deletedCount} Chapters for unit ${unit._id}`
+      );
+
+      // Find all practice subcategories for this unit
+      const practiceSubCategories = await PracticeSubCategory.find({ unitId: unit._id });
+      const practiceSubCategoryIds = practiceSubCategories.map(
+        (subCategory) => subCategory._id
+      );
+      console.log(
+        `🗑️ Found ${practiceSubCategories.length} practice subcategories for unit ${unit._id}`
+      );
+
+      // Delete all practice questions in these subcategories
+      let practiceQuestionsResult = { deletedCount: 0 };
+      if (practiceSubCategoryIds.length > 0) {
+        practiceQuestionsResult = await PracticeQuestion.deleteMany({
+          subCategoryId: { $in: practiceSubCategoryIds },
+        });
+      }
+      console.log(
+        `🗑️ Cascading delete: Deleted ${practiceQuestionsResult.deletedCount} PracticeQuestions for unit ${unit._id}`
+      );
+
+      // Delete all practice subcategories
+      const practiceSubCategoriesResult = await PracticeSubCategory.deleteMany({
+        unitId: unit._id,
+      });
+      console.log(
+        `🗑️ Cascading delete: Deleted ${practiceSubCategoriesResult.deletedCount} PracticeSubCategories for unit ${unit._id}`
       );
     }
   } catch (error) {

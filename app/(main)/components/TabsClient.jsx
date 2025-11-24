@@ -2,7 +2,7 @@
 
 import React, { useState, lazy, Suspense } from "react";
 import Link from "next/link";
-import { FaBook, FaChartLine, FaTrophy, FaFileAlt } from "react-icons/fa";
+import { FaBook, FaChartLine, FaTrophy } from "react-icons/fa";
 import RichContent from "./RichContent";
 import { createSlug } from "../lib/api";
 
@@ -98,104 +98,24 @@ const TabsClient = ({
             )}
 
             {/* SubTopics List - for topic type */}
-            {entityType === "topic" &&
-              subtopics &&
-              subtopics.length > 0 && (
-                <div className="mt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    Sub Topics
-                  </h3>
-                  <div className="space-y-4">
-                    {subtopics.map((subTopic, index) => {
-                      const subtopicSlug =
-                        subTopic.slug || createSlug(subTopic.name);
-                      const subtopicUrl =
-                        examSlug &&
-                        subjectSlug &&
-                        unitSlug &&
-                        chapterSlug &&
-                        topicSlug
-                          ? `/${examSlug}/${subjectSlug}/${unitSlug}/${chapterSlug}/${topicSlug}/${subtopicSlug}`
-                          : null;
-
-                      // Helper to strip HTML and get preview
-                      const getContentPreview = (htmlContent, maxLength = 200) => {
-                        if (!htmlContent) return "";
-                        const textContent = htmlContent
-                          .replace(/<[^>]*>/g, "")
-                          .replace(/&nbsp;/g, " ")
-                          .replace(/&amp;/g, "&")
-                          .replace(/&lt;/g, "<")
-                          .replace(/&gt;/g, ">")
-                          .replace(/&quot;/g, '"')
-                          .replace(/&#39;/g, "'")
-                          .trim();
-                        if (textContent.length <= maxLength) return textContent;
-                        return textContent.substring(0, maxLength) + "...";
-                      };
-
-                      const contentPreview = getContentPreview(
-                        subTopic.content || "",
-                        200
-                      );
-                      const hasContent = contentPreview.length > 0;
-
-                      const SubTopicCard = (
-                        <div className="border border-gray-200 rounded-lg p-5 hover:border-indigo-300 hover:shadow-md transition-all">
-                          <div className="flex items-start justify-between gap-4 mb-3">
-                            <div className="flex-1">
-                              <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                                {subTopic.name}
-                              </h4>
-                              {hasContent && (
-                                <p className="text-sm text-gray-600 leading-relaxed">
-                                  {contentPreview}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-                            <div className="flex items-center gap-4 text-xs text-gray-500">
-                              <span className="font-medium text-emerald-600">
-                                Weightage: {subTopic.weightage || "20%"}
-                              </span>
-                              <span className="inline-flex items-center gap-1">
-                                <FaFileAlt className="text-gray-400" />
-                                {subTopic.engagement || "2.2K"}
-                              </span>
-                            </div>
-                            {subtopicUrl && (
-                              <Link
-                                href={subtopicUrl}
-                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-md hover:bg-indigo-100 transition-colors"
-                              >
-                                Read More
-                                <svg
-                                  className="w-4 h-4"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M9 5l7 7-7 7"
-                                  />
-                                </svg>
-                              </Link>
-                            )}
-                          </div>
+            {entityType === "topic" && subtopics && subtopics.length > 0 && (
+              <div className="mt-6">
+                <div className="space-y-6">
+                  {subtopics.map((subTopic, index) => (
+                    <div key={subTopic._id || index} className="space-y-3">
+                      <h4 className="text-lg font-semibold text-gray-900">
+                        {subTopic.name}
+                      </h4>
+                      {subTopic.content && (
+                        <div className="prose prose-sm sm:prose max-w-none">
+                          <RichContent html={subTopic.content} />
                         </div>
-                      );
-
-                      return (
-                        <div key={subTopic._id || index}>{SubTopicCard}</div>
-                      );
-                    })}
-                  </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
 
             {/* Definitions List - for subtopic and definition types */}
             {(entityType === "subtopic" || entityType === "definition") &&
