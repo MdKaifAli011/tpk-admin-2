@@ -113,7 +113,7 @@ const TopicsTable = ({
             style={{ animationDelay: `${groupIndex * 0.1}s` }}
           >
             {/* Breadcrumb Header */}
-            <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+            <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
               <div className="flex items-center gap-2.5 flex-wrap text-sm font-medium text-white">
                 <span
                   className="px-2.5 py-1 rounded-full"
@@ -158,16 +158,16 @@ const TopicsTable = ({
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Order
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Topic Name
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Content
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -181,12 +181,12 @@ const TopicsTable = ({
                           topic.status === "inactive" ? "opacity-60" : ""
                         }`}
                       >
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-700 font-medium text-sm">
+                        <td className="px-3 py-2 whitespace-nowrap">
+                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 text-gray-700 font-medium text-xs">
                             {topic.orderNumber || topicIndex + 1}
                           </span>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-3 py-2">
                           <span
                             onClick={() => handleTopicClick(topic._id)}
                             className={`cursor-pointer text-sm font-medium hover:text-blue-600 transition-colors ${
@@ -199,7 +199,7 @@ const TopicsTable = ({
                             {topic.name}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-2 whitespace-nowrap">
                           <span className={`text-sm ${
                             topic.contentInfo?.hasContent 
                               ? "text-gray-700" 
@@ -208,7 +208,7 @@ const TopicsTable = ({
                             {formatContentDate(topic.contentInfo)}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <td className="px-3 py-2 whitespace-nowrap text-right">
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={(e) => {
@@ -303,7 +303,7 @@ const TopicsTable = ({
                 return (
                   <div
                     key={topic._id || topicIndex}
-                    className={`p-4 hover:bg-gray-50 transition-colors ${
+                    className={`p-2 hover:bg-gray-50 transition-colors ${
                       topic.status === "inactive" ? "opacity-60" : ""
                     }`}
                   >

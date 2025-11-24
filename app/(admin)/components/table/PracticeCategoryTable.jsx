@@ -67,7 +67,7 @@ const PracticeCategoryTable = ({
           className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm"
         >
           {/* Breadcrumb Header */}
-          <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+          <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
             <div className="flex items-center gap-2.5 flex-wrap text-sm font-medium text-white">
               {/* Exam Name */}
               <span
@@ -93,25 +93,25 @@ const PracticeCategoryTable = ({
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     {group.examName} Paper Categories
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Subject
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     No. of Tests
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Mode
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Duration
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Language
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -124,7 +124,7 @@ const PracticeCategoryTable = ({
                       category.status === "inactive" ? "opacity-60" : ""
                     }`}
                   >
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-2 whitespace-nowrap">
                       <div
                         onClick={() => handleCategoryClick(category)}
                         className="text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer transition-colors"
@@ -135,35 +135,35 @@ const PracticeCategoryTable = ({
                         {category.name}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <td className="px-3 py-2 whitespace-nowrap text-center">
                     <span
-                              className="px-2 py-1 rounded-md text-xs font-medium text-white"
+                              className="px-2 py-0.5 rounded-md text-xs font-medium text-white"
                               style={{ backgroundColor: "#3B82F6" }}
                             >
                               {category.subjectId?.name}
                             </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <td className="px-3 py-2 whitespace-nowrap text-center">
                       <span className="text-sm text-gray-900">
                         {category.noOfTests || 0}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <td className="px-3 py-2 whitespace-nowrap text-center">
                       <span className="text-sm text-gray-600">
                         {category.mode || "N/A"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <td className="px-3 py-2 whitespace-nowrap text-center">
                       <span className="text-sm text-gray-600">
                         {category.duration || "N/A"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <td className="px-3 py-2 whitespace-nowrap text-center">
                       <span className="text-sm text-gray-600">
                         {category.language || "N/A"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                    <td className="px-3 py-2 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end gap-2">
                         {onEdit &&
                           (canEdit ? (
@@ -245,7 +245,7 @@ const PracticeCategoryTable = ({
             {group.categories.map((category, index) => (
               <div
                 key={category._id || category.id || index}
-                className={`p-4 hover:bg-gray-50 transition-colors ${
+                className={`p-2 hover:bg-gray-50 transition-colors ${
                   category.status === "inactive" ? "opacity-60" : ""
                 }`}
               >

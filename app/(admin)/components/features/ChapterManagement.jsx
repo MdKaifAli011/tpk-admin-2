@@ -904,7 +904,7 @@ const ChaptersManagement = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-semibold text-gray-900 mb-2">
-                Chapters Management
+                Chapter Management
               </h1>
               <p className="text-sm text-gray-600">
                 Manage and organize your chapters, create new chapters, and
@@ -914,7 +914,7 @@ const ChaptersManagement = () => {
             {canCreate ? (
               <button
                 onClick={handleOpenAddForm}
-                className="px-4 py-2 bg-[#0056FF] hover:bg-[#0044CC] text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                className="px-3 py-1.5 bg-[#0056FF] hover:bg-[#0044CC] text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
               >
                 <FaPlus className="w-4 h-4" />
                 <span>Add New Chapter</span>
@@ -923,7 +923,7 @@ const ChaptersManagement = () => {
               <button
                 disabled
                 title={getPermissionMessage("create", role)}
-                className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg text-sm font-medium cursor-not-allowed flex items-center gap-2"
+                className="px-3 py-1.5 bg-gray-300 text-gray-500 rounded-lg text-sm font-medium cursor-not-allowed flex items-center gap-2"
               >
                 <FaLock className="w-4 h-4" />
                 <span>Add New Chapter</span>
@@ -1509,7 +1509,7 @@ const ChaptersManagement = () => {
 
         {/* Content Area */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">
@@ -1522,7 +1522,7 @@ const ChaptersManagement = () => {
               </div>
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
               >
                 <FaFilter className="w-4 h-4" />
                 Filter Chapters
@@ -1537,7 +1537,7 @@ const ChaptersManagement = () => {
 
           {/* Filter Section */}
           {showFilters && (
-            <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 {/* Filter by Exam */}
                 <div className="space-y-2">
@@ -1697,7 +1697,7 @@ const ChaptersManagement = () => {
                 {activeFilterCount > 0 ? (
                   <button
                     onClick={clearFilters}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200"
                   >
                     Clear Filters
                   </button>
@@ -1705,13 +1705,13 @@ const ChaptersManagement = () => {
                   canCreate ? (
                     <button
                       onClick={handleOpenAddForm}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2"
                     >
                       <FaPlus className="w-4 h-4" />
                       Create Your First Chapter
                     </button>
                   ) : (
-                    <div className="px-4 py-2 bg-gray-100 text-gray-500 rounded-lg text-sm font-medium flex items-center gap-2">
+                    <div className="px-3 py-1.5 bg-gray-100 text-gray-500 rounded-lg text-sm font-medium flex items-center gap-2">
                       <FaLock className="w-4 h-4" />
                       <span>{getPermissionMessage("create", role)}</span>
                     </div>

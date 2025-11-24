@@ -772,7 +772,7 @@ What is the capital of India?,Mumbai,Delhi,Kolkata,Chennai,B,https://example.com
               <p className="text-sm text-gray-600">
                 {currentSubCategory
                   ? `Manage questions for ${currentSubCategory.name}. Add, edit, and organize practice questions for this paper.`
-                  : "Manage and organize your practice questions, create new questions, and track question performance."}
+                  : "Manage and organize your practice questions, create new questions, and track question performance across your educational platform."}
               </p>
             </div>
             <div className="flex items-center gap-3">

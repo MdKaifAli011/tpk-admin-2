@@ -229,7 +229,7 @@ const LeadManagement = () => {
 
       {/* Leads Table */}
       <div className="mt-6 bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+        <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-xl font-semibold text-gray-900">
@@ -240,28 +240,24 @@ const LeadManagement = () => {
                 View and manage all submitted leads
               </p>
             </div>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+            >
+              <FaFilter className="w-4 h-4" />
+              Filter Leads
+              {activeFilterCount > 0 && (
+                <span className="bg-white text-blue-600 px-2 py-0.5 rounded-full text-xs font-medium">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
           </div>
-        </div>
-
-        {/* Filter Button */}
-        <div className="px-6 py-3 border-b border-gray-200">
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
-          >
-            <FaFilter className="w-4 h-4" />
-            Filter Leads
-            {activeFilterCount > 0 && (
-              <span className="bg-white text-blue-600 px-2 py-0.5 rounded-full text-xs font-medium">
-                {activeFilterCount}
-              </span>
-            )}
-          </button>
         </div>
 
         {/* Filter Section */}
         {showFilters && (
-          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+          <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
               {/* Search */}
               <div className="lg:col-span-3 space-y-2">
@@ -476,7 +472,7 @@ const LeadManagement = () => {
               <p className="text-sm text-gray-500 mb-4">{error}</p>
               <button
                 onClick={() => fetchLeads(pagination.page, pagination.limit)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
               >
                 Retry
               </button>
@@ -497,7 +493,7 @@ const LeadManagement = () => {
               {activeFilterCount > 0 && (
                 <button
                   onClick={clearFilters}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
                 >
                   Clear Filters
                 </button>

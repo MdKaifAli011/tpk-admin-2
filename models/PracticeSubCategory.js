@@ -101,9 +101,8 @@ practiceSubCategorySchema.pre("findOneAndDelete", async function () {
       console.log(
         `🗑️ Cascading delete: Deleting practice subcategory ${subCategory._id}`
       );
-      // Delete all related practice questions
-      const PracticeQuestion =
-        mongoose.models.PracticeQuestion || mongoose.model("PracticeQuestion");
+      // Get model - dynamically import if not already registered
+      const PracticeQuestion = mongoose.models.PracticeQuestion || (await import("./PracticeQuestion.js")).default;
       const result = await PracticeQuestion.deleteMany({
         subCategoryId: subCategory._id,
       });

@@ -75,18 +75,17 @@ subjectSchema.pre("findOneAndDelete", async function () {
         `🗑️ Cascading delete: Deleting all entities for subject ${subject._id}`
       );
 
-      // Get models - use mongoose.model() to ensure models are loaded
-      const Unit = mongoose.models.Unit || mongoose.model("Unit");
-      const Chapter = mongoose.models.Chapter || mongoose.model("Chapter");
-      const Topic = mongoose.models.Topic || mongoose.model("Topic");
-      const SubTopic = mongoose.models.SubTopic || mongoose.model("SubTopic");
-      const Definition = mongoose.models.Definition || mongoose.model("Definition");
-      const DefinitionDetails = mongoose.models.DefinitionDetails || mongoose.model("DefinitionDetails");
-      const SubjectDetails =
-        mongoose.models.SubjectDetails || mongoose.model("SubjectDetails");
-      const PracticeCategory = mongoose.models.PracticeCategory || mongoose.model("PracticeCategory");
-      const PracticeSubCategory = mongoose.models.PracticeSubCategory || mongoose.model("PracticeSubCategory");
-      const PracticeQuestion = mongoose.models.PracticeQuestion || mongoose.model("PracticeQuestion");
+      // Get models - dynamically import if not already registered
+      const Unit = mongoose.models.Unit || (await import("./Unit.js")).default;
+      const Chapter = mongoose.models.Chapter || (await import("./Chapter.js")).default;
+      const Topic = mongoose.models.Topic || (await import("./Topic.js")).default;
+      const SubTopic = mongoose.models.SubTopic || (await import("./SubTopic.js")).default;
+      const Definition = mongoose.models.Definition || (await import("./Definition.js")).default;
+      const DefinitionDetails = mongoose.models.DefinitionDetails || (await import("./DefinitionDetails.js")).default;
+      const SubjectDetails = mongoose.models.SubjectDetails || (await import("./SubjectDetails.js")).default;
+      const PracticeCategory = mongoose.models.PracticeCategory || (await import("./PracticeCategory.js")).default;
+      const PracticeSubCategory = mongoose.models.PracticeSubCategory || (await import("./PracticeSubCategory.js")).default;
+      const PracticeQuestion = mongoose.models.PracticeQuestion || (await import("./PracticeQuestion.js")).default;
 
       // Delete subject details first
       const subjectDetailsResult = await SubjectDetails.deleteMany({

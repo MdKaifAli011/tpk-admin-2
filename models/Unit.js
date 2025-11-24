@@ -77,15 +77,15 @@ unitSchema.pre("findOneAndDelete", async function () {
         `🗑️ Cascading delete: Deleting all entities for unit ${unit._id}`
       );
 
-      // Get models - use mongoose.model() to ensure models are loaded
-      const Chapter = mongoose.models.Chapter || mongoose.model("Chapter");
-      const Topic = mongoose.models.Topic || mongoose.model("Topic");
-      const SubTopic = mongoose.models.SubTopic || mongoose.model("SubTopic");
-      const Definition = mongoose.models.Definition || mongoose.model("Definition");
-      const DefinitionDetails = mongoose.models.DefinitionDetails || mongoose.model("DefinitionDetails");
-      const UnitDetails = mongoose.models.UnitDetails || mongoose.model("UnitDetails");
-      const PracticeSubCategory = mongoose.models.PracticeSubCategory || mongoose.model("PracticeSubCategory");
-      const PracticeQuestion = mongoose.models.PracticeQuestion || mongoose.model("PracticeQuestion");
+      // Get models - dynamically import if not already registered
+      const Chapter = mongoose.models.Chapter || (await import("./Chapter.js")).default;
+      const Topic = mongoose.models.Topic || (await import("./Topic.js")).default;
+      const SubTopic = mongoose.models.SubTopic || (await import("./SubTopic.js")).default;
+      const Definition = mongoose.models.Definition || (await import("./Definition.js")).default;
+      const DefinitionDetails = mongoose.models.DefinitionDetails || (await import("./DefinitionDetails.js")).default;
+      const UnitDetails = mongoose.models.UnitDetails || (await import("./UnitDetails.js")).default;
+      const PracticeSubCategory = mongoose.models.PracticeSubCategory || (await import("./PracticeSubCategory.js")).default;
+      const PracticeQuestion = mongoose.models.PracticeQuestion || (await import("./PracticeQuestion.js")).default;
 
       // Delete unit details first
       const unitDetailsResult = await UnitDetails.deleteMany({ unitId: unit._id });

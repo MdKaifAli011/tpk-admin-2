@@ -43,28 +43,28 @@ const PracticeSubCategoryTable = ({
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Paper Name
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Hierarchy Path
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Duration
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Max Marks
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Questions
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Negative Marks
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -77,7 +77,7 @@ const PracticeSubCategoryTable = ({
                   subCategory.status === "inactive" ? "opacity-60" : ""
                 }`}
               >
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-3 py-2 whitespace-nowrap">
                   <div
                     onClick={() => handlePaperClick(subCategory)}
                     className="text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer transition-colors"
@@ -88,7 +88,7 @@ const PracticeSubCategoryTable = ({
                     {subCategory.name}
                   </div>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-3 py-2">
                   <div className="flex items-center justify-center gap-1 flex-wrap">
                     {/* Show only the last (deepest) assigned level with label */}
                     {subCategory.subTopicId?.name ? (
@@ -138,29 +138,29 @@ const PracticeSubCategoryTable = ({
                     )}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">
+                <td className="px-3 py-2 whitespace-nowrap text-center">
                   <span className="text-sm text-gray-600">
                     {subCategory.duration || "N/A"}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">
+                <td className="px-3 py-2 whitespace-nowrap text-center">
                   <span className="text-sm font-medium text-gray-900">
                     {subCategory.maximumMarks || 0}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">
+                <td className="px-3 py-2 whitespace-nowrap text-center">
                   <span className="text-sm font-medium text-gray-900">
                     {subCategory.numberOfQuestions || 0}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">
+                <td className="px-3 py-2 whitespace-nowrap text-center">
                   <span className="text-sm text-gray-600">
                     {subCategory.negativeMarks || 0}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">
+                <td className="px-3 py-2 whitespace-nowrap text-center">
                   <span
-                    className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                    className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                       subCategory.status === "active"
                         ? "bg-green-100 text-green-800"
                         : "bg-red-100 text-red-800"
@@ -169,7 +169,7 @@ const PracticeSubCategoryTable = ({
                     {subCategory.status === "active" ? "Active" : "Inactive"}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right">
+                <td className="px-3 py-2 whitespace-nowrap text-right">
                   <div className="flex items-center justify-end gap-2">
                     {onEdit &&
                       (canEdit ? (
@@ -251,7 +251,7 @@ const PracticeSubCategoryTable = ({
         {subCategories.map((subCategory, index) => (
           <div
             key={subCategory._id || index}
-            className={`p-4 hover:bg-gray-50 transition-colors ${
+            className={`p-2 hover:bg-gray-50 transition-colors ${
               subCategory.status === "inactive" ? "opacity-60" : ""
             }`}
           >

@@ -59,13 +59,13 @@ const ExamTable = ({ exams, onEdit, onDelete, onView, onToggleStatus }) => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Exam Details
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Content
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -78,8 +78,8 @@ const ExamTable = ({ exams, onEdit, onDelete, onView, onToggleStatus }) => {
                   exam.status === "inactive" ? "opacity-60" : ""
                 }`}
               >
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-3">
+                <td className="px-3 py-2 whitespace-nowrap">
+                  <div className="flex items-center gap-2">
                     <span
                       onClick={() => handleExamClick(exam)}
                       className={`text-sm font-medium truncate cursor-pointer hover:text-blue-600 transition-colors ${
@@ -106,7 +106,7 @@ const ExamTable = ({ exams, onEdit, onDelete, onView, onToggleStatus }) => {
                     </span>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-3 py-2 whitespace-nowrap">
                   <span className={`text-sm ${
                     exam.contentInfo?.hasContent 
                       ? "text-gray-700" 
@@ -115,7 +115,7 @@ const ExamTable = ({ exams, onEdit, onDelete, onView, onToggleStatus }) => {
                     {formatContentDate(exam.contentInfo)}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right">
+                <td className="px-3 py-2 whitespace-nowrap text-right">
                   <div className="flex items-center justify-end gap-2">
                     <button
                       onClick={() => handleExamClick(exam)}
@@ -198,7 +198,7 @@ const ExamTable = ({ exams, onEdit, onDelete, onView, onToggleStatus }) => {
         {exams.map((exam, index) => (
           <div
             key={exam._id || exam.id || index}
-            className={`p-4 hover:bg-gray-50 transition-colors ${
+            className={`p-2 hover:bg-gray-50 transition-colors ${
               exam.status === "inactive" ? "opacity-60" : ""
             }`}
           >

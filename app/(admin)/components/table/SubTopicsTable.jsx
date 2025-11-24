@@ -122,7 +122,7 @@ const SubTopicsTable = ({
             style={{ animationDelay: `${groupIndex * 0.1}s` }}
           >
             {/* Breadcrumb Header */}
-            <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+            <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
               <div className="flex items-center gap-2.5 flex-wrap text-sm font-medium text-white">
                 <span
                   className="px-2.5 py-1 rounded-full"
@@ -174,16 +174,16 @@ const SubTopicsTable = ({
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Order
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       SubTopic Name
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Content
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -198,13 +198,13 @@ const SubTopicsTable = ({
                         }`}
                       >
                         {/* Order Number */}
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-700 font-medium text-sm">
+                        <td className="px-3 py-2 whitespace-nowrap">
+                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 text-gray-700 font-medium text-xs">
                             {subTopic.orderNumber || subTopicIndex + 1}
                           </span>
                         </td>
                         {/* SubTopic Name */}
-                        <td className="px-6 py-4">
+                        <td className="px-3 py-2">
                           <span
                             onClick={() => handleSubTopicClick(subTopic._id)}
                             className={`cursor-pointer text-sm font-medium hover:text-blue-600 transition-colors ${
@@ -217,7 +217,7 @@ const SubTopicsTable = ({
                             {subTopic.name}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-2 whitespace-nowrap">
                           <span className={`text-sm ${
                             subTopic.contentInfo?.hasContent 
                               ? "text-gray-700" 
@@ -227,7 +227,7 @@ const SubTopicsTable = ({
                           </span>
                         </td>
                         {/* Actions */}
-                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <td className="px-3 py-2 whitespace-nowrap text-right">
                           {/* Action Buttons */}
                           <div className="flex items-center justify-end gap-2">
                             {/* view subtopic details */}
@@ -327,7 +327,7 @@ const SubTopicsTable = ({
                 return (
                   <div
                     key={subTopic._id || subTopicIndex}
-                    className={`p-4 hover:bg-gray-50 transition-colors ${
+                    className={`p-2 hover:bg-gray-50 transition-colors ${
                       subTopic.status === "inactive" ? "opacity-60" : ""
                     }`}
                   >

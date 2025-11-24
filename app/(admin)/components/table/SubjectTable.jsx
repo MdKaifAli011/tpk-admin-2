@@ -72,7 +72,7 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
           className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm"
         >
           {/* Breadcrumb Header */}
-          <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+          <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
             <div className="flex items-center gap-2.5 flex-wrap text-sm font-medium text-white">
               {/* Exam Name */}
               <span className="px-2.5 py-1 rounded-full" style={{ backgroundColor: '#10B981' }}>
@@ -92,13 +92,13 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Subject Name
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Content
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -114,7 +114,7 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
                     }`}
                   >
                     <td
-                      className={`px-6 py-4 whitespace-nowrap text-sm font-medium cursor-pointer hover:text-blue-600 transition-colors ${
+                      className={`px-3 py-2 whitespace-nowrap text-sm font-medium cursor-pointer hover:text-blue-600 transition-colors ${
                         subject.status === "inactive"
                           ? "text-gray-500 line-through"
                           : "text-gray-900"
@@ -124,7 +124,7 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
                     >
                       {subject.name}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-2 whitespace-nowrap">
                       <span className={`text-sm ${
                         subject.contentInfo?.hasContent 
                           ? "text-gray-700" 
@@ -133,7 +133,7 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
                         {formatContentDate(subject.contentInfo)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                    <td className="px-3 py-2 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={(e) => {
@@ -228,7 +228,7 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
             {group.subjects.map((subject, index) => (
               <div
                 key={subject._id || subject.id || index}
-                className={`p-4 hover:bg-gray-50 transition-colors ${
+                className={`p-2 hover:bg-gray-50 transition-colors ${
                   subject.status === "inactive" 
                     ? "opacity-60" 
                     : ""

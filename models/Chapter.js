@@ -95,14 +95,14 @@ chapterSchema.pre("findOneAndDelete", async function () {
         `🗑️ Cascading delete: Deleting all entities for chapter ${chapter._id}`
       );
 
-      // Get models - use mongoose.model() to ensure models are loaded
-      const Topic = mongoose.models.Topic || mongoose.model("Topic");
-      const SubTopic = mongoose.models.SubTopic || mongoose.model("SubTopic");
-      const Definition = mongoose.models.Definition || mongoose.model("Definition");
-      const DefinitionDetails = mongoose.models.DefinitionDetails || mongoose.model("DefinitionDetails");
-      const ChapterDetails = mongoose.models.ChapterDetails || mongoose.model("ChapterDetails");
-      const PracticeSubCategory = mongoose.models.PracticeSubCategory || mongoose.model("PracticeSubCategory");
-      const PracticeQuestion = mongoose.models.PracticeQuestion || mongoose.model("PracticeQuestion");
+      // Get models - dynamically import if not already registered
+      const Topic = mongoose.models.Topic || (await import("./Topic.js")).default;
+      const SubTopic = mongoose.models.SubTopic || (await import("./SubTopic.js")).default;
+      const Definition = mongoose.models.Definition || (await import("./Definition.js")).default;
+      const DefinitionDetails = mongoose.models.DefinitionDetails || (await import("./DefinitionDetails.js")).default;
+      const ChapterDetails = mongoose.models.ChapterDetails || (await import("./ChapterDetails.js")).default;
+      const PracticeSubCategory = mongoose.models.PracticeSubCategory || (await import("./PracticeSubCategory.js")).default;
+      const PracticeQuestion = mongoose.models.PracticeQuestion || (await import("./PracticeQuestion.js")).default;
 
       // Delete chapter details first
       const chapterDetailsResult = await ChapterDetails.deleteMany({ chapterId: chapter._id });

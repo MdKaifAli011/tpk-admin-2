@@ -86,12 +86,9 @@ practiceCategorySchema.pre("findOneAndDelete", async function () {
       console.log(
         `🗑️ Cascading delete: Deleting practice category ${category._id}`
       );
-      // Get models
-      const PracticeSubCategory =
-        mongoose.models.PracticeSubCategory ||
-        mongoose.model("PracticeSubCategory");
-      const PracticeQuestion =
-        mongoose.models.PracticeQuestion || mongoose.model("PracticeQuestion");
+      // Get models - dynamically import if not already registered
+      const PracticeSubCategory = mongoose.models.PracticeSubCategory || (await import("./PracticeSubCategory.js")).default;
+      const PracticeQuestion = mongoose.models.PracticeQuestion || (await import("./PracticeQuestion.js")).default;
 
       // Find all subcategories for this category
       const subCategories = await PracticeSubCategory.find({

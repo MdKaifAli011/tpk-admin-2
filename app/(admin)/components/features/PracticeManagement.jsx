@@ -347,16 +347,14 @@ const PracticeManagement = () => {
                 Practice Management
               </h1>
               <p className="text-sm text-gray-600">
-                Manage and organize your practice questions, create new practice
-                questions, and track practice question performance across your
-                educational platform.
+                Manage and organize your practice categories, create new categories, and track category performance across your educational platform.
               </p>
             </div>
             <div className="flex items-center gap-3">
               {canCreate ? (
                 <button
                   onClick={() => setShowAddForm(true)}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
                 >
                   <FaPlus className="w-4 h-4" />
                   <span>Create Category</span>
@@ -365,7 +363,7 @@ const PracticeManagement = () => {
                 <button
                   disabled
                   title={getPermissionMessage("create", role)}
-                  className="px-4 py-2 bg-gray-100 text-gray-400 rounded-lg text-sm font-medium cursor-not-allowed flex items-center gap-2"
+                  className="px-3 py-1.5 bg-gray-100 text-gray-400 rounded-lg text-sm font-medium cursor-not-allowed flex items-center gap-2"
                 >
                   <FaLock className="w-4 h-4" />
                   <span>Create Category</span>
@@ -587,14 +585,14 @@ const PracticeManagement = () => {
                 <button
                   type="button"
                   onClick={handleCancelForm}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg text-sm font-medium transition-colors"
+                  className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg text-sm font-medium transition-colors"
                   disabled={isFormLoading}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   disabled={isFormLoading}
                 >
                   {isFormLoading ? (

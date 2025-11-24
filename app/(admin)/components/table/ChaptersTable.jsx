@@ -107,7 +107,7 @@ const ChaptersTable = ({
             style={{ animationDelay: `${groupIndex * 0.1}s` }}
           >
             {/* Breadcrumb Header */}
-            <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+            <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
               <div className="flex items-center gap-2.5 flex-wrap text-sm font-medium text-white">
                 <span
                   className="px-2.5 py-1 rounded-full"
@@ -145,25 +145,25 @@ const ChaptersTable = ({
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Order
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Chapter Name
                     </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Weightage
                     </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Time (min)
                     </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Questions
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Content
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -177,12 +177,12 @@ const ChaptersTable = ({
                           chapter.status === "inactive" ? "opacity-60" : ""
                         }`}
                       >
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-700 font-medium text-sm">
+                        <td className="px-3 py-2 whitespace-nowrap">
+                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 text-gray-700 font-medium text-xs">
                             {chapter.orderNumber || chapterIndex + 1}
                           </span>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-3 py-2">
                           <span
                             onClick={() => handleChapterClick(chapter._id)}
                             className={`cursor-pointer text-sm font-medium hover:text-blue-600 transition-colors ${
@@ -195,36 +195,36 @@ const ChaptersTable = ({
                             {chapter.name}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <td className="px-3 py-2 whitespace-nowrap text-center">
                           {chapter.weightage && chapter.weightage > 0 ? (
-                            <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 font-medium text-sm">
+                            <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 font-medium text-xs">
                               {chapter.weightage}%
                             </span>
                           ) : (
-                            <span className="text-gray-400 font-medium text-sm">
+                            <span className="text-gray-400 font-medium text-xs">
                               —
                             </span>
                           )}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <td className="px-3 py-2 whitespace-nowrap text-center">
                           {chapter.time && chapter.time > 0 ? (
-                            <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 font-medium text-sm">
+                            <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 font-medium text-xs">
                               {chapter.time}
                             </span>
                           ) : (
-                            <span className="text-sm text-gray-400">—</span>
+                            <span className="text-xs text-gray-400">—</span>
                           )}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <td className="px-3 py-2 whitespace-nowrap text-center">
                           {chapter.questions && chapter.questions > 0 ? (
-                            <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 font-medium text-sm">
+                            <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 font-medium text-xs">
                               {chapter.questions}
                             </span>
                           ) : (
-                            <span className="text-sm text-gray-400">—</span>
+                            <span className="text-xs text-gray-400">—</span>
                           )}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-2 whitespace-nowrap">
                           <span className={`text-sm ${
                             chapter.contentInfo?.hasContent 
                               ? "text-gray-700" 
@@ -233,7 +233,7 @@ const ChaptersTable = ({
                             {formatContentDate(chapter.contentInfo)}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <td className="px-3 py-2 whitespace-nowrap text-right">
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => handleChapterClick(chapter._id)}
@@ -314,7 +314,7 @@ const ChaptersTable = ({
                 return (
                   <div
                     key={chapter._id || chapterIndex}
-                    className={`p-4 hover:bg-gray-50 transition-colors ${
+                    className={`p-2 hover:bg-gray-50 transition-colors ${
                       chapter.status === "inactive" ? "opacity-60" : ""
                     }`}
                   >

@@ -90,12 +90,12 @@ subTopicSchema.pre("findOneAndDelete", async function () {
         `🗑️ Cascading delete: Deleting details for subtopic ${subTopic._id}`
       );
 
-      // Get model - use mongoose.model() to ensure model is loaded
-      const SubTopicDetails = mongoose.models.SubTopicDetails || mongoose.model("SubTopicDetails");
-      const PracticeSubCategory = mongoose.models.PracticeSubCategory || mongoose.model("PracticeSubCategory");
-      const PracticeQuestion = mongoose.models.PracticeQuestion || mongoose.model("PracticeQuestion");
-      const Definition = mongoose.models.Definition || mongoose.model("Definition");
-      const DefinitionDetails = mongoose.models.DefinitionDetails || mongoose.model("DefinitionDetails");
+      // Get models - dynamically import if not already registered
+      const SubTopicDetails = mongoose.models.SubTopicDetails || (await import("./SubTopicDetails.js")).default;
+      const PracticeSubCategory = mongoose.models.PracticeSubCategory || (await import("./PracticeSubCategory.js")).default;
+      const PracticeQuestion = mongoose.models.PracticeQuestion || (await import("./PracticeQuestion.js")).default;
+      const Definition = mongoose.models.Definition || (await import("./Definition.js")).default;
+      const DefinitionDetails = mongoose.models.DefinitionDetails || (await import("./DefinitionDetails.js")).default;
 
       const result = await SubTopicDetails.deleteMany({ subTopicId: subTopic._id });
       console.log(

@@ -85,11 +85,11 @@ topicSchema.pre("findOneAndDelete", async function () {
         `🗑️ Cascading delete: Deleting all entities for topic ${topic._id}`
       );
 
-      // Get models - use mongoose.model() to ensure models are loaded
-      const SubTopic = mongoose.models.SubTopic || mongoose.model("SubTopic");
-      const TopicDetails = mongoose.models.TopicDetails || mongoose.model("TopicDetails");
-      const PracticeSubCategory = mongoose.models.PracticeSubCategory || mongoose.model("PracticeSubCategory");
-      const PracticeQuestion = mongoose.models.PracticeQuestion || mongoose.model("PracticeQuestion");
+      // Get models - dynamically import if not already registered
+      const SubTopic = mongoose.models.SubTopic || (await import("./SubTopic.js")).default;
+      const TopicDetails = mongoose.models.TopicDetails || (await import("./TopicDetails.js")).default;
+      const PracticeSubCategory = mongoose.models.PracticeSubCategory || (await import("./PracticeSubCategory.js")).default;
+      const PracticeQuestion = mongoose.models.PracticeQuestion || (await import("./PracticeQuestion.js")).default;
 
       // Delete topic details first
       const topicDetailsResult = await TopicDetails.deleteMany({ topicId: topic._id });

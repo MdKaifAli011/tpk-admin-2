@@ -1311,7 +1311,7 @@ const DefinitionManagement = () => {
             {canCreate ? (
               <button
                 onClick={handleOpenAddForm}
-                className="px-4 py-2 bg-[#0056FF] hover:bg-[#0044CC] text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                className="px-3 py-1.5 bg-[#0056FF] hover:bg-[#0044CC] text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
               >
                 <FaPlus className="w-4 h-4" />
                 Add New Definition
@@ -1320,7 +1320,7 @@ const DefinitionManagement = () => {
               <button
                 disabled
                 title={getPermissionMessage("create", role)}
-                className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg text-sm font-medium cursor-not-allowed flex items-center gap-2"
+                className="px-3 py-1.5 bg-gray-300 text-gray-500 rounded-lg text-sm font-medium cursor-not-allowed flex items-center gap-2"
               >
                 <FaLock className="w-4 h-4" />
                 Add New Definition
@@ -1568,14 +1568,14 @@ const DefinitionManagement = () => {
                 <button
                   type="button"
                   onClick={handleCancelForm}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors"
+                  className="px-3 py-1.5 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors"
                   disabled={isFormLoading}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   disabled={isFormLoading}
                 >
                   {isFormLoading ? (
@@ -1773,14 +1773,14 @@ const DefinitionManagement = () => {
                 <button
                   type="button"
                   onClick={handleCancelEditForm}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors"
+                  className="px-3 py-1.5 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors"
                   disabled={isFormLoading}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   disabled={isFormLoading}
                 >
                   {isFormLoading ? (
@@ -1799,7 +1799,7 @@ const DefinitionManagement = () => {
 
         {/* Definitions Table */}
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <div className="px-4 py-3 border-b border-gray-200 bg-gray-50">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">
@@ -1812,7 +1812,7 @@ const DefinitionManagement = () => {
               </div>
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
               >
                 <FaFilter className="w-4 h-4" />
                 Filter Definitions
@@ -1827,7 +1827,7 @@ const DefinitionManagement = () => {
 
           {/* Filter Section */}
           {showFilters && (
-            <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+            <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-4">
                 {/* Filter by Exam */}
                 <div className="space-y-2">
