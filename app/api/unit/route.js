@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import { parsePagination, createPaginationResponse } from "@/utils/pagination";
 import { successResponse, errorResponse, handleApiError } from "@/utils/apiResponse";
 import { STATUS, ERROR_MESSAGES } from "@/constants";
+import { requireAuth, requireAction } from "@/middleware/authMiddleware";
 
 // Cache for frequently accessed queries (simple in-memory cache)
 export const queryCache = new Map();
@@ -34,6 +35,12 @@ function cleanupCache() {
 // ---------- GET ALL UNITS ----------
 export async function GET(request) {
   try {
+    // Check authentication (all authenticated users can view)
+    const authCheck = await requireAuth(request);
+    if (authCheck.error) {
+      return NextResponse.json(authCheck, { status: authCheck.status || 401 });
+    }
+
     await connectDB();
     const { searchParams } = new URL(request.url);
     
@@ -135,6 +142,12 @@ export async function GET(request) {
 // ---------- CREATE UNIT ----------
 export async function POST(request) {
   try {
+    // Check authentication and permissions
+    const authCheck = await requireAction(request, "POST");
+    if (authCheck.error) {
+      return NextResponse.json(authCheck, { status: authCheck.status || 403 });
+    }
+
     await connectDB();
     const body = await request.json();
     const { name, orderNumber, subjectId, examId, status } = body;
@@ -206,6 +219,9 @@ export async function POST(request) {
       .populate("subjectId", "name")
       .populate("examId", "name status")
       .lean();
+
+    // Clear cache when new unit is created
+    queryCache.clear();
 
     return successResponse(populatedUnit, "Unit created successfully", 201);
   } catch (error) {

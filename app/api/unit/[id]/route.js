@@ -7,10 +7,17 @@ import SubTopic from "@/models/SubTopic";
 import mongoose from "mongoose";
 import { successResponse, errorResponse, handleApiError, notFoundResponse } from "@/utils/apiResponse";
 import { ERROR_MESSAGES } from "@/constants";
+import { requireAuth, requireAction } from "@/middleware/authMiddleware";
 
 // ---------- GET SINGLE UNIT ----------
 export async function GET(request, { params }) {
   try {
+    // Check authentication (all authenticated users can view)
+    const authCheck = await requireAuth(request);
+    if (authCheck.error) {
+      return NextResponse.json(authCheck, { status: authCheck.status || 401 });
+    }
+
     await connectDB();
     const { id } = await params;
 
@@ -36,6 +43,12 @@ export async function GET(request, { params }) {
 // ---------- UPDATE UNIT ----------
 export async function PUT(request, { params }) {
   try {
+    // Check authentication and permissions
+    const authCheck = await requireAction(request, "PUT");
+    if (authCheck.error) {
+      return NextResponse.json(authCheck, { status: authCheck.status || 403 });
+    }
+
     await connectDB();
     const { id } = await params;
     const body = await request.json();
@@ -83,6 +96,16 @@ export async function PUT(request, { params }) {
       return notFoundResponse(ERROR_MESSAGES.UNIT_NOT_FOUND);
     }
 
+    // Clear cache when unit is updated
+    try {
+      const unitRouteModule = await import("../route");
+      if (unitRouteModule?.queryCache) {
+        unitRouteModule.queryCache.clear();
+      }
+    } catch (cacheError) {
+      // Ignore cache errors
+    }
+
     return successResponse(updated, "Unit updated successfully");
   } catch (error) {
     return handleApiError(error, ERROR_MESSAGES.UPDATE_FAILED);
@@ -92,6 +115,12 @@ export async function PUT(request, { params }) {
 // ---------- PATCH UNIT (Partial Update) ----------
 export async function PATCH(request, { params }) {
   try {
+    // Check authentication and permissions
+    const authCheck = await requireAction(request, "PATCH");
+    if (authCheck.error) {
+      return NextResponse.json(authCheck, { status: authCheck.status || 403 });
+    }
+
     await connectDB();
     const { id } = await params;
     const body = await request.json();
@@ -128,6 +157,16 @@ export async function PATCH(request, { params }) {
       return notFoundResponse(ERROR_MESSAGES.UNIT_NOT_FOUND);
     }
 
+    // Clear cache when unit is updated
+    try {
+      const unitRouteModule = await import("../route");
+      if (unitRouteModule?.queryCache) {
+        unitRouteModule.queryCache.clear();
+      }
+    } catch (cacheError) {
+      // Ignore cache errors
+    }
+
     return successResponse(updated, "Unit updated successfully");
   } catch (error) {
     return handleApiError(error, "Failed to update unit");
@@ -137,6 +176,12 @@ export async function PATCH(request, { params }) {
 // ---------- DELETE UNIT ----------
 export async function DELETE(request, { params }) {
   try {
+    // Check authentication and permissions
+    const authCheck = await requireAction(request, "DELETE");
+    if (authCheck.error) {
+      return NextResponse.json(authCheck, { status: authCheck.status || 403 });
+    }
+
     await connectDB();
     const { id } = await params;
 
@@ -147,6 +192,16 @@ export async function DELETE(request, { params }) {
     const deleted = await Unit.findByIdAndDelete(id);
     if (!deleted) {
       return notFoundResponse(ERROR_MESSAGES.UNIT_NOT_FOUND);
+    }
+
+    // Clear cache when unit is deleted
+    try {
+      const unitRouteModule = await import("../route");
+      if (unitRouteModule?.queryCache) {
+        unitRouteModule.queryCache.clear();
+      }
+    } catch (cacheError) {
+      // Ignore cache errors
     }
 
     return successResponse(deleted, "Unit deleted successfully");

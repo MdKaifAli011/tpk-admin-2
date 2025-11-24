@@ -13,10 +13,17 @@ import {
   notFoundResponse,
 } from "@/utils/apiResponse";
 import { ERROR_MESSAGES } from "@/constants";
+import { requireAuth, requireAction } from "@/middleware/authMiddleware";
 
 // ---------- GET SINGLE SUBJECT ----------
 export async function GET(_request, { params }) {
   try {
+    // Check authentication (all authenticated users can view)
+    const authCheck = await requireAuth(_request);
+    if (authCheck.error) {
+      return NextResponse.json(authCheck, { status: authCheck.status || 401 });
+    }
+
     await connectDB();
     const { id } = await params;
 
@@ -41,6 +48,12 @@ export async function GET(_request, { params }) {
 // ---------- UPDATE SUBJECT ----------
 export async function PUT(request, { params }) {
   try {
+    // Check authentication and permissions
+    const authCheck = await requireAction(request, "PUT");
+    if (authCheck.error) {
+      return NextResponse.json(authCheck, { status: authCheck.status || 403 });
+    }
+
     await connectDB();
     const { id } = await params;
     const body = await request.json();
@@ -105,6 +118,16 @@ export async function PUT(request, { params }) {
       return notFoundResponse(ERROR_MESSAGES.SUBJECT_NOT_FOUND);
     }
 
+    // Clear cache when subject is updated
+    try {
+      const subjectRouteModule = await import("../route");
+      if (subjectRouteModule?.queryCache) {
+        subjectRouteModule.queryCache.clear();
+      }
+    } catch (cacheError) {
+      // Ignore cache errors
+    }
+
     return successResponse(updated, "Subject updated successfully");
   } catch (error) {
     return handleApiError(error, ERROR_MESSAGES.UPDATE_FAILED);
@@ -114,6 +137,12 @@ export async function PUT(request, { params }) {
 // ---------- PATCH SUBJECT (Reorder/Status) ----------
 export async function PATCH(request, { params }) {
   try {
+    // Check authentication and permissions
+    const authCheck = await requireAction(request, "PATCH");
+    if (authCheck.error) {
+      return NextResponse.json(authCheck, { status: authCheck.status || 403 });
+    }
+
     await connectDB();
     const { id } = await params;
     const body = await request.json();
@@ -146,6 +175,16 @@ export async function PATCH(request, { params }) {
       return notFoundResponse(ERROR_MESSAGES.SUBJECT_NOT_FOUND);
     }
 
+    // Clear cache when subject is updated
+    try {
+      const subjectRouteModule = await import("../route");
+      if (subjectRouteModule?.queryCache) {
+        subjectRouteModule.queryCache.clear();
+      }
+    } catch (cacheError) {
+      // Ignore cache errors
+    }
+
     return successResponse(updated, "Subject updated successfully");
   } catch (error) {
     return handleApiError(error, "Failed to update subject");
@@ -155,6 +194,12 @@ export async function PATCH(request, { params }) {
 // ---------- DELETE SUBJECT ----------
 export async function DELETE(_request, { params }) {
   try {
+    // Check authentication and permissions
+    const authCheck = await requireAction(_request, "DELETE");
+    if (authCheck.error) {
+      return NextResponse.json(authCheck, { status: authCheck.status || 403 });
+    }
+
     await connectDB();
     const { id } = await params;
 
@@ -165,6 +210,16 @@ export async function DELETE(_request, { params }) {
     const deleted = await Subject.findByIdAndDelete(id);
     if (!deleted) {
       return notFoundResponse(ERROR_MESSAGES.SUBJECT_NOT_FOUND);
+    }
+
+    // Clear cache when subject is deleted
+    try {
+      const subjectRouteModule = await import("../route");
+      if (subjectRouteModule?.queryCache) {
+        subjectRouteModule.queryCache.clear();
+      }
+    } catch (cacheError) {
+      // Ignore cache errors
     }
 
     return successResponse(deleted, "Subject deleted successfully");

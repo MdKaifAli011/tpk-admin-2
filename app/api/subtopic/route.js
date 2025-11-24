@@ -10,10 +10,17 @@ import mongoose from "mongoose";
 import { parsePagination, createPaginationResponse } from "@/utils/pagination";
 import { successResponse, errorResponse, handleApiError } from "@/utils/apiResponse";
 import { STATUS, ERROR_MESSAGES } from "@/constants";
+import { requireAuth, requireAction } from "@/middleware/authMiddleware";
 
 // ---------- GET ALL SUBTOPICS ----------
 export async function GET(request) {
   try {
+    // Check authentication (all authenticated users can view)
+    const authCheck = await requireAuth(request);
+    if (authCheck.error) {
+      return NextResponse.json(authCheck, { status: authCheck.status || 401 });
+    }
+
     await connectDB();
     const { searchParams } = new URL(request.url);
     
@@ -94,6 +101,12 @@ export async function GET(request) {
 // ---------- CREATE NEW SUBTOPIC ----------
 export async function POST(request) {
   try {
+    // Check authentication and permissions
+    const authCheck = await requireAction(request, "POST");
+    if (authCheck.error) {
+      return NextResponse.json(authCheck, { status: authCheck.status || 403 });
+    }
+
     await connectDB();
     const body = await request.json();
 

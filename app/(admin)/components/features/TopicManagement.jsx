@@ -1357,23 +1357,19 @@ const TopicManagement = () => {
                   drag to reorder topics.
                 </p>
               </div>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+              >
+                <FaFilter className="w-4 h-4" />
+                Filter Topics
+                {activeFilterCount > 0 && (
+                  <span className="bg-white text-blue-600 px-2 py-0.5 rounded-full text-xs font-medium">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
             </div>
-          </div>
-
-          {/* Filter Button */}
-          <div className="px-6 py-3 border-b border-gray-200">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
-            >
-              <FaFilter className="w-4 h-4" />
-              Filter Topics
-              {activeFilterCount > 0 && (
-                <span className="bg-white text-blue-600 px-2 py-0.5 rounded-full text-xs font-medium">
-                  {activeFilterCount}
-                </span>
-              )}
-            </button>
           </div>
 
           {/* Filter Section */}
