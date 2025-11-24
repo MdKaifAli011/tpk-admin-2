@@ -1,0 +1,2123 @@
+"use client";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
+import DefinitionsTable from "../table/DefinitionsTable";
+import { LoadingWrapper, SkeletonChaptersTable } from "../ui/SkeletonLoader";
+import { FaEdit, FaPlus, FaTimes, FaFilter, FaLock } from "react-icons/fa";
+import api from "@/lib/api";
+import { usePermissions, getPermissionMessage } from "../../hooks/usePermissions";
+
+const DefinitionManagement = () => {
+  const { canCreate, canEdit, canDelete, canReorder, role } = usePermissions();
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [editingDefinition, setEditingDefinition] = useState(null);
+  const [isDataLoading, setIsDataLoading] = useState(false);
+  const [isFormLoading, setIsFormLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [definitions, setDefinitions] = useState([]);
+  const [exams, setExams] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [units, setUnits] = useState([]);
+  const [filterUnits, setFilterUnits] = useState([]); // Separate units for filter section
+  const [chapters, setChapters] = useState([]);
+  const [filterChapters, setFilterChapters] = useState([]); // Separate chapters for filter section
+  const [topics, setTopics] = useState([]);
+  const [filterTopics, setFilterTopics] = useState([]); // Separate topics for filter section
+  const [subTopics, setSubTopics] = useState([]);
+  const [filterSubTopics, setFilterSubTopics] = useState([]); // Separate subtopics for filter section
+  const [formData, setFormData] = useState({
+    name: "",
+    examId: "",
+    subjectId: "",
+    unitId: "",
+    chapterId: "",
+    topicId: "",
+    subTopicId: "",
+    orderNumber: "",
+  });
+  const [editFormData, setEditFormData] = useState({
+    name: "",
+    examId: "",
+    subjectId: "",
+    unitId: "",
+    chapterId: "",
+    topicId: "",
+    subTopicId: "",
+    orderNumber: "",
+  });
+  const [additionalDefinitions, setAdditionalDefinitions] = useState([
+    { name: "", orderNumber: "" },
+  ]);
+  const [nextOrderNumber, setNextOrderNumber] = useState(1);
+  const [formError, setFormError] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterExam, setFilterExam] = useState("");
+  const [filterSubject, setFilterSubject] = useState("");
+  const [filterUnit, setFilterUnit] = useState("");
+  const [filterChapter, setFilterChapter] = useState("");
+  const [filterTopic, setFilterTopic] = useState("");
+  const [filterSubTopic, setFilterSubTopic] = useState("");
+  const isFetchingRef = useRef(false);
+
+  // Fetch definitions from API using Axios
+  const fetchDefinitions = useCallback(async () => {
+    if (isFetchingRef.current) return;
+    try {
+      isFetchingRef.current = true;
+      setIsDataLoading(true);
+      setError(null);
+      const response = await api.get("/definition?status=all&limit=10000");
+
+      if (response.data.success) {
+        setDefinitions(response.data.data);
+      } else {
+        throw new Error(response.data.message || "Failed to fetch definitions");
+      }
+    } catch (error) {
+      console.error("❌ Error fetching definitions:", error);
+      setError(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to fetch definitions"
+      );
+    } finally {
+      setIsDataLoading(false);
+      isFetchingRef.current = false;
+    }
+  }, []);
+
+  // Fetch exams from API
+  const fetchExams = useCallback(async () => {
+    try {
+      // Fetch all exams (active and inactive) for dropdown
+      const response = await api.get("/exam?status=all");
+      if (response.data.success) {
+        setExams(response.data.data || []);
+      }
+    } catch (error) {
+      console.error("❌ Error fetching exams:", error);
+    }
+  }, []);
+
+  // Fetch subjects from API
+  const fetchSubjects = useCallback(async () => {
+    try {
+      // Fetch all subjects (active and inactive) for dropdown
+      const response = await api.get("/subject?status=all");
+      if (response.data.success) {
+        setSubjects(response.data.data || []);
+      }
+    } catch (error) {
+      console.error("❌ Error fetching subjects:", error);
+    }
+  }, []);
+
+  // Fetch units from API based on exam and subject
+  const fetchUnits = useCallback(async (examId, subjectId) => {
+    if (!examId || !subjectId) {
+      setUnits([]);
+      return;
+    }
+    try {
+      // Fetch units for the selected exam and subject
+      const response = await api.get(
+        `/unit?examId=${examId}&subjectId=${subjectId}&status=all&limit=1000`
+      );
+      if (response.data.success) {
+        setUnits(response.data.data || []);
+      } else {
+        setUnits([]);
+      }
+    } catch (error) {
+      console.error("❌ Error fetching units:", error);
+      setUnits([]);
+    }
+  }, []);
+
+  // Fetch topics from API based on chapter
+  const fetchTopics = useCallback(async (chapterId) => {
+    if (!chapterId) {
+      setTopics([]);
+      return;
+    }
+    try {
+      // Fetch topics for the selected chapter
+      const response = await api.get(
+        `/topic?chapterId=${chapterId}&status=all&limit=1000`
+      );
+      if (response.data.success) {
+        const topicsData = response.data.data || [];
+        // Sort by orderNumber in ascending order
+        const sorted = topicsData.sort((a, b) => {
+          const ao = a.orderNumber || 0;
+          const bo = b.orderNumber || 0;
+          return ao - bo;
+        });
+        setTopics(sorted);
+      } else {
+        setTopics([]);
+      }
+    } catch (error) {
+      console.error("❌ Error fetching topics:", error);
+      setTopics([]);
+    }
+  }, []);
+
+  // Fetch chapters from API based on unit
+  const fetchChapters = useCallback(async (unitId) => {
+    if (!unitId) {
+      setChapters([]);
+      return;
+    }
+    try {
+      // Fetch chapters for the selected unit
+      const response = await api.get(
+        `/chapter?unitId=${unitId}&status=all&limit=1000`
+      );
+      if (response.data.success) {
+        const chaptersData = response.data.data || [];
+        // Sort by orderNumber in ascending order
+        const sorted = chaptersData.sort((a, b) => {
+          const ao = a.orderNumber || 0;
+          const bo = b.orderNumber || 0;
+          return ao - bo;
+        });
+        setChapters(sorted);
+      } else {
+        setChapters([]);
+      }
+    } catch (error) {
+      console.error("❌ Error fetching chapters:", error);
+      setChapters([]);
+    }
+  }, []);
+
+  // Fetch subtopics from API based on topic
+  const fetchSubTopics = useCallback(async (topicId) => {
+    if (!topicId) {
+      setSubTopics([]);
+      return;
+    }
+    try {
+      // Fetch subtopics for the selected topic
+      const response = await api.get(
+        `/subtopic?topicId=${topicId}&status=all&limit=1000`
+      );
+      if (response.data.success) {
+        const subtopicsData = response.data.data || [];
+        // Sort by orderNumber in ascending order
+        const sorted = subtopicsData.sort((a, b) => {
+          const ao = a.orderNumber || 0;
+          const bo = b.orderNumber || 0;
+          return ao - bo;
+        });
+        setSubTopics(sorted);
+      } else {
+        setSubTopics([]);
+      }
+    } catch (error) {
+      console.error("❌ Error fetching subtopics:", error);
+      setSubTopics([]);
+    }
+  }, []);
+
+
+  // Load data on component mount
+  useEffect(() => {
+    fetchDefinitions();
+    fetchExams();
+    fetchSubjects();
+    // Don't fetch units, topics, and subtopics on mount - will fetch when parent is selected
+  }, [fetchDefinitions, fetchExams, fetchSubjects]);
+
+  // Auto-clear error after 5 seconds with cleanup
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  // Filter subjects based on selected exam
+  const filteredSubjects = useMemo(() => {
+    if (!formData.examId) {
+      return subjects || [];
+    }
+    if (!subjects || subjects.length === 0) {
+      return [];
+    }
+    // Filter subjects by selected exam (handle both populated and non-populated examId)
+    return subjects.filter(
+      (subject) =>
+        subject.examId?._id === formData.examId ||
+        subject.examId === formData.examId
+    );
+  }, [formData.examId, subjects]);
+
+  // Units are already filtered by API call, so return all units
+  const filteredUnits = useMemo(() => {
+    // Units are already filtered by fetchUnits(examId, subjectId), so just return them
+    return units || [];
+  }, [units]);
+
+  // Topics are already filtered by API call, so return all topics
+  const filteredTopics = useMemo(() => {
+    // Topics are already filtered by fetchTopics(unitId), so just return them
+    // Sort by orderNumber in ascending order
+    const sorted = (topics || []).sort((a, b) => {
+      const ao = a.orderNumber || 0;
+      const bo = b.orderNumber || 0;
+      return ao - bo;
+    });
+    return sorted;
+  }, [topics]);
+
+  // Chapters are already filtered by API call, so return all chapters
+  const filteredChapters = useMemo(() => {
+    // Chapters are already filtered by fetchChapters(unitId), so just return them
+    // Sort by orderNumber in ascending order
+    const sorted = (chapters || []).sort((a, b) => {
+      const ao = a.orderNumber || 0;
+      const bo = b.orderNumber || 0;
+      return ao - bo;
+    });
+    return sorted;
+  }, [chapters]);
+
+  // SubTopics are already filtered by API call, so return all subtopics
+  const filteredSubTopics = useMemo(() => {
+    // SubTopics are already filtered by fetchSubTopics(topicId), so just return them
+    // Sort by orderNumber in ascending order
+    const sorted = (subTopics || []).sort((a, b) => {
+      const ao = a.orderNumber || 0;
+      const bo = b.orderNumber || 0;
+      return ao - bo;
+    });
+    return sorted;
+  }, [subTopics]);
+
+  // Filter subjects for edit form
+  const filteredEditSubjects = useMemo(() => {
+    if (!editFormData.examId) {
+      return subjects || [];
+    }
+    if (!subjects || subjects.length === 0) {
+      return [];
+    }
+    // Filter subjects by selected exam (handle both populated and non-populated examId)
+    return subjects.filter(
+      (subject) =>
+        subject.examId?._id === editFormData.examId ||
+        subject.examId === editFormData.examId
+    );
+  }, [editFormData.examId, subjects]);
+
+  // Units for edit form are already filtered by API call, so return all units
+  const filteredEditUnits = useMemo(() => {
+    // Units are already filtered by fetchUnits(examId, subjectId), so just return them
+    return units || [];
+  }, [units]);
+
+  // Topics for edit form are already filtered by API call, so return all topics
+  const filteredEditTopics = useMemo(() => {
+    // Topics are already filtered by fetchTopics(unitId), so just return them
+    // Sort by orderNumber in ascending order
+    const sorted = (topics || []).sort((a, b) => {
+      const ao = a.orderNumber || 0;
+      const bo = b.orderNumber || 0;
+      return ao - bo;
+    });
+    return sorted;
+  }, [topics]);
+
+  // Chapters for edit form are already filtered by API call, so return all chapters
+  const filteredEditChapters = useMemo(() => {
+    // Chapters are already filtered by fetchChapters(unitId), so just return them
+    // Sort by orderNumber in ascending order
+    const sorted = (chapters || []).sort((a, b) => {
+      const ao = a.orderNumber || 0;
+      const bo = b.orderNumber || 0;
+      return ao - bo;
+    });
+    return sorted;
+  }, [chapters]);
+
+  // SubTopics for edit form are already filtered by API call, so return all subtopics
+  const filteredEditSubTopics = useMemo(() => {
+    // SubTopics are already filtered by fetchSubTopics(topicId), so just return them
+    // Sort by orderNumber in ascending order
+    const sorted = (subTopics || []).sort((a, b) => {
+      const ao = a.orderNumber || 0;
+      const bo = b.orderNumber || 0;
+      return ao - bo;
+    });
+    return sorted;
+  }, [subTopics]);
+
+  // Filter subjects based on selected exam for filters
+  const filteredFilterSubjects = useMemo(() => {
+    if (!filterExam) return [];
+    return subjects.filter(
+      (subject) =>
+        subject.examId?._id === filterExam || subject.examId === filterExam
+    );
+  }, [subjects, filterExam]);
+
+  // Fetch units for filter section
+  const fetchUnitsForFilter = useCallback(async (examId, subjectId) => {
+    if (!examId || !subjectId) {
+      setFilterUnits([]);
+      return;
+    }
+    try {
+      const response = await api.get(
+        `/unit?examId=${examId}&subjectId=${subjectId}&status=all&limit=1000`
+      );
+      if (response.data.success) {
+        setFilterUnits(response.data.data || []);
+      } else {
+        console.error("Failed to fetch filter units:", response.data.message);
+        setFilterUnits([]);
+      }
+    } catch (error) {
+      console.error("Error fetching filter units:", error);
+      setFilterUnits([]);
+    }
+  }, []);
+
+  // Fetch units for filter section when filterSubject changes
+  useEffect(() => {
+    if (filterSubject && filterExam) {
+      fetchUnitsForFilter(filterExam, filterSubject);
+    } else {
+      setFilterUnits([]);
+    }
+  }, [filterSubject, filterExam, fetchUnitsForFilter]);
+
+  // Filter units based on selected subject for filters
+  const filteredFilterUnits = useMemo(() => {
+    if (!filterSubject) return [];
+    return filterUnits.filter(
+      (unit) =>
+        unit.subjectId?._id === filterSubject ||
+        unit.subjectId === filterSubject
+    );
+  }, [filterUnits, filterSubject]);
+
+  // Fetch chapters for filter section
+  const fetchChaptersForFilter = useCallback(async (unitId) => {
+    if (!unitId) {
+      setFilterChapters([]);
+      return;
+    }
+    try {
+      const response = await api.get(
+        `/chapter?unitId=${unitId}&status=all&limit=1000`
+      );
+      if (response.data.success) {
+        const chaptersData = response.data.data || [];
+        // Sort by orderNumber in ascending order
+        const sorted = chaptersData.sort((a, b) => {
+          const ao = a.orderNumber || 0;
+          const bo = b.orderNumber || 0;
+          return ao - bo;
+        });
+        setFilterChapters(sorted);
+      } else {
+        console.error("Failed to fetch filter chapters:", response.data.message);
+        setFilterChapters([]);
+      }
+    } catch (error) {
+      console.error("Error fetching filter chapters:", error);
+      setFilterChapters([]);
+    }
+  }, []);
+
+  // Fetch chapters for filter section when filterUnit changes
+  useEffect(() => {
+    if (filterUnit) {
+      fetchChaptersForFilter(filterUnit);
+    } else {
+      setFilterChapters([]);
+    }
+  }, [filterUnit, fetchChaptersForFilter]);
+
+  // Filter chapters based on selected unit for filters
+  const filteredFilterChapters = useMemo(() => {
+    if (!filterUnit) return [];
+    return filterChapters.filter(
+      (chapter) =>
+        chapter.unitId?._id === filterUnit || chapter.unitId === filterUnit
+    );
+  }, [filterChapters, filterUnit]);
+
+  // Fetch topics for filter section
+  const fetchTopicsForFilter = useCallback(async (chapterId) => {
+    if (!chapterId) {
+      setFilterTopics([]);
+      return;
+    }
+    try {
+      const response = await api.get(
+        `/topic?chapterId=${chapterId}&status=all&limit=1000`
+      );
+      if (response.data.success) {
+        const topicsData = response.data.data || [];
+        // Sort by orderNumber in ascending order
+        const sorted = topicsData.sort((a, b) => {
+          const ao = a.orderNumber || 0;
+          const bo = b.orderNumber || 0;
+          return ao - bo;
+        });
+        setFilterTopics(sorted);
+      } else {
+        console.error("Failed to fetch filter topics:", response.data.message);
+        setFilterTopics([]);
+      }
+    } catch (error) {
+      console.error("Error fetching filter topics:", error);
+      setFilterTopics([]);
+    }
+  }, []);
+
+  // Fetch topics for filter section when filterChapter changes
+  useEffect(() => {
+    if (filterChapter) {
+      fetchTopicsForFilter(filterChapter);
+    } else {
+      setFilterTopics([]);
+    }
+  }, [filterChapter, fetchTopicsForFilter]);
+
+  // Filter topics based on selected chapter for filters
+  const filteredFilterTopics = useMemo(() => {
+    if (!filterChapter) return [];
+    return filterTopics.filter(
+      (topic) =>
+        topic.chapterId?._id === filterChapter || topic.chapterId === filterChapter
+    );
+  }, [filterTopics, filterChapter]);
+
+  // Fetch subtopics for filter section
+  const fetchSubTopicsForFilter = useCallback(async (topicId) => {
+    if (!topicId) {
+      setFilterSubTopics([]);
+      return;
+    }
+    try {
+      const response = await api.get(
+        `/subtopic?topicId=${topicId}&status=all&limit=1000`
+      );
+      if (response.data.success) {
+        const subtopicsData = response.data.data || [];
+        // Sort by orderNumber in ascending order
+        const sorted = subtopicsData.sort((a, b) => {
+          const ao = a.orderNumber || 0;
+          const bo = b.orderNumber || 0;
+          return ao - bo;
+        });
+        setFilterSubTopics(sorted);
+      } else {
+        console.error("Failed to fetch filter subtopics:", response.data.message);
+        setFilterSubTopics([]);
+      }
+    } catch (error) {
+      console.error("Error fetching filter subtopics:", error);
+      setFilterSubTopics([]);
+    }
+  }, []);
+
+  // Fetch subtopics for filter section when filterTopic changes
+  useEffect(() => {
+    if (filterTopic) {
+      fetchSubTopicsForFilter(filterTopic);
+    } else {
+      setFilterSubTopics([]);
+    }
+  }, [filterTopic, fetchSubTopicsForFilter]);
+
+  // Filter subtopics based on selected topic for filters
+  const filteredFilterSubTopics = useMemo(() => {
+    if (!filterTopic) return [];
+    return filterSubTopics.filter(
+      (subtopic) =>
+        subtopic.topicId?._id === filterTopic || subtopic.topicId === filterTopic
+    );
+  }, [filterSubTopics, filterTopic]);
+
+  // Filter definitions based on filters
+  const filteredDefinitions = useMemo(() => {
+    let result = definitions;
+    if (filterExam) {
+      result = result.filter(
+        (definition) =>
+          definition.examId?._id === filterExam || definition.examId === filterExam
+      );
+    }
+    if (filterSubject) {
+      result = result.filter(
+        (definition) =>
+          definition.subjectId?._id === filterSubject ||
+          definition.subjectId === filterSubject
+      );
+    }
+    if (filterUnit) {
+      result = result.filter(
+        (definition) =>
+          definition.unitId?._id === filterUnit || definition.unitId === filterUnit
+      );
+    }
+    if (filterChapter) {
+      result = result.filter(
+        (definition) =>
+          definition.chapterId?._id === filterChapter ||
+          definition.chapterId === filterChapter
+      );
+    }
+    if (filterTopic) {
+      result = result.filter(
+        (definition) =>
+          definition.topicId?._id === filterTopic ||
+          definition.topicId === filterTopic
+      );
+    }
+    if (filterSubTopic) {
+      result = result.filter(
+        (definition) =>
+          definition.subTopicId?._id === filterSubTopic ||
+          definition.subTopicId === filterSubTopic
+      );
+    }
+    return result;
+  }, [definitions, filterExam, filterSubject, filterUnit, filterChapter, filterTopic, filterSubTopic]);
+
+  // Get active filter count
+  const activeFilterCount =
+    (filterExam ? 1 : 0) +
+    (filterSubject ? 1 : 0) +
+    (filterUnit ? 1 : 0) +
+    (filterChapter ? 1 : 0) +
+    (filterTopic ? 1 : 0) +
+    (filterSubTopic ? 1 : 0);
+
+  // Clear all filters
+  const clearFilters = () => {
+    setFilterExam("");
+    setFilterSubject("");
+    setFilterUnit("");
+    setFilterChapter("");
+    setFilterTopic("");
+    setFilterSubTopic("");
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => {
+      const newData = { ...prev, [name]: value };
+      
+      // Reset subject when exam changes
+      if (name === "examId" && value !== prev.examId) {
+        newData.subjectId = "";
+        newData.unitId = "";
+        newData.chapterId = "";
+        newData.topicId = "";
+        newData.subTopicId = "";
+        setUnits([]); // Clear units when exam changes
+        setChapters([]); // Clear chapters when exam changes
+        setTopics([]); // Clear topics when exam changes
+        setSubTopics([]); // Clear subtopics when exam changes
+      }
+      
+      // Reset unit when subject changes and fetch units for the selected exam and subject
+      if (name === "subjectId" && value !== prev.subjectId) {
+        newData.unitId = "";
+        newData.chapterId = "";
+        newData.topicId = "";
+        newData.subTopicId = "";
+        setChapters([]); // Clear chapters when subject changes
+        setTopics([]); // Clear topics when subject changes
+        setSubTopics([]); // Clear subtopics when subject changes
+        // Fetch units for the selected exam and subject
+        if (newData.examId && value) {
+          fetchUnits(newData.examId, value);
+        } else {
+          setUnits([]);
+        }
+      }
+      
+      // Reset chapter when unit changes and fetch chapters for the selected unit
+      if (name === "unitId" && value !== prev.unitId) {
+        newData.chapterId = "";
+        newData.topicId = "";
+        newData.subTopicId = "";
+        setTopics([]); // Clear topics when unit changes
+        setSubTopics([]); // Clear subtopics when unit changes
+        // Fetch chapters for the selected unit
+        if (value) {
+          fetchChapters(value);
+        } else {
+          setChapters([]);
+        }
+      }
+      
+      // Reset topic when chapter changes and fetch topics for the selected chapter
+      if (name === "chapterId" && value !== prev.chapterId) {
+        newData.topicId = "";
+        newData.subTopicId = "";
+        setSubTopics([]); // Clear subtopics when chapter changes
+        // Fetch topics for the selected chapter
+        if (value) {
+          fetchTopics(value);
+        } else {
+          setTopics([]);
+        }
+      }
+      
+      // Reset subtopic when topic changes and fetch subtopics for the selected topic
+      if (name === "topicId" && value !== prev.topicId) {
+        newData.subTopicId = "";
+        // Fetch subtopics for the selected topic
+        if (value) {
+          fetchSubTopics(value);
+        } else {
+          setSubTopics([]);
+        }
+      }
+      
+      // Note: Definition clearing and order number calculation is handled by useEffect
+      // when subTopicId changes
+      
+      return newData;
+    });
+    setFormError(null);
+  };
+
+  const handleEditFormChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData((prev) => {
+      const newData = { ...prev, [name]: value };
+      
+      // Reset subject when exam changes
+      if (name === "examId" && value !== prev.examId) {
+        newData.subjectId = "";
+        newData.unitId = "";
+        newData.chapterId = "";
+        newData.topicId = "";
+        newData.subTopicId = "";
+        setUnits([]); // Clear units when exam changes
+        setChapters([]); // Clear chapters when exam changes
+        setTopics([]); // Clear topics when exam changes
+        setSubTopics([]); // Clear subtopics when exam changes
+      }
+      
+      // Reset unit when subject changes and fetch units for the selected exam and subject
+      if (name === "subjectId" && value !== prev.subjectId) {
+        newData.unitId = "";
+        newData.chapterId = "";
+        newData.topicId = "";
+        newData.subTopicId = "";
+        setChapters([]); // Clear chapters when subject changes
+        setTopics([]); // Clear topics when subject changes
+        setSubTopics([]); // Clear subtopics when subject changes
+        // Fetch units for the selected exam and subject in edit form
+        if (newData.examId && value) {
+          fetchUnits(newData.examId, value);
+        } else {
+          setUnits([]);
+        }
+      }
+      
+      // Reset chapter when unit changes and fetch chapters for the selected unit
+      if (name === "unitId" && value !== prev.unitId) {
+        newData.chapterId = "";
+        newData.topicId = "";
+        newData.subTopicId = "";
+        setTopics([]); // Clear topics when unit changes
+        setSubTopics([]); // Clear subtopics when unit changes
+        // Fetch chapters for the selected unit in edit form
+        if (value) {
+          fetchChapters(value);
+        } else {
+          setChapters([]);
+        }
+      }
+      
+      // Reset topic when chapter changes and fetch topics for the selected chapter
+      if (name === "chapterId" && value !== prev.chapterId) {
+        newData.topicId = "";
+        newData.subTopicId = "";
+        setSubTopics([]); // Clear subtopics when chapter changes
+        // Fetch topics for the selected chapter in edit form
+        if (value) {
+          fetchTopics(value);
+        } else {
+          setTopics([]);
+        }
+      }
+      
+      // Reset subtopic when topic changes and fetch subtopics for the selected topic
+      if (name === "topicId" && value !== prev.topicId) {
+        newData.subTopicId = "";
+        // Fetch subtopics for the selected topic in edit form
+        if (value) {
+          fetchSubTopics(value);
+        } else {
+          setSubTopics([]);
+        }
+      }
+      
+      return newData;
+    });
+    setFormError(null);
+  };
+
+  const handleCancelForm = () => {
+    setShowAddForm(false);
+    setFormData({
+      name: "",
+      examId: "",
+      subjectId: "",
+      unitId: "",
+      chapterId: "",
+      topicId: "",
+      subTopicId: "",
+      orderNumber: "",
+    });
+    setAdditionalDefinitions([{ name: "", orderNumber: "" }]);
+    setFormError(null);
+    setUnits([]); // Clear units when form is cancelled
+    setChapters([]); // Clear chapters when form is cancelled
+    setTopics([]); // Clear topics when form is cancelled
+    setSubTopics([]); // Clear subtopics when form is cancelled
+  };
+
+  const handleCancelEditForm = () => {
+    setShowEditForm(false);
+    setEditingDefinition(null);
+    setEditFormData({
+      name: "",
+      examId: "",
+      subjectId: "",
+      unitId: "",
+      chapterId: "",
+      topicId: "",
+      subTopicId: "",
+      orderNumber: "",
+    });
+    setFormError(null);
+    setUnits([]); // Clear units when edit form is cancelled
+    setChapters([]); // Clear chapters when edit form is cancelled
+    setTopics([]); // Clear topics when edit form is cancelled
+    setSubTopics([]); // Clear subtopics when edit form is cancelled
+  };
+
+  const handleOpenAddForm = () => {
+    setShowAddForm(true);
+    setFormData({
+      name: "",
+      examId: "",
+      subjectId: "",
+      unitId: "",
+      chapterId: "",
+      topicId: "",
+      subTopicId: "",
+      orderNumber: "",
+    });
+    setAdditionalDefinitions([{ name: "", orderNumber: "" }]);
+    setFormError(null);
+    setUnits([]); // Clear units when opening new form
+    setChapters([]); // Clear chapters when opening new form
+    setTopics([]); // Clear topics when opening new form
+    setSubTopics([]); // Clear subtopics when opening new form
+  };
+
+  const handleAddMoreDefinitions = () => {
+    setAdditionalDefinitions((prev) => {
+      const nextOrder = nextOrderNumber + prev.length;
+      return [...prev, { name: "", orderNumber: nextOrder.toString() }];
+    });
+  };
+
+  const handleRemoveDefinition = (index) => {
+    if (additionalDefinitions.length > 1) {
+      setAdditionalDefinitions((prev) => prev.filter((_, i) => i !== index));
+    }
+  };
+
+  const handleAdditionalDefinitionChange = (index, field, value) => {
+    setAdditionalDefinitions((prev) =>
+      prev.map((definition, i) =>
+        i === index ? { ...definition, [field]: value } : definition
+      )
+    );
+  };
+
+  const getNextOrderNumber = useCallback(async (subTopicId) => {
+    if (!subTopicId) return 1;
+    try {
+      const response = await api.get(`/definition?subTopicId=${subTopicId}&status=all&limit=1000`);
+      if (response.data.success && response.data.data && response.data.data.length > 0) {
+        const existingDefinitions = response.data.data;
+        const maxOrder = existingDefinitions.reduce(
+          (max, definition) => Math.max(max, definition.orderNumber || 0),
+          0
+        );
+        return maxOrder + 1;
+      }
+    } catch (error) {
+      console.error("Error fetching next order number:", error);
+    }
+    return 1;
+  }, []);
+
+  // Update order numbers when subtopic is selected
+  useEffect(() => {
+    if (formData.subTopicId && showAddForm) {
+      getNextOrderNumber(formData.subTopicId).then((orderNumber) => {
+        setNextOrderNumber(orderNumber);
+        setFormData((prev) => ({
+          ...prev,
+          orderNumber: orderNumber.toString(),
+        }));
+        
+        // Always update definitions - create first one if none exist, or update existing ones
+        setAdditionalDefinitions((prev) => {
+          if (prev.length === 0 || prev.some(d => !d.orderNumber || d.orderNumber === "")) {
+            // Create first definition with calculated order number
+            return [
+              {
+                name: "",
+                orderNumber: orderNumber.toString(),
+              },
+            ];
+          } else {
+            // Update order numbers for existing definitions
+            return prev.map((definition, index) => ({
+              ...definition,
+              orderNumber: (orderNumber + index).toString(),
+            }));
+          }
+        });
+      });
+    } else if (!formData.subTopicId && showAddForm) {
+      // Clear definitions when subtopic is cleared
+      setAdditionalDefinitions([{ name: "", orderNumber: "" }]);
+      setNextOrderNumber(1);
+    }
+  }, [formData.subTopicId, showAddForm, getNextOrderNumber]);
+
+  const handleAddDefinitions = async (e) => {
+    e.preventDefault();
+
+    // Check permissions
+    if (!canCreate) {
+      setFormError(getPermissionMessage("create", role));
+      return;
+    }
+
+    // Validate required fields
+    if (!formData.examId || !formData.subjectId || !formData.unitId || !formData.chapterId || !formData.topicId || !formData.subTopicId) {
+      setFormError("Please select Exam, Subject, Unit, Chapter, Topic, and SubTopic");
+      setIsFormLoading(false);
+      return;
+    }
+
+    setIsFormLoading(true);
+    setFormError(null);
+
+    try {
+      const definitionsToCreate = additionalDefinitions
+        .filter((definition) => definition.name.trim())
+        .map((definition, index) => ({
+          name: definition.name,
+          examId: formData.examId,
+          subjectId: formData.subjectId,
+          unitId: formData.unitId,
+          chapterId: formData.chapterId, // Ensure chapterId is always sent
+          topicId: formData.topicId,
+          subTopicId: formData.subTopicId,
+          orderNumber: parseInt(definition.orderNumber) || nextOrderNumber + index,
+        }));
+
+      const response = await api.post("/definition", definitionsToCreate);
+
+      if (response.data.success) {
+        const newDefinitions = Array.isArray(response.data.data)
+          ? response.data.data
+          : [response.data.data];
+        setDefinitions((prevDefinitions) => [...prevDefinitions, ...newDefinitions]);
+        handleCancelForm();
+        console.log(`✅ ${newDefinitions.length} definition(s) created successfully`);
+      } else {
+        throw new Error(response.data.message || "Failed to create definitions");
+      }
+    } catch (error) {
+      console.error("❌ Error creating definitions:", error);
+      setFormError(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to create definitions"
+      );
+    } finally {
+      setIsFormLoading(false);
+    }
+  };
+
+  const handleEditDefinition = async (definitionToEdit) => {
+    // Check permissions
+    if (!canEdit) {
+      setFormError(getPermissionMessage("edit", role));
+      return;
+    }
+
+    const examId = definitionToEdit.examId?._id || definitionToEdit.examId;
+    const subjectId = definitionToEdit.subjectId?._id || definitionToEdit.subjectId;
+    const unitId = definitionToEdit.unitId?._id || definitionToEdit.unitId;
+    let chapterId = definitionToEdit.chapterId?._id || definitionToEdit.chapterId;
+    const topicId = definitionToEdit.topicId?._id || definitionToEdit.topicId;
+    const subTopicId = definitionToEdit.subTopicId?._id || definitionToEdit.subTopicId;
+
+    // Auto-populate chapterId from topicId if missing
+    if (!chapterId && topicId) {
+      try {
+        const topicResponse = await api.get(`/topic/${topicId}`);
+        if (topicResponse.data.success && topicResponse.data.data?.chapterId) {
+          chapterId = topicResponse.data.data.chapterId._id || topicResponse.data.data.chapterId;
+          console.log(`✅ Auto-populated chapterId ${chapterId} from topicId ${topicId} for editing definition`);
+        }
+      } catch (error) {
+        console.error("Error fetching chapterId from topic:", error);
+      }
+    }
+
+    setEditingDefinition(definitionToEdit);
+    setEditFormData({
+      name: definitionToEdit.name,
+      examId: examId,
+      subjectId: subjectId,
+      unitId: unitId,
+      chapterId: chapterId || "",
+      topicId: topicId,
+      subTopicId: subTopicId,
+      orderNumber: definitionToEdit.orderNumber?.toString() || "",
+    });
+    
+    // Fetch units, chapters, topics, and subtopics for the selected exam, subject, unit, chapter, and topic when editing
+    if (examId && subjectId) {
+      fetchUnits(examId, subjectId).then(() => {
+        if (unitId) {
+          fetchChapters(unitId).then(() => {
+            // If chapterId was auto-populated, fetch topics for that chapter
+            if (chapterId) {
+              fetchTopics(chapterId).then(() => {
+                if (topicId) {
+                  fetchSubTopics(topicId);
+                }
+              });
+            } else if (topicId) {
+              // If chapterId is still missing after auto-population, just fetch subtopics
+              // Topics will be empty but that's okay - user needs to select chapter first
+              fetchSubTopics(topicId);
+            }
+          });
+        }
+      });
+    }
+    
+    setShowEditForm(true);
+  };
+
+  const handleUpdateDefinition = async (e) => {
+    e.preventDefault();
+    
+    // Validate required fields
+    if (!editFormData.examId || !editFormData.subjectId || !editFormData.unitId || !editFormData.chapterId || !editFormData.topicId || !editFormData.subTopicId) {
+      setFormError("Please select Exam, Subject, Unit, Chapter, Topic, and SubTopic");
+      setIsFormLoading(false);
+      return;
+    }
+    
+    setIsFormLoading(true);
+    setFormError(null);
+
+    try {
+      const response = await api.put(`/definition/${editingDefinition._id}`, {
+        name: editFormData.name,
+        examId: editFormData.examId,
+        subjectId: editFormData.subjectId,
+        unitId: editFormData.unitId,
+        chapterId: editFormData.chapterId || null, // Ensure chapterId is sent (null if empty, will be auto-populated)
+        topicId: editFormData.topicId,
+        subTopicId: editFormData.subTopicId,
+        orderNumber: editFormData.orderNumber && editFormData.orderNumber.trim()
+          ? parseInt(editFormData.orderNumber)
+          : undefined,
+      });
+
+      if (response.data.success) {
+        setDefinitions((prevDefinitions) =>
+          prevDefinitions.map((d) =>
+            d._id === editingDefinition._id ? response.data.data : d
+          )
+        );
+        handleCancelEditForm();
+        console.log(
+          `✅ Definition "${response.data.data.name}" updated successfully`
+        );
+      } else {
+        throw new Error(response.data.message || "Failed to update definition");
+      }
+    } catch (error) {
+      console.error("❌ Error updating definition:", error);
+      setFormError(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to update definition"
+      );
+    } finally {
+      setIsFormLoading(false);
+    }
+  };
+
+  const handleDeleteDefinition = async (definitionToDelete) => {
+    // Check permissions
+    if (!canDelete) {
+      setFormError(getPermissionMessage("delete", role));
+      return;
+    }
+
+    if (
+      !window.confirm(
+        `Are you sure you want to delete "${definitionToDelete.name}"?`
+      )
+    ) {
+      return;
+    }
+
+    setIsFormLoading(true);
+    setError(null);
+
+    try {
+      const response = await api.delete(`/definition/${definitionToDelete._id}`);
+
+      if (response.data.success) {
+        setDefinitions((prevDefinitions) =>
+          prevDefinitions.filter((d) => d._id !== definitionToDelete._id)
+        );
+        console.log(`✅ Definition "${definitionToDelete.name}" deleted successfully`);
+      } else {
+        throw new Error(response.data.message || "Failed to delete definition");
+      }
+    } catch (error) {
+      console.error("❌ Error deleting definition:", error);
+      setError(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to delete definition"
+      );
+    } finally {
+      setIsFormLoading(false);
+    }
+  };
+
+  const handleToggleStatus = async (definition) => {
+    const currentStatus = definition.status || "active";
+    const newStatus = currentStatus === "active" ? "inactive" : "active";
+    const action = newStatus === "inactive" ? "deactivate" : "activate";
+
+    if (
+      window.confirm(
+        `Are you sure you want to ${action} "${definition.name}"?`
+      )
+    ) {
+      try {
+        setIsFormLoading(true);
+        setError(null);
+
+        const response = await api.patch(`/definition/${definition._id}/status`, {
+          status: newStatus,
+        });
+
+        if (response.data.success) {
+          // Update the definition status in the list
+          setDefinitions((prev) =>
+            prev.map((d) =>
+              d._id === definition._id ? { ...d, status: newStatus } : d
+            )
+          );
+          console.log(
+            `✅ Definition "${definition.name}" ${action}d successfully`
+          );
+        } else {
+          throw new Error(response.data.message || `Failed to ${action} definition`);
+        }
+      } catch (error) {
+        console.error(`❌ Error ${action}ing definition:`, error);
+        setError(
+          error.response?.data?.message ||
+            error.message ||
+            `Failed to ${action} definition`
+        );
+      } finally {
+        setIsFormLoading(false);
+      }
+    }
+  };
+
+  const handleDragEnd = async (result) => {
+    // Check permissions
+    if (!canReorder) {
+      setFormError(getPermissionMessage("reorder", role));
+      return;
+    }
+
+    if (!result.destination) return;
+
+    const sourceIndex = result.source.index;
+    const destinationIndex = result.destination.index;
+
+    if (sourceIndex === destinationIndex) return;
+
+    const items = Array.from(definitions);
+    const reorderedItem = items[sourceIndex];
+    
+    // Get the subtopic ID to identify the group
+    const subTopicId = reorderedItem.subTopicId?._id || reorderedItem.subTopicId;
+
+    // Find all definitions in the same group (same subtopic)
+    const groupDefinitions = items.filter((definition) => {
+      const definitionSubTopicId = definition.subTopicId?._id || definition.subTopicId;
+      return definitionSubTopicId === subTopicId;
+    });
+
+    // Find indices within the group
+    const groupSourceIndex = groupDefinitions.findIndex(
+      (d) => (d._id || d.id) === (reorderedItem._id || reorderedItem.id)
+    );
+    
+    // Create a reordered group array
+    const reorderedGroup = Array.from(groupDefinitions);
+    const [movedDefinition] = reorderedGroup.splice(groupSourceIndex, 1);
+    
+    // Calculate destination index within the group
+    const groupDestIndex = groupDefinitions.findIndex((definition, idx) => {
+      if (idx === groupSourceIndex) return false;
+      const flatIndex = items.findIndex(
+        (d) => (d._id || d.id) === (definition._id || definition.id)
+      );
+      return flatIndex >= destinationIndex;
+    });
+    const finalDestIndex = groupDestIndex === -1 ? reorderedGroup.length : groupDestIndex;
+    reorderedGroup.splice(finalDestIndex, 0, movedDefinition);
+
+    // Update order numbers only for definitions in this group
+    const updatedGroupDefinitions = reorderedGroup.map((definition, index) => ({
+      ...definition,
+      orderNumber: index + 1,
+    }));
+
+    // Update the full definitions array, preserving other definitions
+    const updatedItems = items.map((definition) => {
+      const updatedDefinition = updatedGroupDefinitions.find(
+        (d) => (d._id || d.id) === (definition._id || definition.id)
+      );
+      return updatedDefinition || definition;
+    });
+
+    setDefinitions(updatedItems);
+
+    try {
+      // Prepare definitions data for the reorder endpoint
+      const definitionsData = updatedGroupDefinitions.map((definition) => ({
+        id: definition._id,
+        orderNumber: definition.orderNumber,
+      }));
+
+      const response = await api.patch("/definition/reorder", {
+        definitions: definitionsData,
+      });
+
+      if (response.data.success) {
+        console.log(
+          `✅ Definition "${reorderedItem.name}" moved to position ${finalDestIndex + 1}`
+        );
+      } else {
+        throw new Error(
+          response.data.message || "Failed to update definition order"
+        );
+      }
+    } catch (error) {
+      console.error("❌ Error updating definition order:", error);
+      console.log("🔄 Reverting definition order due to API error");
+      fetchDefinitions(); // Revert local state
+      setError(
+        `Failed to update definition order: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+    }
+  };
+
+  return (
+    <LoadingWrapper
+      isLoading={isDataLoading}
+      skeleton={<SkeletonChaptersTable />}
+    >
+      <div className="space-y-6">
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-red-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Header Section */}
+        <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-lg border border-gray-200 p-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+                Definition Management
+              </h1>
+              <p className="text-sm text-gray-600">
+                Manage and organize your definitions, create new definitions, and track
+                definition performance across your educational platform.
+              </p>
+            </div>
+            {canCreate ? (
+              <button
+                onClick={handleOpenAddForm}
+                className="px-4 py-2 bg-[#0056FF] hover:bg-[#0044CC] text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+              >
+                <FaPlus className="w-4 h-4" />
+                Add New Definition
+              </button>
+            ) : (
+              <button
+                disabled
+                title={getPermissionMessage("create", role)}
+                className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg text-sm font-medium cursor-not-allowed flex items-center gap-2"
+              >
+                <FaLock className="w-4 h-4" />
+                Add New Definition
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Add Definition Form */}
+        {showAddForm && (
+          <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Add New Definition{additionalDefinitions.length > 1 ? "s" : ""}
+              </h2>
+              <button
+                onClick={handleCancelForm}
+                className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors"
+                disabled={isFormLoading}
+              >
+                <FaTimes className="w-4 h-4" />
+              </button>
+            </div>
+
+            {formError && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  <p className="text-sm font-medium text-red-800">
+                    {formError}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleAddDefinitions} className="space-y-6">
+              {/* Selection Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Exam *
+                  </label>
+                  <select
+                    name="examId"
+                    value={formData.examId}
+                    onChange={handleFormChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Select Exam</option>
+                    {exams.map((exam) => (
+                      <option key={exam._id} value={exam._id}>
+                        {exam.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Subject *
+                  </label>
+                  <select
+                    name="subjectId"
+                    value={formData.subjectId}
+                    onChange={handleFormChange}
+                    required
+                    disabled={!formData.examId}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                  >
+                    <option value="">Select Subject</option>
+                    {filteredSubjects.map((subject) => (
+                      <option key={subject._id} value={subject._id}>
+                        {subject.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Unit *
+                  </label>
+                  <select
+                    name="unitId"
+                    value={formData.unitId}
+                    onChange={handleFormChange}
+                    required
+                    disabled={!formData.subjectId}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                  >
+                    <option value="">Select Unit</option>
+                    {filteredUnits.map((unit) => (
+                      <option key={unit._id} value={unit._id}>
+                        {unit.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Chapter *
+                  </label>
+                  <select
+                    name="chapterId"
+                    value={formData.chapterId}
+                    onChange={handleFormChange}
+                    required
+                    disabled={!formData.unitId}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                  >
+                    <option value="">Select Chapter</option>
+                    {filteredChapters.map((chapter) => (
+                      <option key={chapter._id} value={chapter._id}>
+                        {chapter.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Topic *
+                  </label>
+                  <select
+                    name="topicId"
+                    value={formData.topicId}
+                    onChange={handleFormChange}
+                    required
+                    disabled={!formData.chapterId}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                  >
+                    <option value="">Select Topic</option>
+                    {filteredTopics.map((topic) => (
+                      <option key={topic._id} value={topic._id}>
+                        {topic.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    SubTopic *
+                  </label>
+                  <select
+                    name="subTopicId"
+                    value={formData.subTopicId}
+                    onChange={handleFormChange}
+                    required
+                    disabled={!formData.topicId}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                  >
+                    <option value="">Select SubTopic</option>
+                    {filteredSubTopics.map((subtopic) => (
+                      <option key={subtopic._id} value={subtopic._id}>
+                        {subtopic.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Definition Names */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-gray-700">
+                    Definition Names *
+                  </h3>
+                  {additionalDefinitions.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={handleAddMoreDefinitions}
+                      className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1"
+                    >
+                      <FaPlus className="w-3 h-3" />
+                      Add More
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {additionalDefinitions.map((definition, index) => (
+                    <div key={index} className="flex gap-2">
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          placeholder={`Definition ${index + 1} name`}
+                          value={definition.name}
+                          onChange={(e) =>
+                            handleAdditionalDefinitionChange(
+                              index,
+                              "name",
+                              e.target.value
+                            )
+                          }
+                          required
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                      </div>
+                      <div className="w-20">
+                        <input
+                          type="number"
+                          placeholder="Order"
+                          value={definition.orderNumber}
+                          onChange={(e) =>
+                            handleAdditionalDefinitionChange(
+                              index,
+                              "orderNumber",
+                              e.target.value
+                            )
+                          }
+                          min="1"
+                          className="w-full px-2 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center"
+                        />
+                      </div>
+                      {additionalDefinitions.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveDefinition(index)}
+                          className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          <FaTimes className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {additionalDefinitions.length === 1 && (
+                  <button
+                    type="button"
+                    onClick={handleAddMoreDefinitions}
+                    className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1"
+                  >
+                    <FaPlus className="w-3 h-3" />
+                    Add More Definitions
+                  </button>
+                )}
+              </div>
+
+              {/* Form Actions */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={handleCancelForm}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors"
+                  disabled={isFormLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  disabled={isFormLoading}
+                >
+                  {isFormLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                      Adding...
+                    </>
+                  ) : (
+                    `Add Definition${additionalDefinitions.length > 1 ? "s" : ""}`
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Edit Definition Form */}
+        {showEditForm && editingDefinition && (
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <FaEdit className="size-3 text-blue-600" />
+              </div>
+              <h2 className="text-sm font-bold text-gray-900">
+                Edit Definition: {editingDefinition.name}
+              </h2>
+            </div>
+
+            {formError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                {formError}
+              </div>
+            )}
+
+            <form onSubmit={handleUpdateDefinition} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Exam *
+                  </label>
+                  <select
+                    name="examId"
+                    value={editFormData.examId}
+                    onChange={handleEditFormChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Select Exam</option>
+                    {exams.map((exam) => (
+                      <option key={exam._id} value={exam._id}>
+                        {exam.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Subject *
+                  </label>
+                  <select
+                    name="subjectId"
+                    value={editFormData.subjectId}
+                    onChange={handleEditFormChange}
+                    required
+                    disabled={!editFormData.examId}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                  >
+                    <option value="">Select Subject</option>
+                    {filteredEditSubjects.map((subject) => (
+                      <option key={subject._id} value={subject._id}>
+                        {subject.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Unit *
+                  </label>
+                  <select
+                    name="unitId"
+                    value={editFormData.unitId}
+                    onChange={handleEditFormChange}
+                    required
+                    disabled={!editFormData.subjectId}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                  >
+                    <option value="">Select Unit</option>
+                    {filteredEditUnits.map((unit) => (
+                      <option key={unit._id} value={unit._id}>
+                        {unit.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Chapter *
+                  </label>
+                  <select
+                    name="chapterId"
+                    value={editFormData.chapterId}
+                    onChange={handleEditFormChange}
+                    required
+                    disabled={!editFormData.unitId}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                  >
+                    <option value="">Select Chapter</option>
+                    {filteredEditChapters.map((chapter) => (
+                      <option key={chapter._id} value={chapter._id}>
+                        {chapter.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Topic *
+                  </label>
+                  <select
+                    name="topicId"
+                    value={editFormData.topicId}
+                    onChange={handleEditFormChange}
+                    required
+                    disabled={!editFormData.chapterId}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                  >
+                    <option value="">Select Topic</option>
+                    {filteredEditTopics.map((topic) => (
+                      <option key={topic._id} value={topic._id}>
+                        {topic.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    SubTopic *
+                  </label>
+                  <select
+                    name="subTopicId"
+                    value={editFormData.subTopicId}
+                    onChange={handleEditFormChange}
+                    required
+                    disabled={!editFormData.topicId}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
+                  >
+                    <option value="">Select SubTopic</option>
+                    {filteredEditSubTopics.map((subtopic) => (
+                      <option key={subtopic._id} value={subtopic._id}>
+                        {subtopic.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Definition Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={editFormData.name}
+                    onChange={handleEditFormChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Order Number *
+                  </label>
+                  <input
+                    type="number"
+                    name="orderNumber"
+                    value={editFormData.orderNumber}
+                    onChange={handleEditFormChange}
+                    required
+                    min="1"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={handleCancelEditForm}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors"
+                  disabled={isFormLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  disabled={isFormLoading}
+                >
+                  {isFormLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                      Updating...
+                    </>
+                  ) : (
+                    "Update Definition"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Definitions Table */}
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Definitions List
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  Manage your definitions, view details, and perform actions. You can
+                  drag to reorder definitions.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Filter Button */}
+          <div className="px-6 py-3 border-b border-gray-200">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+            >
+              <FaFilter className="w-4 h-4" />
+              Filter Definitions
+              {activeFilterCount > 0 && (
+                <span className="bg-white text-blue-600 px-2 py-0.5 rounded-full text-xs font-medium">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {/* Filter Section */}
+          {showFilters && (
+            <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-4">
+                {/* Filter by Exam */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Filter by Exam
+                  </label>
+                  <select
+                    value={filterExam}
+                    onChange={(e) => {
+                      setFilterExam(e.target.value);
+                      setFilterSubject("");
+                      setFilterUnit("");
+                      setFilterChapter("");
+                      setFilterTopic("");
+                      setFilterSubTopic("");
+                    }}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                  >
+                    <option value="">All Exams</option>
+                    {exams.map((exam) => (
+                      <option key={exam._id} value={exam._id}>
+                        {exam.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Filter by Subject */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700">
+                    Filter by Subject
+                  </label>
+                  <select
+                    value={filterSubject}
+                    onChange={(e) => {
+                      setFilterSubject(e.target.value);
+                      setFilterUnit("");
+                      setFilterChapter("");
+                      setFilterTopic("");
+                      setFilterSubTopic("");
+                    }}
+                    disabled={!filterExam}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm bg-white disabled:bg-gray-100 disabled:text-gray-400"
+                  >
+                    <option value="">
+                      {filterExam ? "Select Exam First" : "All Subjects"}
+                    </option>
+                    {filteredFilterSubjects.map((subject) => (
+                      <option key={subject._id} value={subject._id}>
+                        {subject.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Filter by Unit */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700">
+                    Filter by Unit
+                  </label>
+                  <select
+                    value={filterUnit}
+                    onChange={(e) => {
+                      setFilterUnit(e.target.value);
+                      setFilterChapter("");
+                      setFilterTopic("");
+                      setFilterSubTopic("");
+                    }}
+                    disabled={!filterSubject}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm bg-white disabled:bg-gray-100 disabled:text-gray-400"
+                  >
+                    <option value="">
+                      {filterSubject ? "Select Subject First" : "All Units"}
+                    </option>
+                    {filteredFilterUnits.map((unit) => (
+                      <option key={unit._id} value={unit._id}>
+                        {unit.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Filter by Chapter */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700">
+                    Filter by Chapter
+                  </label>
+                  <select
+                    value={filterChapter}
+                    onChange={(e) => {
+                      setFilterChapter(e.target.value);
+                      setFilterTopic("");
+                      setFilterSubTopic("");
+                    }}
+                    disabled={!filterUnit}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm bg-white disabled:bg-gray-100 disabled:text-gray-400"
+                  >
+                    <option value="">
+                      {filterUnit ? "Select Unit First" : "All Chapters"}
+                    </option>
+                    {filteredFilterChapters.map((chapter) => (
+                      <option key={chapter._id} value={chapter._id}>
+                        {chapter.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Filter by Topic */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700">
+                    Filter by Topic
+                  </label>
+                  <select
+                    value={filterTopic}
+                    onChange={(e) => {
+                      setFilterTopic(e.target.value);
+                      setFilterSubTopic("");
+                    }}
+                    disabled={!filterChapter}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm bg-white disabled:bg-gray-100 disabled:text-gray-400"
+                  >
+                    <option value="">
+                      {filterChapter ? "Select Chapter First" : "All Topics"}
+                    </option>
+                    {filteredFilterTopics.map((topic) => (
+                      <option key={topic._id} value={topic._id}>
+                        {topic.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Filter by SubTopic */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-700">
+                    Filter by SubTopic
+                  </label>
+                  <select
+                    value={filterSubTopic}
+                    onChange={(e) => setFilterSubTopic(e.target.value)}
+                    disabled={!filterTopic}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm bg-white disabled:bg-gray-100 disabled:text-gray-400"
+                  >
+                    <option value="">
+                      {filterTopic ? "Select Topic First" : "All SubTopics"}
+                    </option>
+                    {filteredFilterSubTopics.map((subtopic) => (
+                      <option key={subtopic._id} value={subtopic._id}>
+                        {subtopic.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Active Filters */}
+              {activeFilterCount > 0 && (
+                <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-gray-200">
+                  <span className="text-xs font-semibold text-gray-600">
+                    Active Filters:
+                  </span>
+                  {filterExam && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                      Exam:{" "}
+                      {exams.find((e) => e._id === filterExam)?.name || "N/A"}
+                      <button
+                        onClick={() => {
+                          setFilterExam("");
+                          setFilterSubject("");
+                          setFilterUnit("");
+                          setFilterChapter("");
+                          setFilterTopic("");
+                          setFilterSubTopic("");
+                        }}
+                        className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+                      >
+                        <FaTimes className="w-3 h-3" />
+                      </button>
+                    </span>
+                  )}
+                  {filterSubject && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                      Subject:{" "}
+                      {subjects.find((s) => s._id === filterSubject)?.name ||
+                        "N/A"}
+                      <button
+                        onClick={() => {
+                          setFilterSubject("");
+                          setFilterUnit("");
+                          setFilterChapter("");
+                          setFilterTopic("");
+                          setFilterSubTopic("");
+                        }}
+                        className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+                      >
+                        <FaTimes className="w-3 h-3" />
+                      </button>
+                    </span>
+                  )}
+                  {filterUnit && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                      Unit:{" "}
+                      {filterUnits.find((u) => u._id === filterUnit)?.name || "N/A"}
+                      <button
+                        onClick={() => {
+                          setFilterUnit("");
+                          setFilterChapter("");
+                          setFilterTopic("");
+                          setFilterSubTopic("");
+                        }}
+                        className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+                      >
+                        <FaTimes className="w-3 h-3" />
+                      </button>
+                    </span>
+                  )}
+                  {filterChapter && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                      Chapter:{" "}
+                      {filterChapters.find((c) => c._id === filterChapter)?.name || "N/A"}
+                      <button
+                        onClick={() => {
+                          setFilterChapter("");
+                          setFilterTopic("");
+                          setFilterSubTopic("");
+                        }}
+                        className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+                      >
+                        <FaTimes className="w-3 h-3" />
+                      </button>
+                    </span>
+                  )}
+                  {filterTopic && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                      Topic:{" "}
+                      {filterTopics.find((t) => t._id === filterTopic)?.name || "N/A"}
+                      <button
+                        onClick={() => {
+                          setFilterTopic("");
+                          setFilterSubTopic("");
+                        }}
+                        className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+                      >
+                        <FaTimes className="w-3 h-3" />
+                      </button>
+                    </span>
+                  )}
+                  {filterSubTopic && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                      SubTopic:{" "}
+                      {filterSubTopics.find((st) => st._id === filterSubTopic)?.name || "N/A"}
+                      <button
+                        onClick={() => {
+                          setFilterSubTopic("");
+                        }}
+                        className="hover:bg-blue-200 rounded-full p-0.5 transition-colors"
+                      >
+                        <FaTimes className="w-3 h-3" />
+                      </button>
+                    </span>
+                  )}
+                  <button
+                    onClick={clearFilters}
+                    className="ml-auto px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full text-xs font-medium transition-colors"
+                  >
+                    Clear All Filters
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="p-6">
+            <DefinitionsTable
+              definitions={filteredDefinitions}
+              onEdit={handleEditDefinition}
+              onDelete={handleDeleteDefinition}
+              onDragEnd={handleDragEnd}
+              onToggleStatus={handleToggleStatus}
+            />
+          </div>
+        </div>
+      </div>
+    </LoadingWrapper>
+  );
+};
+
+export default DefinitionManagement;

@@ -1,0 +1,170 @@
+// ============================================
+// SEO Utility Functions
+// ============================================
+
+import { SEO_DEFAULTS, APP_CONFIG } from "@/constants";
+
+/**
+ * Generate SEO metadata for pages
+ * @param {Object} data - Entity data with title, metaDescription, keywords
+ * @param {Object} options - Additional options like type, name
+ * @returns {Object} SEO metadata object
+ */
+export function generateMetadata(data, options = {}) {
+  const { type = "", name = "", path = "" } = options;
+
+  // Debug logging
+  console.log("=== generateSEO DEBUG ===");
+  console.log("Received data:", data);
+  console.log("Data title:", data?.title);
+  console.log("Data title type:", typeof data?.title);
+  console.log("Options name:", name);
+
+  // Use admin-provided SEO data if available, otherwise generate defaults
+  // Prioritize admin-provided title - if it exists and has content, use it as-is
+  let title;
+  if (
+    data?.title &&
+    typeof data.title === "string" &&
+    data.title.trim().length > 0
+  ) {
+    // Use admin-provided title exactly as provided
+    title = data.title.trim();
+    console.log("Using admin title:", title);
+  } else if (name) {
+    // Fallback to name-based title
+    title = `${name} - ${APP_CONFIG.name}`;
+    console.log("Using fallback title from name:", title);
+  } else {
+    // Final fallback to default
+    title = SEO_DEFAULTS.TITLE;
+    console.log("Using default title:", title);
+  }
+
+  // Ensure title doesn't exceed recommended length
+  const optimizedTitle =
+    title.length > 60 ? `${title.substring(0, 57)}...` : title;
+
+  // Prioritize admin-provided metaDescription - if it exists and has content, use it as-is
+  let description;
+  if (data?.metaDescription && data.metaDescription.trim().length > 0) {
+    // Use admin-provided description exactly as provided
+    description = data.metaDescription.trim();
+  } else if (name) {
+    // Fallback to name-based description
+    description = `Prepare for ${name} with ${APP_CONFIG.name}. ${SEO_DEFAULTS.DESCRIPTION}`;
+  } else {
+    // Final fallback to default
+    description = SEO_DEFAULTS.DESCRIPTION;
+  }
+
+  // Ensure description doesn't exceed recommended length
+  const optimizedDescription =
+    description.length > 160
+      ? `${description.substring(0, 157)}...`
+      : description;
+
+  // Handle keywords - prioritize admin-provided keywords
+  let keywords = SEO_DEFAULTS.KEYWORDS;
+  if (data?.keywords && data.keywords.trim().length > 0) {
+    // Use admin-provided keywords
+    if (typeof data.keywords === "string") {
+      // Split comma-separated string and filter out empty values
+      keywords = data.keywords
+        .split(",")
+        .map((k) => k.trim())
+        .filter(Boolean);
+    } else if (Array.isArray(data.keywords)) {
+      keywords = data.keywords.filter((k) => k && k.trim().length > 0);
+    }
+    // Use only admin-provided keywords (don't mix with defaults)
+    keywords = keywords.slice(0, 10);
+  } else if (name) {
+    // Fallback: Generate keywords from name
+    keywords = [name, ...SEO_DEFAULTS.KEYWORDS].slice(0, 10);
+  }
+
+  // Build canonical URL
+  const canonicalUrl = `${APP_CONFIG.url}${path || ""}`;
+
+  return {
+    title: optimizedTitle,
+    description: optimizedDescription,
+    keywords: keywords.slice(0, 10).join(", "),
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: optimizedTitle,
+      description: optimizedDescription,
+      type: "website",
+      url: canonicalUrl,
+      siteName: APP_CONFIG.name,
+      images: [
+        {
+          url: `${APP_CONFIG.url}${SEO_DEFAULTS.OG_IMAGE}`,
+          width: 1200,
+          height: 630,
+          alt: optimizedTitle,
+        },
+      ],
+      locale: "en_US",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: optimizedTitle,
+      description: optimizedDescription,
+      images: [`${APP_CONFIG.url}${SEO_DEFAULTS.OG_IMAGE}`],
+      creator: "@testprepkart",
+      site: "@testprepkart",
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
+  };
+}
+
+/**
+ * Generate page title from entity data
+ */
+export function generatePageTitle(data, fallback = SEO_DEFAULTS.TITLE) {
+  return data?.title || fallback;
+}
+
+/**
+ * Generate meta description from entity data
+ */
+export function generateMetaDescription(
+  data,
+  fallback = SEO_DEFAULTS.DESCRIPTION
+) {
+  return data?.metaDescription || fallback;
+}
+
+/**
+ * Parse keywords from string or array
+ */
+export function parseKeywords(keywords) {
+  if (!keywords) return SEO_DEFAULTS.KEYWORDS;
+
+  if (typeof keywords === "string") {
+    return keywords
+      .split(",")
+      .map((k) => k.trim())
+      .filter(Boolean);
+  }
+
+  if (Array.isArray(keywords)) {
+    return keywords;
+  }
+
+  return SEO_DEFAULTS.KEYWORDS;
+}

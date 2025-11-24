@@ -1,0 +1,186 @@
+"use client";
+import React from "react";
+import Link from "next/link";
+import {
+  FaFacebook,
+  FaInstagram,
+  FaTwitter,
+  FaLinkedin,
+  FaYoutube,
+  FaArrowRight,
+  FaPhone,
+  FaWhatsapp,
+  FaEnvelope,
+  FaBuilding,
+} from "react-icons/fa";
+import Image from "next/image";
+
+const Footer = () => {
+  const usefulLinks = [
+    "Connect With Counselor",
+    "University Admissions",
+    "Prime Videos",
+    "Enrollment Form",
+    "Online Fee Payment",
+    "TestprepKart Operations",
+    "Faculty Registration",
+    "Downloads",
+  ];
+
+  const companyLinks = [
+    "Contact Us",
+    "Work With Us",
+    "Blog",
+    "Faculties",
+    "Partners",
+  ];
+
+  return (
+    <footer className="bg-gray-50 z-50 relative">
+      {/* Upper Section - Four Columns */}
+      <div className="container mx-auto px-4 py-12 md:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6">
+          {/* Column 1: Brand and CTA */}
+          <div className="space-y-4">
+            {/* Logo */}
+            <Link href="/">
+              <Image
+                src="/logo.png"
+                alt="TestPrepKart Logo"
+                width={150}
+                height={150}
+                className="w-24 sm:w-28 md:w-32 lg:w-36 h-auto"
+                loading="lazy"
+                placeholder="blur"
+                blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PC9zdmc+"
+              />
+            </Link>
+            {/* Description */}
+            <p className="text-gray-500 text-sm leading-relaxed">
+              Enabling students prepare and crack toughest examinations
+              worldwide for over a decade with problem solving aptitude!
+            </p>
+
+            {/* CTA Button */}
+            <button className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-200 to-blue-200 rounded-lg text-gray-900 font-medium hover:from-purple-300 hover:to-blue-300 transition-all shadow-sm hover:shadow-md">
+              <span>Contact With Us</span>
+              <FaArrowRight className="text-sm" />
+            </button>
+          </div>
+
+          {/* Column 2: Useful Links */}
+          <div>
+            <h3 className="text-gray-900 font-bold text-base mb-4">
+              Useful Links
+            </h3>
+            <ul className="space-y-2.5">
+              {usefulLinks.map((link, index) => (
+                <li key={index}>
+                  <Link
+                    href="#"
+                    className="text-gray-500 text-sm hover:text-blue-600 transition-colors"
+                  >
+                    {link}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 3: Our Company */}
+          <div>
+            <h3 className="text-gray-900 font-bold text-base mb-4">
+              Our Company
+            </h3>
+            <ul className="space-y-2.5">
+              {companyLinks.map((link, index) => (
+                <li key={index}>
+                  <Link
+                    href="#"
+                    className="text-gray-500 text-sm hover:text-blue-600 transition-colors"
+                  >
+                    {link}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 4: Contact Details */}
+          <div>
+            <h3 className="text-gray-900 font-bold text-base mb-4">
+              Contact Details
+            </h3>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-2 text-gray-500 text-sm">
+                <FaPhone className="text-gray-400 mt-0.5 shrink-0 text-sm" />
+                <span>Phone: +91 0120 4525484</span>
+              </li>
+              <li className="flex items-start gap-2 text-gray-500 text-sm">
+                <FaWhatsapp className="text-gray-400 mt-0.5 shrink-0 text-sm" />
+                <span>Whatsapp: +1 (510) 706-9331</span>
+              </li>
+              <li className="flex items-start gap-2 text-gray-500 text-sm">
+                <FaPhone className="text-gray-400 mt-0.5 shrink-0 text-sm" />
+                <span>Admission: +91 8800123492</span>
+              </li>
+              <li className="flex items-start gap-2 text-gray-500 text-sm">
+                <FaEnvelope className="text-gray-400 mt-0.5 shrink-0 text-sm" />
+                <span>E-mail: info@testprepkart.com</span>
+              </li>
+              <li className="flex items-start gap-2 text-gray-500 text-sm">
+                <FaBuilding className="text-gray-400 mt-0.5 shrink-0 text-sm" />
+                <span>
+                  Head Office: F 377, Sector 63, Noida, Uttar Pradesh, India
+                </span>
+              </li>
+            </ul>
+
+            {/* Social Media Icons */}
+            <div className="flex items-center gap-3 mt-6">
+              <FaYoutube className="text-gray-400 text-lg cursor-pointer hover:text-red-600 transition-colors" />
+              <FaFacebook className="text-gray-400 text-lg cursor-pointer hover:text-blue-600 transition-colors" />
+              <FaTwitter className="text-gray-400 text-lg cursor-pointer hover:text-blue-400 transition-colors" />
+              <FaInstagram className="text-gray-400 text-lg cursor-pointer hover:text-pink-600 transition-colors" />
+              <FaLinkedin className="text-gray-400 text-lg cursor-pointer hover:text-blue-700 transition-colors" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Section - Copyright and Legal Links */}
+      <div className="border-t border-gray-200 bg-white">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-500">
+            {/* Copyright */}
+            <p className="text-center md:text-left">
+              Copyright © 2024 CounselKart Educational Services Pvt. Ltd.. All
+              Rights Reserved
+            </p>
+
+            {/* Legal Links */}
+            <div className="flex flex-wrap items-center justify-center md:justify-end gap-3">
+              <Link href="#" className="hover:text-blue-600 transition-colors">
+                Terms of service
+              </Link>
+              <span className="text-gray-300">|</span>
+              <Link href="#" className="hover:text-blue-600 transition-colors">
+                Privacy policy
+              </Link>
+              <span className="text-gray-300">|</span>
+              <Link href="#" className="hover:text-blue-600 transition-colors">
+                Refund Policy
+              </Link>
+              <span className="text-gray-300">|</span>
+              <Link href="#" className="hover:text-blue-600 transition-colors">
+                Login & Register
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;
