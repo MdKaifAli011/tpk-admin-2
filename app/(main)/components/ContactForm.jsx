@@ -9,6 +9,7 @@ import {
   FaCheckCircle,
   FaExclamationCircle,
   FaSpinner,
+  FaPhone,
 } from "react-icons/fa";
 import api from "@/lib/api";
 
@@ -18,6 +19,7 @@ const ContactForm = () => {
     email: "",
     country: "",
     className: "",
+    phoneNumber: "",
     message: "",
   });
 
@@ -69,6 +71,10 @@ const ContactForm = () => {
       newErrors.className = "Class name is required";
     }
 
+    if (formData.phoneNumber && !/^[\d\s\-\+\(\)]+$/.test(formData.phoneNumber.trim())) {
+      newErrors.phoneNumber = "Please enter a valid phone number";
+    }
+
     if (!formData.message.trim()) {
       newErrors.message = "Message is required";
     }
@@ -96,6 +102,7 @@ const ContactForm = () => {
         email: formData.email.trim(),
         country: formData.country.trim(),
         className: formData.className.trim(),
+        phoneNumber: formData.phoneNumber.trim(),
         message: formData.message.trim(),
       });
 
@@ -111,6 +118,7 @@ const ContactForm = () => {
           email: "",
           country: "",
           className: "",
+          phoneNumber: "",
           message: "",
         });
         setErrors({});
@@ -289,6 +297,37 @@ const ContactForm = () => {
             </div>
             {errors.className && (
               <p className="mt-1 text-sm text-red-600">{errors.className}</p>
+            )}
+          </div>
+
+          {/* Phone Number Field */}
+          <div>
+            <label
+              htmlFor="phoneNumber"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Phone Number
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaPhone className="text-gray-400 text-sm" />
+              </div>
+              <input
+                type="tel"
+                id="phoneNumber"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+                className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  errors.phoneNumber
+                    ? "border-red-300 bg-red-50"
+                    : "border-gray-300 bg-white"
+                }`}
+                placeholder="Enter your phone number (optional)"
+              />
+            </div>
+            {errors.phoneNumber && (
+              <p className="mt-1 text-sm text-red-600">{errors.phoneNumber}</p>
             )}
           </div>
 

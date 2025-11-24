@@ -11,6 +11,7 @@ import {
   FaSpinner,
   FaTimes,
   FaDownload,
+  FaPhone,
 } from "react-icons/fa";
 import api from "@/lib/api";
 
@@ -20,6 +21,7 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
     email: "",
     country: "",
     className: "",
+    phoneNumber: "",
     message: "",
   });
 
@@ -71,6 +73,10 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
       newErrors.className = "Class name is required";
     }
 
+    if (formData.phoneNumber && !/^[\d\s\-\+\(\)]+$/.test(formData.phoneNumber.trim())) {
+      newErrors.phoneNumber = "Please enter a valid phone number";
+    }
+
     if (!formData.message.trim()) {
       newErrors.message = "Message is required";
     }
@@ -98,6 +104,7 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
         email: formData.email.trim(),
         country: formData.country.trim(),
         className: formData.className.trim(),
+        phoneNumber: formData.phoneNumber.trim(),
         message: formData.message.trim(),
       });
 
@@ -113,6 +120,7 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
           email: "",
           country: "",
           className: "",
+          phoneNumber: "",
           message: "",
         });
         setErrors({});
@@ -151,6 +159,7 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
         email: "",
         country: "",
         className: "",
+        phoneNumber: "",
         message: "",
       });
       setErrors({});
@@ -184,18 +193,18 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
         {/* Modal Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-xl z-10">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <FaDownload className="text-blue-600 text-lg" />
+        <div className="flex-shrink-0 bg-white border-b border-gray-200 px-5 py-3 flex items-center justify-between rounded-t-xl">
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 bg-blue-100 rounded-lg">
+              <FaDownload className="text-blue-600 text-base" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">
+              <h2 className="text-lg font-bold text-gray-900">
                 Download Study Materials
               </h2>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs text-gray-500">
                 Fill out the form to download {unitName} materials
               </p>
             </div>
@@ -203,29 +212,30 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
           <button
             onClick={handleClose}
             disabled={isSubmitting}
-            className="p-2 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Close modal"
           >
-            <FaTimes className="text-xl" />
+            <FaTimes className="text-lg" />
           </button>
         </div>
 
-        {/* Modal Body */}
-        <div className="p-6">
-          <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Modal Body - Scrollable */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-4">
+            <form onSubmit={handleSubmit} className="space-y-3.5">
             {/* Success/Error Message */}
             {submitStatus && (
               <div
-                className={`p-4 rounded-lg flex items-start gap-3 ${
+                className={`p-3 rounded-lg flex items-start gap-2 ${
                   submitStatus === "success"
                     ? "bg-green-50 border border-green-200 text-green-800"
                     : "bg-red-50 border border-red-200 text-red-800"
                 }`}
               >
                 {submitStatus === "success" ? (
-                  <FaCheckCircle className="text-green-600 text-base shrink-0 mt-0.5" />
+                  <FaCheckCircle className="text-green-600 text-sm shrink-0 mt-0.5" />
                 ) : (
-                  <FaExclamationCircle className="text-red-600 text-base shrink-0 mt-0.5" />
+                  <FaExclamationCircle className="text-red-600 text-sm shrink-0 mt-0.5" />
                 )}
                 <p className="text-sm font-medium">{submitMessage}</p>
               </div>
@@ -235,7 +245,7 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
             <div>
               <label
                 htmlFor="modal-name"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-gray-700 mb-1.5"
               >
                 Full Name <span className="text-red-500">*</span>
               </label>
@@ -249,7 +259,7 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
                     errors.name
                       ? "border-red-300 bg-red-50"
                       : "border-gray-300 bg-white"
@@ -259,7 +269,7 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
                 />
               </div>
               {errors.name && (
-                <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                <p className="mt-1 text-xs text-red-600">{errors.name}</p>
               )}
             </div>
 
@@ -267,7 +277,7 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
             <div>
               <label
                 htmlFor="modal-email"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-gray-700 mb-1.5"
               >
                 Email Address <span className="text-red-500">*</span>
               </label>
@@ -281,7 +291,7 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
                     errors.email
                       ? "border-red-300 bg-red-50"
                       : "border-gray-300 bg-white"
@@ -291,7 +301,7 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
                 />
               </div>
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                <p className="mt-1 text-xs text-red-600">{errors.email}</p>
               )}
             </div>
 
@@ -299,7 +309,7 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
             <div>
               <label
                 htmlFor="modal-country"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-gray-700 mb-1.5"
               >
                 Country <span className="text-red-500">*</span>
               </label>
@@ -313,7 +323,7 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
                   name="country"
                   value={formData.country}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
                     errors.country
                       ? "border-red-300 bg-red-50"
                       : "border-gray-300 bg-white"
@@ -323,7 +333,7 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
                 />
               </div>
               {errors.country && (
-                <p className="mt-1 text-sm text-red-600">{errors.country}</p>
+                <p className="mt-1 text-xs text-red-600">{errors.country}</p>
               )}
             </div>
 
@@ -331,7 +341,7 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
             <div>
               <label
                 htmlFor="modal-className"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-gray-700 mb-1.5"
               >
                 Class Name <span className="text-red-500">*</span>
               </label>
@@ -345,7 +355,7 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
                   name="className"
                   value={formData.className}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
                     errors.className
                       ? "border-red-300 bg-red-50"
                       : "border-gray-300 bg-white"
@@ -355,7 +365,39 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
                 />
               </div>
               {errors.className && (
-                <p className="mt-1 text-sm text-red-600">{errors.className}</p>
+                <p className="mt-1 text-xs text-red-600">{errors.className}</p>
+              )}
+            </div>
+
+            {/* Phone Number Field */}
+            <div>
+              <label
+                htmlFor="modal-phoneNumber"
+                className="block text-sm font-medium text-gray-700 mb-1.5"
+              >
+                Phone Number
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaPhone className="text-gray-400 text-sm" />
+                </div>
+                <input
+                  type="tel"
+                  id="modal-phoneNumber"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                    errors.phoneNumber
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-300 bg-white"
+                  }`}
+                  placeholder="Enter your phone number (optional)"
+                  disabled={isSubmitting}
+                />
+              </div>
+              {errors.phoneNumber && (
+                <p className="mt-1 text-xs text-red-600">{errors.phoneNumber}</p>
               )}
             </div>
 
@@ -363,12 +405,12 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
             <div>
               <label
                 htmlFor="modal-message"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-gray-700 mb-1.5"
               >
                 Message <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <div className="absolute top-3 left-3 pointer-events-none">
+                <div className="absolute top-2.5 left-3 pointer-events-none">
                   <FaComment className="text-gray-400 text-sm" />
                 </div>
                 <textarea
@@ -376,8 +418,8 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
-                  rows={4}
-                  className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none ${
+                  rows={3}
+                  className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none ${
                     errors.message
                       ? "border-red-300 bg-red-50"
                       : "border-gray-300 bg-white"
@@ -387,24 +429,24 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
                 />
               </div>
               {errors.message && (
-                <p className="mt-1 text-sm text-red-600">{errors.message}</p>
+                <p className="mt-1 text-xs text-red-600">{errors.message}</p>
               )}
             </div>
 
             {/* Submit Button */}
-            <div className="pt-4 flex gap-3">
+            <div className="pt-2 flex gap-2.5">
               <button
                 type="button"
                 onClick={handleClose}
                 disabled={isSubmitting}
-                className="flex-1 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (
                   <>
@@ -421,10 +463,11 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
             </div>
 
             {/* Required Field Note */}
-            <p className="text-xs text-gray-500 text-center">
+            <p className="text-xs text-gray-500 text-center pt-1">
               <span className="text-red-500">*</span> Required fields
             </p>
           </form>
+          </div>
         </div>
       </div>
     </div>

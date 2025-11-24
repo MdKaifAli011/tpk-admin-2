@@ -4,6 +4,7 @@ import React, { useState, lazy, Suspense } from "react";
 import Link from "next/link";
 import { FaBook, FaChartLine, FaTrophy } from "react-icons/fa";
 import RichContent from "./RichContent";
+import DownloadButton from "./DownloadButton";
 import { createSlug } from "../lib/api";
 
 // Lazy load PracticeTestList to reduce initial bundle size
@@ -34,6 +35,7 @@ const TabsClient = ({
   subTopicSlug,
   subtopics = [],
   chapters = [],
+  unitName,
 }) => {
   const [activeTab, setActiveTab] = useState(initialTab);
 
@@ -42,6 +44,13 @@ const TabsClient = ({
       case "Overview":
         return (
           <div className="space-y-4">
+            {/* Download Button - only for unit type */}
+            {entityType === "unit" && unitName && (
+              <div className="flex justify-end mb-4">
+                <DownloadButton unitName={unitName} />
+              </div>
+            )}
+
             <div className="prose prose-sm sm:prose max-w-none">
               {content ? (
                 <RichContent html={content} />

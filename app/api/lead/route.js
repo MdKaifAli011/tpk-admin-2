@@ -51,6 +51,7 @@ export async function GET(request) {
       query.$or = [
         { name: { $regex: searchQuery, $options: "i" } },
         { email: { $regex: searchQuery, $options: "i" } },
+        { phoneNumber: { $regex: searchQuery, $options: "i" } },
       ];
     }
 
@@ -134,6 +135,7 @@ export async function POST(request) {
       email: body.email.toLowerCase().trim(),
       country: body.country.trim(),
       className: body.className.trim(),
+      phoneNumber: body.phoneNumber ? body.phoneNumber.trim() : undefined,
       message: body.message.trim(),
       status: "new", // Default status
     });

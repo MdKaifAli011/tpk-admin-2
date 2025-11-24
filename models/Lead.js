@@ -25,6 +25,10 @@ const leadSchema = new mongoose.Schema(
       required: [true, "Class name is required"],
       trim: true,
     },
+    phoneNumber: {
+      type: String,
+      trim: true,
+    },
     message: {
       type: String,
       required: [true, "Message is required"],

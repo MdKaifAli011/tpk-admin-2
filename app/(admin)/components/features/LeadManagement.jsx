@@ -213,13 +213,13 @@ const LeadManagement = () => {
       <ToastContainer toasts={toasts} removeToast={removeToast} />
 
       {/* Page Header */}
-      <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-lg border border-gray-200 p-6 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-lg border border-gray-200 p-4 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+            <h1 className="text-xl font-semibold text-gray-900 mb-1">
               Lead Management
             </h1>
-            <p className="text-sm text-gray-600">
+            <p className="text-xs text-gray-600">
               Manage and organize your leads, track lead performance across your
               educational platform.
             </p>
@@ -262,7 +262,7 @@ const LeadManagement = () => {
               {/* Search */}
               <div className="lg:col-span-3 space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
-                  Search (Name or Email)
+                  Search (Name, Email, or Phone)
                 </label>
                 <input
                   type="text"
@@ -271,7 +271,7 @@ const LeadManagement = () => {
                     setFilterSearch(e.target.value);
                     setPagination((prev) => ({ ...prev, page: 1 }));
                   }}
-                  placeholder="Search by name or email..."
+                  placeholder="Search by name, email, or phone number..."
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
                 />
               </div>
@@ -617,6 +617,15 @@ const LeadManagement = () => {
             <label className="text-sm font-medium text-gray-600">Class Name</label>
             <p className="mt-1 text-sm text-gray-900 font-semibold">
               {selectedLead.className}
+            </p>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-gray-600">Phone Number</label>
+            <p className="mt-1 text-sm text-gray-900 font-semibold">
+              {selectedLead.phoneNumber || (
+                <span className="text-gray-400 italic">Not provided</span>
+              )}
             </p>
           </div>
 

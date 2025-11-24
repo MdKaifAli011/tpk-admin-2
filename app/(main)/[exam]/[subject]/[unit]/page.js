@@ -5,7 +5,6 @@ import { FaBook } from "react-icons/fa";
 import ListItem from "../../../components/ListItem";
 import TabsClient from "../../../components/TabsClient";
 import NavigationClient from "../../../components/NavigationClient";
-import DownloadButton from "../../../components/DownloadButton";
 import { ERROR_MESSAGES } from "@/constants";
 import {
   fetchExamById,
@@ -129,19 +128,16 @@ const UnitPage = async ({ params }) => {
               </div>
             </div>
 
-            {/* Progress and Download Button */}
-            <div className="flex flex-col items-end gap-3">
-              <DownloadButton unitName={unit.name} />
-              <div className="text-right">
-                <p className="text-xs text-gray-500 mb-1">Unit Progress</p>
-                <div className="flex items-center gap-3">
-                  <span className="font-semibold text-gray-700">0%</span>
-                  <div className="w-28 h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-blue-500 transition-all duration-300"
-                      style={{ width: "0%" }}
-                    ></div>
-                  </div>
+            {/* Progress */}
+            <div className="text-right">
+              <p className="text-xs text-gray-500 mb-1">Unit Progress</p>
+              <div className="flex items-center gap-3">
+                <span className="font-semibold text-gray-700">0%</span>
+                <div className="w-28 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-blue-500 transition-all duration-300"
+                    style={{ width: "0%" }}
+                  ></div>
                 </div>
               </div>
             </div>
@@ -160,6 +156,7 @@ const UnitPage = async ({ params }) => {
           examSlug={examSlug}
           subjectSlug={subjectSlugValue}
           unitSlug={unitSlugValue}
+          unitName={unit.name}
         />
 
         {/* Chapters Section */}
