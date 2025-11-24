@@ -22,7 +22,7 @@ import {
   getPreviousUnit,
 } from "../../../lib/hierarchicalNavigation";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 const UnitPage = async ({ params }) => {
@@ -50,10 +50,7 @@ const UnitPage = async ({ params }) => {
   const subject = fullSubjectData || foundSubject;
 
   // Fetch units for this subject
-  const fetchedUnits = await fetchUnitsBySubject(
-    foundSubject._id,
-    examIdValue
-  );
+  const fetchedUnits = await fetchUnitsBySubject(foundSubject._id, examIdValue);
 
   // Find unit by slug
   const foundUnit = findByIdOrSlug(fetchedUnits, unitSlug);
@@ -155,6 +152,10 @@ const UnitPage = async ({ params }) => {
           unitId={unit._id}
           entityName={unit.name}
           entityType="unit"
+          chapters={fetchedChapters}
+          examSlug={examSlug}
+          subjectSlug={subjectSlugValue}
+          unitSlug={unitSlugValue}
         />
 
         {/* Chapters Section */}
@@ -165,7 +166,8 @@ const UnitPage = async ({ params }) => {
                 <FaBook className="text-lg sm:text-xl text-indigo-600" />
                 <div>
                   <h2 className="text-base sm:text-lg font-semibold text-gray-900">
-                    {fetchedExam.name} &gt; {subject.name} &gt; {unit.name} Chapters
+                    {fetchedExam.name} &gt; {subject.name} &gt; {unit.name}{" "}
+                    Chapters
                   </h2>
                   <p className="mt-1 text-xs sm:text-sm text-gray-500">
                     Review your status and progress for each chapter in this

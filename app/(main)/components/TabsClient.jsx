@@ -33,6 +33,7 @@ const TabsClient = ({
   topicSlug,
   subTopicSlug,
   subtopics = [],
+  chapters = [],
 }) => {
   const [activeTab, setActiveTab] = useState(initialTab);
 
@@ -113,6 +114,73 @@ const TabsClient = ({
                       )}
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Chapters Grid - for unit type */}
+            {entityType === "unit" && chapters && chapters.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Chapters
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {chapters.map((chapter, index) => {
+                    const chapterSlugValue =
+                      chapter.slug || createSlug(chapter.name);
+                    const chapterUrl =
+                      examSlug && subjectSlug && unitSlug
+                        ? `/${examSlug}/${subjectSlug}/${unitSlug}/${chapterSlugValue}`
+                        : null;
+
+                    const ChapterCard = (
+                      <div className="bg-white rounded-lg p-4 border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all shadow-sm hover:shadow-md">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <h4
+                              className={`font-medium text-gray-900 text-base ${
+                                chapterUrl
+                                  ? "hover:text-indigo-600 transition-colors cursor-pointer"
+                                  : ""
+                              }`}
+                            >
+                              {chapter.name}
+                            </h4>
+                            {chapter.orderNumber && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                Order: {chapter.orderNumber}
+                              </p>
+                            )}
+                          </div>
+                          {chapterUrl && (
+                            <div className="ml-3 flex-shrink-0 text-indigo-600">
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 5l7 7-7 7"
+                                />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+
+                    return chapterUrl ? (
+                      <Link key={chapter._id || index} href={chapterUrl}>
+                        {ChapterCard}
+                      </Link>
+                    ) : (
+                      <div key={chapter._id || index}>{ChapterCard}</div>
+                    );
+                  })}
                 </div>
               </div>
             )}
