@@ -54,7 +54,7 @@ const TabsClient = ({
 
             <div className="prose prose-sm sm:prose max-w-none">
               {content ? (
-                <RichContent html={content} />
+                <RichContent key={`overview-${activeTab}-${entityType}`} html={content} />
               ) : (
                 <>
                   {entityType === "subject" ? (
@@ -140,7 +140,7 @@ const TabsClient = ({
                           )}
                           {subTopic.content && (
                             <div className="prose prose-sm sm:prose max-w-none">
-                              <RichContent html={subTopic.content} />
+                              <RichContent key={`subtopic-${subTopic._id || index}-${activeTab}`} html={subTopic.content} />
                             </div>
                           )}
                         </div>
@@ -172,7 +172,7 @@ const TabsClient = ({
                           <div className="flex items-start justify-between">
                             <div className="flex-1 min-w-0">
                               <h4
-                                className={`font-bold text-indigo-700 text-lg sm:text-xl ${
+                                className={`font-normal text-base text-indigo-700 ${
                                   subTopicUrl
                                     ? "hover:text-indigo-600 transition-colors cursor-pointer"
                                     : ""
@@ -376,7 +376,7 @@ const TabsClient = ({
                             )}
                             {definition.content && (
                               <div className="prose prose-sm sm:prose max-w-none">
-                                <RichContent html={definition.content} />
+                                <RichContent key={`definition-${definition._id || index}-${activeTab}`} html={definition.content} />
                               </div>
                             )}
                           </div>
@@ -409,7 +409,7 @@ const TabsClient = ({
                             <div className="flex items-start justify-between">
                               <div className="flex-1 min-w-0">
                                 <h4
-                                  className={`font-bold text-indigo-700 text-lg sm:text-xl ${
+                                  className={`font-normal text-base text-indigo-700 ${
                                     definitionUrl
                                       ? "hover:text-indigo-600 transition-colors cursor-pointer"
                                       : ""
@@ -457,79 +457,7 @@ const TabsClient = ({
                 </>
               )}
 
-            {/* Definitions List - for definition type (related definitions) */}
-            {entityType === "definition" &&
-              definitions &&
-              definitions.length > 0 && (
-                <div className="mt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    Related Definitions
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {definitions
-                      .filter((def) => def._id !== currentDefinitionId)
-                      .map((definition, index) => {
-                        const definitionSlug =
-                          definition.slug || createSlug(definition.name);
-                        const definitionUrl =
-                          examSlug &&
-                          subjectSlug &&
-                          unitSlug &&
-                          chapterSlug &&
-                          topicSlug &&
-                          subTopicSlug
-                            ? `/${examSlug}/${subjectSlug}/${unitSlug}/${chapterSlug}/${topicSlug}/${subTopicSlug}/${definitionSlug}`
-                            : null;
-
-                        const DefinitionCard = (
-                          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-colors">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <h4
-                                  className={`font-medium text-gray-900 text-sm ${
-                                    definitionUrl
-                                      ? "hover:text-indigo-600 transition-colors"
-                                      : ""
-                                  }`}
-                                >
-                                  {definition.name}
-                                </h4>
-                                <p className="text-xs text-gray-500 mt-1">
-                                  Order: {definition.orderNumber || index + 1}
-                                </p>
-                              </div>
-                              {definitionUrl && (
-                                <div className="ml-4 text-indigo-600">
-                                  <svg
-                                    className="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M9 5l7 7-7 7"
-                                    />
-                                  </svg>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        );
-
-                        return definitionUrl ? (
-                          <Link key={definition._id} href={definitionUrl}>
-                            {DefinitionCard}
-                          </Link>
-                        ) : (
-                          <div key={definition._id}>{DefinitionCard}</div>
-                        );
-                      })}
-                  </div>
-                </div>
-              )}
+          
           </div>
         );
 
