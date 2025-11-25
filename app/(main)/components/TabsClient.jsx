@@ -110,43 +110,109 @@ const TabsClient = ({
 
             {/* SubTopics List - for topic type */}
             {entityType === "topic" && subtopics && subtopics.length > 0 && (
-              <div className="mt-6">
-                <div className="space-y-6">
-                  {subtopics.map((subTopic, index) => {
-                    const subTopicSlugValue =
-                      subTopic.slug || createSlug(subTopic.name);
-                    const subTopicUrl =
-                      examSlug &&
-                      subjectSlug &&
-                      unitSlug &&
-                      chapterSlug &&
-                      topicSlug
-                        ? `/${examSlug}/${subjectSlug}/${unitSlug}/${chapterSlug}/${topicSlug}/${subTopicSlugValue}`
-                        : null;
+              <>
+                <div className="mt-6">
+                  <div className="space-y-6">
+                    {subtopics.map((subTopic, index) => {
+                      const subTopicSlugValue =
+                        subTopic.slug || createSlug(subTopic.name);
+                      const subTopicUrl =
+                        examSlug &&
+                        subjectSlug &&
+                        unitSlug &&
+                        chapterSlug &&
+                        topicSlug
+                          ? `/${examSlug}/${subjectSlug}/${unitSlug}/${chapterSlug}/${topicSlug}/${subTopicSlugValue}`
+                          : null;
 
-                    return (
-                      <div key={subTopic._id || index} className="space-y-3">
-                        {subTopicUrl ? (
-                          <Link href={subTopicUrl}>
-                            <h4 className="text-lg font-semibold text-gray-900 hover:text-indigo-600 transition-colors cursor-pointer">
+                      return (
+                        <div key={subTopic._id || index} className="space-y-3">
+                          {subTopicUrl ? (
+                            <Link href={subTopicUrl}>
+                              <h3 className="text-xl sm:text-2xl font-bold text-indigo-700 hover:text-indigo-600 transition-colors cursor-pointer">
+                                {subTopic.name}
+                              </h3>
+                            </Link>
+                          ) : (
+                            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
                               {subTopic.name}
-                            </h4>
-                          </Link>
-                        ) : (
-                          <h4 className="text-lg font-semibold text-gray-900">
-                            {subTopic.name}
-                          </h4>
-                        )}
-                        {subTopic.content && (
-                          <div className="prose prose-sm sm:prose max-w-none">
-                            <RichContent html={subTopic.content} />
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                            </h3>
+                          )}
+                          {subTopic.content && (
+                            <div className="prose prose-sm sm:prose max-w-none">
+                              <RichContent html={subTopic.content} />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+
+                {/* SubTopics Grid - for topic type */}
+                <div className="mt-8">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Subtopics
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {subtopics.map((subTopic, index) => {
+                      const subTopicSlugValue =
+                        subTopic.slug || createSlug(subTopic.name);
+                      const subTopicUrl =
+                        examSlug &&
+                        subjectSlug &&
+                        unitSlug &&
+                        chapterSlug &&
+                        topicSlug
+                          ? `/${examSlug}/${subjectSlug}/${unitSlug}/${chapterSlug}/${topicSlug}/${subTopicSlugValue}`
+                          : null;
+
+                      const SubTopicCard = (
+                        <div className="bg-white rounded-lg p-4 border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all shadow-sm hover:shadow-md">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1 min-w-0">
+                              <h4
+                                className={`font-bold text-indigo-700 text-lg sm:text-xl ${
+                                  subTopicUrl
+                                    ? "hover:text-indigo-600 transition-colors cursor-pointer"
+                                    : ""
+                                }`}
+                              >
+                                {subTopic.name}
+                              </h4>
+                            </div>
+                            {subTopicUrl && (
+                              <div className="ml-3 shrink-0 text-indigo-600">
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 5l7 7-7 7"
+                                  />
+                                </svg>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+
+                      return subTopicUrl ? (
+                        <Link key={subTopic._id || index} href={subTopicUrl}>
+                          {SubTopicCard}
+                        </Link>
+                      ) : (
+                        <div key={subTopic._id || index}>{SubTopicCard}</div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
             )}
 
             {/* Chapters Grid - for unit type */}
@@ -272,28 +338,140 @@ const TabsClient = ({
               </div>
             )}
 
-            {/* Definitions List - for subtopic and definition types */}
-            {(entityType === "subtopic" || entityType === "definition") &&
+            {/* Definitions List - for subtopic type */}
+            {entityType === "subtopic" &&
+              definitions &&
+              definitions.length > 0 && (
+                <>
+                  <div className="mt-6">
+                    <div className="space-y-6">
+                      {definitions.map((definition, index) => {
+                        const definitionSlug =
+                          definition.slug || createSlug(definition.name);
+                        const definitionUrl =
+                          examSlug &&
+                          subjectSlug &&
+                          unitSlug &&
+                          chapterSlug &&
+                          topicSlug &&
+                          subTopicSlug
+                            ? `/${examSlug}/${subjectSlug}/${unitSlug}/${chapterSlug}/${topicSlug}/${subTopicSlug}/${definitionSlug}`
+                            : null;
+
+                        return (
+                          <div
+                            key={definition._id || index}
+                            className="space-y-3"
+                          >
+                            {definitionUrl ? (
+                              <Link href={definitionUrl}>
+                                <h3 className="text-xl sm:text-2xl font-bold text-indigo-700 hover:text-indigo-600 transition-colors cursor-pointer">
+                                  {definition.name}
+                                </h3>
+                              </Link>
+                            ) : (
+                              <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
+                                {definition.name}
+                              </h3>
+                            )}
+                            {definition.content && (
+                              <div className="prose prose-sm sm:prose max-w-none">
+                                <RichContent html={definition.content} />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Definitions Grid - for subtopic type */}
+                  <div className="mt-8">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      Definitions
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {definitions.map((definition, index) => {
+                        const definitionSlug =
+                          definition.slug || createSlug(definition.name);
+                        const definitionUrl =
+                          examSlug &&
+                          subjectSlug &&
+                          unitSlug &&
+                          chapterSlug &&
+                          topicSlug &&
+                          subTopicSlug
+                            ? `/${examSlug}/${subjectSlug}/${unitSlug}/${chapterSlug}/${topicSlug}/${subTopicSlug}/${definitionSlug}`
+                            : null;
+
+                        const DefinitionCard = (
+                          <div className="bg-white rounded-lg p-4 border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all shadow-sm hover:shadow-md">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1 min-w-0">
+                                <h4
+                                  className={`font-bold text-indigo-700 text-lg sm:text-xl ${
+                                    definitionUrl
+                                      ? "hover:text-indigo-600 transition-colors cursor-pointer"
+                                      : ""
+                                  }`}
+                                >
+                                  {definition.name}
+                                </h4>
+                              </div>
+                              {definitionUrl && (
+                                <div className="ml-3 shrink-0 text-indigo-600">
+                                  <svg
+                                    className="w-5 h-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M9 5l7 7-7 7"
+                                    />
+                                  </svg>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+
+                        return definitionUrl ? (
+                          <Link
+                            key={definition._id || index}
+                            href={definitionUrl}
+                          >
+                            {DefinitionCard}
+                          </Link>
+                        ) : (
+                          <div key={definition._id || index}>
+                            {DefinitionCard}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              )}
+
+            {/* Definitions List - for definition type (related definitions) */}
+            {entityType === "definition" &&
               definitions &&
               definitions.length > 0 && (
                 <div className="mt-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    {entityType === "definition"
-                      ? "Related Definitions"
-                      : "Definitions"}
+                    Related Definitions
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {definitions
-                      .filter((def) =>
-                        entityType === "definition"
-                          ? def._id !== currentDefinitionId
-                          : true
-                      )
+                      .filter((def) => def._id !== currentDefinitionId)
                       .map((definition, index) => {
                         const definitionSlug =
                           definition.slug || createSlug(definition.name);
                         const definitionUrl =
-                          entityType === "definition" &&
                           examSlug &&
                           subjectSlug &&
                           unitSlug &&

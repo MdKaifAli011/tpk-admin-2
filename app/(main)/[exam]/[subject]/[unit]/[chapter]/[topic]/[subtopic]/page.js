@@ -24,6 +24,7 @@ import {
   createSlug,
   findByIdOrSlug,
   fetchSubTopicDetailsById,
+  fetchDefinitionDetailsById,
 } from "../../../../../../lib/api";
 import {
   getNextSubtopic,
@@ -129,6 +130,15 @@ const SubTopicPage = async ({ params }) => {
 
   const subTopic = fullSubTopicData || foundSubTopic;
 
+  // Fetch definition details (content only) for all definitions in parallel
+  const definitionDetailsArray = await Promise.all(
+    fetchedDefinitions.map((definition) =>
+      fetchDefinitionDetailsById(definition._id)
+        .then((details) => ({ content: details?.content || "" }))
+        .catch(() => ({ content: "" }))
+    )
+  );
+
   // Find current subtopic index for navigation
   const index = fetchedSubTopics.findIndex(
     (st) =>
@@ -228,7 +238,16 @@ const SubTopicPage = async ({ params }) => {
           subTopicId={subTopic._id}
           entityName={subTopic.name}
           entityType="subtopic"
-          definitions={fetchedDefinitions}
+          definitions={fetchedDefinitions.map((definition, index) => ({
+            ...definition,
+            content: definitionDetailsArray[index]?.content || "",
+          }))}
+          examSlug={examSlug}
+          subjectSlug={subjectSlugValue}
+          unitSlug={unitSlugValue}
+          chapterSlug={chapterSlugValue}
+          topicSlug={topicSlugValue}
+          subTopicSlug={subTopicSlugValue}
         />
 
         {/* Definitions Section */}
