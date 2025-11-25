@@ -112,18 +112,39 @@ const TabsClient = ({
             {entityType === "topic" && subtopics && subtopics.length > 0 && (
               <div className="mt-6">
                 <div className="space-y-6">
-                  {subtopics.map((subTopic, index) => (
-                    <div key={subTopic._id || index} className="space-y-3">
-                      <h4 className="text-lg font-semibold text-gray-900">
-                        {subTopic.name}
-                      </h4>
-                      {subTopic.content && (
-                        <div className="prose prose-sm sm:prose max-w-none">
-                          <RichContent html={subTopic.content} />
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                  {subtopics.map((subTopic, index) => {
+                    const subTopicSlugValue =
+                      subTopic.slug || createSlug(subTopic.name);
+                    const subTopicUrl =
+                      examSlug &&
+                      subjectSlug &&
+                      unitSlug &&
+                      chapterSlug &&
+                      topicSlug
+                        ? `/${examSlug}/${subjectSlug}/${unitSlug}/${chapterSlug}/${topicSlug}/${subTopicSlugValue}`
+                        : null;
+
+                    return (
+                      <div key={subTopic._id || index} className="space-y-3">
+                        {subTopicUrl ? (
+                          <Link href={subTopicUrl}>
+                            <h4 className="text-lg font-semibold text-gray-900 hover:text-indigo-600 transition-colors cursor-pointer">
+                              {subTopic.name}
+                            </h4>
+                          </Link>
+                        ) : (
+                          <h4 className="text-lg font-semibold text-gray-900">
+                            {subTopic.name}
+                          </h4>
+                        )}
+                        {subTopic.content && (
+                          <div className="prose prose-sm sm:prose max-w-none">
+                            <RichContent html={subTopic.content} />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
