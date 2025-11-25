@@ -22,6 +22,7 @@ const TopicDetailPage = ({ topicId }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [originalContent, setOriginalContent] = useState(""); // Store original content when editing starts
   const [formData, setFormData] = useState({
     name: "",
     content: "",
@@ -78,7 +79,8 @@ const TopicDetailPage = ({ topicId }) => {
     if (topicId) fetchTopic();
   }, [topicId, fetchTopic]);
 
-  const handleSave = async () => {
+  // Save only content for preview
+  const handleSaveContent = async () => {
     // Check permissions
     if (!canEdit) {
       showError(getPermissionMessage("edit", role));
@@ -87,7 +89,65 @@ const TopicDetailPage = ({ topicId }) => {
 
     try {
       setIsSaving(true);
-      // Save main topic and details separately
+      // Save only content field
+      const detailsRes = await api.put(`/topic/${topicId}/details`, {
+        content: formData.content,
+      });
+      
+      if (detailsRes.data?.success) {
+        success("Content saved! You can preview on frontend.");
+        // Keep editor open (isEditing stays true)
+        // Keep originalContent unchanged so Cancel can restore it
+      } else {
+        showError(detailsRes.data?.message || "Failed to save content");
+      }
+    } catch (err) {
+      showError(err.response?.data?.message || "Failed to save content");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Handle Cancel - restore original content and close editor
+  const handleCancel = async () => {
+    // If content was saved (different from original), restore it
+    if (formData.content !== originalContent) {
+      try {
+        setIsSaving(true);
+        // Restore original content to database
+        const detailsRes = await api.put(`/topic/${topicId}/details`, {
+          content: originalContent,
+        });
+        
+        if (detailsRes.data?.success) {
+          // Update formData to show original content
+          setFormData({ ...formData, content: originalContent });
+          success("Changes discarded. Original content restored.");
+        } else {
+          showError(detailsRes.data?.message || "Failed to restore content");
+        }
+      } catch (err) {
+        showError(err.response?.data?.message || "Failed to restore content");
+      } finally {
+        setIsSaving(false);
+      }
+    }
+    
+    // Close editor
+    setIsEditing(false);
+  };
+
+  // Save all fields and close editor
+  const handleSaveAndClose = async () => {
+    // Check permissions
+    if (!canEdit) {
+      showError(getPermissionMessage("edit", role));
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      // Save main topic and all details
       const [topicRes, detailsRes] = await Promise.all([
         api.put(`/topic/${topicId}`, { name: formData.name }),
         api.put(`/topic/${topicId}/details`, {
@@ -101,8 +161,8 @@ const TopicDetailPage = ({ topicId }) => {
 
       if (topicRes.data.success && detailsRes.data?.success) {
         setTopic(topicRes.data.data);
-        success("Topic details saved successfully!");
-        setIsEditing(false);
+        success("All changes saved successfully!");
+        setIsEditing(false); // Close editor
       } else {
         showError(
           topicRes.data.message ||
@@ -245,34 +305,56 @@ const TopicDetailPage = ({ topicId }) => {
           {isEditing ? (
             <>
               <button
-                onClick={() => setIsEditing(false)}
-                className="px-2 py-1.5 bg-white border border-gray-300 rounded-xl hover:shadow-md text-gray-800 text-sm font-semibold transition-all duration-200"
+                onClick={handleCancel}
+                disabled={isSaving}
+                className="px-2 py-1.5 bg-white border border-gray-300 rounded-xl hover:shadow-md text-gray-800 text-sm font-semibold transition-all duration-200 disabled:opacity-50"
               >
-                Cancel
+                {isSaving ? "Restoring..." : "Cancel"}
               </button>
               {canEdit ? (
-                <button
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="px-2 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:scale-105 hover:shadow-lg text-white text-sm rounded-xl font-semibold flex items-center gap-2 transition-all duration-200 disabled:opacity-50"
-                >
-                  {isSaving ? <LoadingSpinner size="small" /> : null}
-                  {isSaving ? "Saving..." : "Save Changes"}
-                </button>
+                <>
+                  <button
+                    onClick={handleSaveContent}
+                    disabled={isSaving}
+                    className="px-2 py-1.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:scale-105 hover:shadow-lg text-white text-sm rounded-xl font-semibold flex items-center gap-2 transition-all duration-200 disabled:opacity-50"
+                  >
+                    {isSaving ? <LoadingSpinner size="small" /> : null}
+                    {isSaving ? "Saving..." : "Save"}
+                  </button>
+                  <button
+                    onClick={handleSaveAndClose}
+                    disabled={isSaving}
+                    className="px-2 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:scale-105 hover:shadow-lg text-white text-sm rounded-xl font-semibold flex items-center gap-2 transition-all duration-200 disabled:opacity-50"
+                  >
+                    {isSaving ? <LoadingSpinner size="small" /> : null}
+                    {isSaving ? "Saving..." : "Save & Close"}
+                  </button>
+                </>
               ) : (
-                <button
-                  disabled
-                  title={getPermissionMessage("edit", role)}
-                  className="px-2 py-1.5 bg-gray-300 text-gray-500 text-sm rounded-xl font-semibold flex items-center gap-2 cursor-not-allowed transition-all duration-200"
-                >
-                  Save Changes
-                </button>
+                <>
+                  <button
+                    disabled
+                    title={getPermissionMessage("edit", role)}
+                    className="px-2 py-1.5 bg-gray-300 text-gray-500 text-sm rounded-xl font-semibold flex items-center gap-2 cursor-not-allowed transition-all duration-200"
+                  >
+                    Save
+                  </button>
+                  <button
+                    disabled
+                    title={getPermissionMessage("edit", role)}
+                    className="px-2 py-1.5 bg-gray-300 text-gray-500 text-sm rounded-xl font-semibold flex items-center gap-2 cursor-not-allowed transition-all duration-200"
+                  >
+                    Save & Close
+                  </button>
+                </>
               )}
             </>
           ) : canEdit ? (
             <button
               onClick={() => {
                 if (canEdit) {
+                  // Store original content when starting to edit
+                  setOriginalContent(formData.content);
                   setIsEditing(true);
                 } else {
                   showError(getPermissionMessage("edit", role));
