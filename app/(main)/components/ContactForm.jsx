@@ -167,7 +167,7 @@ const ContactForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-4">
+    <div className="">
       <div className="max-w-6xl mx-auto px-4">
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2">
