@@ -155,11 +155,7 @@ const TabsClient = ({
                             >
                               {chapter.name}
                             </h4>
-                            {chapter.orderNumber && (
-                              <p className="text-xs text-gray-500 mt-1">
-                                Order: {chapter.orderNumber}
-                              </p>
-                            )}
+                           
                           </div>
                           {chapterUrl && (
                             <div className="ml-3 flex-shrink-0 text-indigo-600">

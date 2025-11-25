@@ -194,34 +194,19 @@ const DownloadModal = ({ isOpen, onClose, unitName }) => {
 
       {/* Modal */}
       <div className="relative bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
-        {/* Modal Header */}
-        <div className="flex-shrink-0 bg-white border-b border-gray-200 px-5 py-3 flex items-center justify-between rounded-t-xl">
-          <div className="flex items-center gap-2.5">
-            <div className="p-1.5 bg-blue-100 rounded-lg">
-              <FaDownload className="text-blue-600 text-base" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-gray-900">
-                Download Study Materials
-              </h2>
-              <p className="text-xs text-gray-500">
-                Fill out the form to download {unitName} materials
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={handleClose}
-            disabled={isSubmitting}
-            className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="Close modal"
-          >
-            <FaTimes className="text-lg" />
-          </button>
-        </div>
+        {/* Close Button */}
+        <button
+          onClick={handleClose}
+          disabled={isSubmitting}
+          className="absolute top-3 right-3 z-10 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-label="Close modal"
+        >
+          <FaTimes className="text-lg" />
+        </button>
 
         {/* Modal Body - Scrollable */}
         <div className="flex-1 overflow-y-auto">
-          <div className="p-4">
+          <div className="p-5 pt-4">
             <form onSubmit={handleSubmit} className="space-y-3.5">
             {/* Success/Error Message */}
             {submitStatus && (
