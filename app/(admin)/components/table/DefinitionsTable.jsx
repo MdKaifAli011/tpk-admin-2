@@ -98,9 +98,9 @@ const DefinitionsTable = ({
 
   if (!definitions || definitions.length === 0) {
     return (
-      <div className="text-center py-16 bg-white rounded-lg border border-gray-200 shadow-sm">
-        <div className="text-gray-400 text-6xl mb-4">📖</div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+      <div className="text-center py-12 bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div className="text-gray-400 text-5xl mb-3">📖</div>
+        <h3 className="text-sm font-semibold text-gray-900 mb-1">
           No Definitions Found
         </h3>
         <p className="text-sm text-gray-500">
@@ -127,52 +127,52 @@ const DefinitionsTable = ({
             style={{ animationDelay: `${groupIndex * 0.1}s` }}
           >
             {/* Breadcrumb Header */}
-            <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-              <div className="flex items-center gap-2.5 flex-wrap text-sm font-medium text-white">
+            <div className="bg-gray-50 px-3 py-2 border-b border-gray-200">
+              <div className="flex items-center gap-1.5 flex-wrap text-xs font-medium text-white">
                 <span
-                  className="px-2.5 py-1 rounded-full"
+                  className="px-2 py-0.5 rounded-full"
                   style={{ backgroundColor: "#10B981" }}
                 >
                   {group.examName}
                 </span>
                 <span className="text-gray-400">›</span>
                 <span
-                  className="px-2.5 py-1 rounded-full"
+                  className="px-2 py-0.5 rounded-full"
                   style={{ backgroundColor: "#9333EA" }}
                 >
                   {group.subjectName}
                 </span>
                 <span className="text-gray-400">›</span>
                 <span
-                  className="px-2.5 py-1 rounded-full"
+                  className="px-2 py-0.5 rounded-full"
                   style={{ backgroundColor: "#0056FF" }}
                 >
                   {group.unitName}
                 </span>
                 <span className="text-gray-400">›</span>
                 <span
-                  className="px-2.5 py-1 rounded-full"
+                  className="px-2 py-0.5 rounded-full"
                   style={{ backgroundColor: "#EF4444" }}
                 >
                   {group.chapterName}
                 </span>
                 <span className="text-gray-400">›</span>
                 <span
-                  className="px-2.5 py-1 rounded-full"
+                  className="px-2 py-0.5 rounded-full"
                   style={{ backgroundColor: "#F59E0B" }}
                 >
                   {group.topicName}
                 </span>
                 <span className="text-gray-400">›</span>
                 <span
-                  className="px-2.5 py-1 rounded-full"
+                  className="px-2 py-0.5 rounded-full"
                   style={{ backgroundColor: "#7C3AED" }}
                 >
                   {group.subTopicName}
                 </span>
                 <span className="text-gray-400">›</span>
                 <span
-                  className="px-2.5 py-1 rounded-full"
+                  className="px-2 py-0.5 rounded-full"
                   style={{ backgroundColor: "#374151" }}
                 >
                   {sortedDefinitions.length}{" "}
@@ -183,19 +183,19 @@ const DefinitionsTable = ({
 
             {/* Desktop Table */}
             <div className="hidden lg:block overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
+              <table className="min-w-full divide-y divide-gray-200 table-fixed">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
                       Order
                     </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Definition Name
                     </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">
                       Content
                     </th>
-                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-2 py-1 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                       Actions
                     </th>
                   </tr>
@@ -209,12 +209,12 @@ const DefinitionsTable = ({
                           definition.status === "inactive" ? "opacity-60" : ""
                         }`}
                       >
-                        <td className="px-3 py-2 whitespace-nowrap">
-                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 text-gray-700 font-medium text-xs">
+                        <td className="px-2 py-1 whitespace-nowrap">
+                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 text-gray-700 font-medium text-sm">
                             {definition.orderNumber || definitionIndex + 1}
                           </span>
                         </td>
-                        <td className="px-3 py-2">
+                        <td className="px-2 py-1">
                           <span
                             onClick={() => handleDefinitionClick(definition._id)}
                             className={`cursor-pointer text-sm font-medium hover:text-blue-600 transition-colors ${
@@ -227,7 +227,7 @@ const DefinitionsTable = ({
                             {definition.name}
                           </span>
                         </td>
-                        <td className="px-3 py-2 whitespace-nowrap">
+                        <td className="px-2 py-1 whitespace-nowrap w-40">
                           <span className={`text-sm ${
                             definition.contentInfo?.hasContent 
                               ? "text-gray-700" 
@@ -236,14 +236,14 @@ const DefinitionsTable = ({
                             {formatContentDate(definition.contentInfo)}
                           </span>
                         </td>
-                        <td className="px-3 py-2 whitespace-nowrap text-right">
-                          <div className="flex items-center justify-end gap-2">
+                        <td className="px-2 py-1 whitespace-nowrap text-right w-32">
+                          <div className="flex items-center justify-end gap-1">
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleDefinitionClick(definition._id);
                               }}
-                              className="p-2 bg-green-50 text-green-600 rounded-lg transition-colors hover:bg-green-100"
+                              className="p-1 bg-green-50 text-green-600 rounded-lg transition-colors hover:bg-green-100"
                               title="View Definition Details"
                             >
                               <FaEye className="text-sm" />
@@ -255,7 +255,7 @@ const DefinitionsTable = ({
                                     e.stopPropagation();
                                     onEdit(definition);
                                   }}
-                                  className="p-2 bg-blue-50 text-blue-600 rounded-lg transition-colors hover:bg-blue-100"
+                                  className="p-1 bg-blue-50 text-blue-600 rounded-lg transition-colors hover:bg-blue-100"
                                   title="Edit Definition"
                                 >
                                   <FaEdit className="text-sm" />
@@ -264,7 +264,7 @@ const DefinitionsTable = ({
                                 <button
                                   disabled
                                   title={getPermissionMessage("edit", role)}
-                                  className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                                  className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                                 >
                                   <FaLock className="text-sm" />
                                 </button>
@@ -276,7 +276,7 @@ const DefinitionsTable = ({
                                     e.stopPropagation();
                                     onDelete(definition);
                                   }}
-                                  className="p-2 bg-red-50 text-red-600 rounded-lg transition-colors hover:bg-red-100"
+                                  className="p-1 bg-red-50 text-red-600 rounded-lg transition-colors hover:bg-red-100"
                                   title="Delete Definition"
                                 >
                                   <FaTrash className="text-sm" />
@@ -285,7 +285,7 @@ const DefinitionsTable = ({
                                 <button
                                   disabled
                                   title={getPermissionMessage("delete", role)}
-                                  className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                                  className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                                 >
                                   <FaLock className="text-sm" />
                                 </button>
@@ -297,7 +297,7 @@ const DefinitionsTable = ({
                                     e.stopPropagation();
                                     onToggleStatus(definition);
                                   }}
-                                  className="p-2 bg-orange-50 text-orange-600 rounded-lg transition-colors hover:bg-orange-100"
+                                  className="p-1 bg-orange-50 text-orange-600 rounded-lg transition-colors hover:bg-orange-100"
                                   title={
                                     definition.status === "active"
                                       ? "Deactivate Definition"
@@ -310,7 +310,7 @@ const DefinitionsTable = ({
                                 <button
                                   disabled
                                   title={getPermissionMessage("reorder", role)}
-                                  className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                                  className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                                 >
                                   <FaLock className="text-sm" />
                                 </button>
@@ -330,15 +330,15 @@ const DefinitionsTable = ({
                 return (
                   <div
                     key={definition._id || definitionIndex}
-                    className={`p-2 hover:bg-gray-50 transition-colors ${
+                    className={`p-1.5 hover:bg-gray-50 transition-colors ${
                       definition.status === "inactive" ? "opacity-60" : ""
                     }`}
                   >
-                    <div className="flex justify-between items-start gap-3">
+                    <div className="flex justify-between items-start gap-2">
                       <div className="flex-1 min-w-0 pr-2">
                         <h3
                           onClick={() => handleDefinitionClick(definition._id)}
-                          className={`text-base font-semibold mb-2 cursor-pointer hover:text-blue-600 transition-colors ${
+                          className={`text-sm font-semibold mb-1 cursor-pointer hover:text-blue-600 transition-colors ${
                             definition.status === "inactive"
                               ? "text-gray-500 line-through"
                               : "text-gray-900"
@@ -347,11 +347,11 @@ const DefinitionsTable = ({
                         >
                           {definition.name}
                         </h3>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 font-medium text-xs">
+                        <div className="flex items-center gap-1 flex-wrap">
+                          <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 font-medium text-sm">
                             #{definition.orderNumber || definitionIndex + 1}
                           </span>
-                          <span className={`text-xs ${
+                          <span className={`text-sm ${
                             definition.contentInfo?.hasContent 
                               ? "text-gray-600" 
                               : "text-gray-400 italic"
@@ -360,13 +360,13 @@ const DefinitionsTable = ({
                           </span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex items-center gap-1 flex-shrink-0">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDefinitionClick(definition._id);
                           }}
-                          className="p-2 bg-green-50 text-green-600 rounded-lg transition-colors hover:bg-green-100"
+                          className="p-1 bg-green-50 text-green-600 rounded-lg transition-colors hover:bg-green-100"
                           title="View Definition Details"
                         >
                           <FaEye className="text-sm" />
@@ -378,7 +378,7 @@ const DefinitionsTable = ({
                                 e.stopPropagation();
                                 onEdit(definition);
                               }}
-                              className="p-2 bg-blue-50 text-blue-600 rounded-lg transition-colors hover:bg-blue-100"
+                              className="p-1 bg-blue-50 text-blue-600 rounded-lg transition-colors hover:bg-blue-100"
                               title="Edit Definition"
                             >
                               <FaEdit className="text-sm" />
@@ -387,7 +387,7 @@ const DefinitionsTable = ({
                             <button
                               disabled
                               title={getPermissionMessage("edit", role)}
-                              className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                              className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                             >
                               <FaLock className="text-sm" />
                             </button>
@@ -399,7 +399,7 @@ const DefinitionsTable = ({
                                 e.stopPropagation();
                                 onDelete(definition);
                               }}
-                              className="p-2 bg-red-50 text-red-600 rounded-lg transition-colors hover:bg-red-100"
+                              className="p-1 bg-red-50 text-red-600 rounded-lg transition-colors hover:bg-red-100"
                               title="Delete Definition"
                             >
                               <FaTrash className="text-sm" />
@@ -408,7 +408,7 @@ const DefinitionsTable = ({
                             <button
                               disabled
                               title={getPermissionMessage("delete", role)}
-                              className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                              className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                             >
                               <FaLock className="text-sm" />
                             </button>
@@ -420,7 +420,7 @@ const DefinitionsTable = ({
                                 e.stopPropagation();
                                 onToggleStatus(definition);
                               }}
-                              className="p-2 bg-orange-50 text-orange-600 rounded-lg transition-colors hover:bg-orange-100"
+                              className="p-1 bg-orange-50 text-orange-600 rounded-lg transition-colors hover:bg-orange-100"
                               title={
                                 definition.status === "active"
                                   ? "Deactivate Definition"
@@ -433,7 +433,7 @@ const DefinitionsTable = ({
                             <button
                               disabled
                               title={getPermissionMessage("reorder", role)}
-                              className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                              className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                             >
                               <FaLock className="text-sm" />
                             </button>

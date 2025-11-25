@@ -24,9 +24,9 @@ const PracticeSubCategoryTable = ({
 
   if (!subCategories || subCategories.length === 0) {
     return (
-      <div className="text-center py-16 bg-white rounded-lg border border-gray-200 shadow-sm">
-        <div className="text-gray-400 text-6xl mb-4">📄</div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+      <div className="text-center py-12 bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div className="text-gray-400 text-5xl mb-3">📄</div>
+        <h3 className="text-sm font-semibold text-gray-900 mb-1">
           No Papers Found
         </h3>
         <p className="text-sm text-gray-500">
@@ -40,31 +40,31 @@ const PracticeSubCategoryTable = ({
     <div className="overflow-x-auto">
       {/* Desktop Table View */}
       <div className="hidden lg:block">
-        <table className="min-w-full divide-y divide-gray-200">
+        <table className="min-w-full divide-y divide-gray-200 table-fixed">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Paper Name
               </th>
-              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-40">
                 Hierarchy Path
               </th>
-              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
                 Duration
               </th>
-              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                 Max Marks
               </th>
-              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                 Questions
               </th>
-              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
                 Negative Marks
               </th>
-              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                 Status
               </th>
-              <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 py-1 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                 Actions
               </th>
             </tr>
@@ -77,7 +77,7 @@ const PracticeSubCategoryTable = ({
                   subCategory.status === "inactive" ? "opacity-60" : ""
                 }`}
               >
-                <td className="px-3 py-2 whitespace-nowrap">
+                <td className="px-2 py-1 whitespace-nowrap">
                   <div
                     onClick={() => handlePaperClick(subCategory)}
                     className="text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer transition-colors"
@@ -88,79 +88,79 @@ const PracticeSubCategoryTable = ({
                     {subCategory.name}
                   </div>
                 </td>
-                <td className="px-3 py-2">
+                <td className="px-2 py-1 w-40">
                   <div className="flex items-center justify-center gap-1 flex-wrap">
                     {/* Show only the last (deepest) assigned level with label */}
                     {subCategory.subTopicId?.name ? (
-                      <span className="text-xs text-gray-700">
+                      <span className="text-sm text-gray-700">
                         <span className="font-medium">Subtopic:</span>{" "}
                         <span
-                          className="px-2 py-0.5 rounded-md text-xs font-medium text-white"
+                          className="px-2 py-0.5 rounded-md text-sm font-medium text-white"
                           style={{ backgroundColor: "#06B6D4" }}
                         >
                           {subCategory.subTopicId.name}
                         </span>
                       </span>
                     ) : subCategory.topicId?.name ? (
-                      <span className="text-xs text-gray-700">
+                      <span className="text-sm text-gray-700">
                         <span className="font-medium">Topic:</span>{" "}
                         <span
-                          className="px-2 py-0.5 rounded-md text-xs font-medium text-white"
+                          className="px-2 py-0.5 rounded-md text-sm font-medium text-white"
                           style={{ backgroundColor: "#F59E0B" }}
                         >
                           {subCategory.topicId.name}
                         </span>
                       </span>
                     ) : subCategory.chapterId?.name ? (
-                      <span className="text-xs text-gray-700">
+                      <span className="text-sm text-gray-700">
                         <span className="font-medium">Chapter:</span>{" "}
                         <span
-                          className="px-2 py-0.5 rounded-md text-xs font-medium text-white"
+                          className="px-2 py-0.5 rounded-md text-sm font-medium text-white"
                           style={{ backgroundColor: "#EC4899" }}
                         >
                           {subCategory.chapterId.name}
                         </span>
                       </span>
                     ) : subCategory.unitId?.name ? (
-                      <span className="text-xs text-gray-700">
+                      <span className="text-sm text-gray-700">
                         <span className="font-medium">Unit:</span>{" "}
                         <span
-                          className="px-2 py-0.5 rounded-md text-xs font-medium text-white"
+                          className="px-2 py-0.5 rounded-md text-sm font-medium text-white"
                           style={{ backgroundColor: "#8B5CF6" }}
                         >
                           {subCategory.unitId.name}
                         </span>
                       </span>
                     ) : (
-                      <span className="text-xs text-gray-400 italic">
+                      <span className="text-sm text-gray-400 italic">
                         Not Assigned
                       </span>
                     )}
                   </div>
                 </td>
-                <td className="px-3 py-2 whitespace-nowrap text-center">
+                <td className="px-2 py-1 whitespace-nowrap text-center w-28">
                   <span className="text-sm text-gray-600">
                     {subCategory.duration || "N/A"}
                   </span>
                 </td>
-                <td className="px-3 py-2 whitespace-nowrap text-center">
+                <td className="px-2 py-1 whitespace-nowrap text-center w-24">
                   <span className="text-sm font-medium text-gray-900">
                     {subCategory.maximumMarks || 0}
                   </span>
                 </td>
-                <td className="px-3 py-2 whitespace-nowrap text-center">
+                <td className="px-2 py-1 whitespace-nowrap text-center w-24">
                   <span className="text-sm font-medium text-gray-900">
                     {subCategory.numberOfQuestions || 0}
                   </span>
                 </td>
-                <td className="px-3 py-2 whitespace-nowrap text-center">
+                <td className="px-2 py-1 whitespace-nowrap text-center w-28">
                   <span className="text-sm text-gray-600">
                     {subCategory.negativeMarks || 0}
                   </span>
                 </td>
-                <td className="px-3 py-2 whitespace-nowrap text-center">
+                <td className="px-2 py-1 whitespace-nowrap text-center w-24">
                   <span
-                    className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                    className={`px-2 py-0.5 rounded-full text-sm font-medium ${
                       subCategory.status === "active"
                         ? "bg-green-100 text-green-800"
                         : "bg-red-100 text-red-800"
@@ -169,8 +169,8 @@ const PracticeSubCategoryTable = ({
                     {subCategory.status === "active" ? "Active" : "Inactive"}
                   </span>
                 </td>
-                <td className="px-3 py-2 whitespace-nowrap text-right">
-                  <div className="flex items-center justify-end gap-2">
+                <td className="px-2 py-1 whitespace-nowrap text-right w-32">
+                  <div className="flex items-center justify-end gap-1">
                     {onEdit &&
                       (canEdit ? (
                         <button
@@ -178,7 +178,7 @@ const PracticeSubCategoryTable = ({
                             e.stopPropagation();
                             onEdit(subCategory);
                           }}
-                          className="p-2 bg-blue-50 text-blue-600 rounded-lg transition-colors hover:bg-blue-100"
+                          className="p-1 bg-blue-50 text-blue-600 rounded-lg transition-colors hover:bg-blue-100"
                           title="Edit Paper"
                         >
                           <FaEdit className="text-sm" />
@@ -187,7 +187,7 @@ const PracticeSubCategoryTable = ({
                         <button
                           disabled
                           title={getPermissionMessage("edit", role)}
-                          className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                          className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                         >
                           <FaLock className="text-sm" />
                         </button>
@@ -199,7 +199,7 @@ const PracticeSubCategoryTable = ({
                             e.stopPropagation();
                             onDelete(subCategory);
                           }}
-                          className="p-2 bg-red-50 text-red-600 rounded-lg transition-colors hover:bg-red-100"
+                          className="p-1 bg-red-50 text-red-600 rounded-lg transition-colors hover:bg-red-100"
                           title="Delete Paper"
                         >
                           <FaTrash className="text-sm" />
@@ -208,7 +208,7 @@ const PracticeSubCategoryTable = ({
                         <button
                           disabled
                           title={getPermissionMessage("delete", role)}
-                          className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                          className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                         >
                           <FaLock className="text-sm" />
                         </button>
@@ -220,7 +220,7 @@ const PracticeSubCategoryTable = ({
                             e.stopPropagation();
                             onToggleStatus(subCategory);
                           }}
-                          className="p-2 bg-orange-50 text-orange-600 rounded-lg transition-colors hover:bg-orange-100"
+                          className="p-1 bg-orange-50 text-orange-600 rounded-lg transition-colors hover:bg-orange-100"
                           title={
                             subCategory.status === "active"
                               ? "Deactivate Paper"
@@ -233,7 +233,7 @@ const PracticeSubCategoryTable = ({
                         <button
                           disabled
                           title={getPermissionMessage("reorder", role)}
-                          className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                          className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                         >
                           <FaLock className="text-sm" />
                         </button>
@@ -251,15 +251,15 @@ const PracticeSubCategoryTable = ({
         {subCategories.map((subCategory, index) => (
           <div
             key={subCategory._id || index}
-            className={`p-2 hover:bg-gray-50 transition-colors ${
+            className={`p-1.5 hover:bg-gray-50 transition-colors ${
               subCategory.status === "inactive" ? "opacity-60" : ""
             }`}
           >
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
                 <h3
                   onClick={() => handlePaperClick(subCategory)}
-                  className={`text-base font-semibold mb-2 cursor-pointer transition-colors ${
+                  className={`text-sm font-semibold mb-1 cursor-pointer transition-colors ${
                     subCategory.status === "inactive"
                       ? "text-gray-500 line-through"
                       : "text-blue-600 hover:text-blue-800"
@@ -271,56 +271,56 @@ const PracticeSubCategoryTable = ({
                   {subCategory.name}
                 </h3>
                 {/* Hierarchy Path - Show only last assigned level with label */}
-                <div className="mb-2">
+                <div className="mb-1">
                   <div className="flex items-center gap-1 flex-wrap">
                     {subCategory.subTopicId?.name ? (
-                      <span className="text-xs text-gray-700">
+                      <span className="text-sm text-gray-700">
                         <span className="font-medium">Subtopic:</span>{" "}
                         <span
-                          className="px-2 py-0.5 rounded-md text-xs font-medium text-white"
+                          className="px-2 py-0.5 rounded-md text-sm font-medium text-white"
                           style={{ backgroundColor: "#06B6D4" }}
                         >
                           {subCategory.subTopicId.name}
                         </span>
                       </span>
                     ) : subCategory.topicId?.name ? (
-                      <span className="text-xs text-gray-700">
+                      <span className="text-sm text-gray-700">
                         <span className="font-medium">Topic:</span>{" "}
                         <span
-                          className="px-2 py-0.5 rounded-md text-xs font-medium text-white"
+                          className="px-2 py-0.5 rounded-md text-sm font-medium text-white"
                           style={{ backgroundColor: "#F59E0B" }}
                         >
                           {subCategory.topicId.name}
                         </span>
                       </span>
                     ) : subCategory.chapterId?.name ? (
-                      <span className="text-xs text-gray-700">
+                      <span className="text-sm text-gray-700">
                         <span className="font-medium">Chapter:</span>{" "}
                         <span
-                          className="px-2 py-0.5 rounded-md text-xs font-medium text-white"
+                          className="px-2 py-0.5 rounded-md text-sm font-medium text-white"
                           style={{ backgroundColor: "#EC4899" }}
                         >
                           {subCategory.chapterId.name}
                         </span>
                       </span>
                     ) : subCategory.unitId?.name ? (
-                      <span className="text-xs text-gray-700">
+                      <span className="text-sm text-gray-700">
                         <span className="font-medium">Unit:</span>{" "}
                         <span
-                          className="px-2 py-0.5 rounded-md text-xs font-medium text-white"
+                          className="px-2 py-0.5 rounded-md text-sm font-medium text-white"
                           style={{ backgroundColor: "#8B5CF6" }}
                         >
                           {subCategory.unitId.name}
                         </span>
                       </span>
                     ) : (
-                      <span className="text-xs text-gray-400 italic">
+                      <span className="text-sm text-gray-400 italic">
                         Not Assigned
                       </span>
                     )}
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                <div className="grid grid-cols-2 gap-1 text-sm text-gray-600">
                   <div>
                     <span className="font-medium">Duration:</span>{" "}
                     {subCategory.duration || "N/A"}
@@ -339,7 +339,7 @@ const PracticeSubCategoryTable = ({
                   </div>
                   <div className="col-span-2">
                     <span
-                      className={`px-2.5 py-1 rounded-full text-xs font-medium inline-block ${
+                      className={`px-2 py-0.5 rounded-full text-sm font-medium inline-block ${
                         subCategory.status === "active"
                           ? "bg-green-100 text-green-800"
                           : "bg-red-100 text-red-800"
@@ -350,7 +350,7 @@ const PracticeSubCategoryTable = ({
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-1 shrink-0">
                 {onEdit &&
                   (canEdit ? (
                     <button
@@ -358,7 +358,7 @@ const PracticeSubCategoryTable = ({
                         e.stopPropagation();
                         onEdit(subCategory);
                       }}
-                      className="p-2 bg-blue-50 text-blue-600 rounded-lg transition-colors hover:bg-blue-100"
+                      className="p-1 bg-blue-50 text-blue-600 rounded-lg transition-colors hover:bg-blue-100"
                       title="Edit Paper"
                     >
                       <FaEdit className="text-sm" />
@@ -367,7 +367,7 @@ const PracticeSubCategoryTable = ({
                     <button
                       disabled
                       title={getPermissionMessage("edit", role)}
-                      className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                      className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                     >
                       <FaLock className="text-sm" />
                     </button>
@@ -379,7 +379,7 @@ const PracticeSubCategoryTable = ({
                         e.stopPropagation();
                         onDelete(subCategory);
                       }}
-                      className="p-2 bg-red-50 text-red-600 rounded-lg transition-colors hover:bg-red-100"
+                      className="p-1 bg-red-50 text-red-600 rounded-lg transition-colors hover:bg-red-100"
                       title="Delete Paper"
                     >
                       <FaTrash className="text-sm" />
@@ -388,7 +388,7 @@ const PracticeSubCategoryTable = ({
                     <button
                       disabled
                       title={getPermissionMessage("delete", role)}
-                      className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                      className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                     >
                       <FaLock className="text-sm" />
                     </button>
@@ -400,7 +400,7 @@ const PracticeSubCategoryTable = ({
                         e.stopPropagation();
                         onToggleStatus(subCategory);
                       }}
-                      className="p-2 bg-orange-50 text-orange-600 rounded-lg transition-colors hover:bg-orange-100"
+                      className="p-1 bg-orange-50 text-orange-600 rounded-lg transition-colors hover:bg-orange-100"
                       title={
                         subCategory.status === "active"
                           ? "Deactivate Paper"
@@ -413,7 +413,7 @@ const PracticeSubCategoryTable = ({
                     <button
                       disabled
                       title={getPermissionMessage("reorder", role)}
-                      className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                      className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                     >
                       <FaLock className="text-sm" />
                     </button>

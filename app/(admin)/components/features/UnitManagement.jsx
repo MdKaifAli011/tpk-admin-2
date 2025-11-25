@@ -20,7 +20,6 @@ import {
   FaEdit,
   FaExclamationTriangle,
   FaClipboardList,
-  FaFilter,
   FaLock,
 } from "react-icons/fa";
 import { ToastContainer, useToast } from "../ui/Toast";
@@ -632,32 +631,30 @@ const UnitsManagement = () => {
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <div className="space-y-6">
         {/* Page Header */}
-        <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-lg border border-gray-200 p-6 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-lg border border-gray-200 p-4 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+              <h1 className="text-xl font-semibold text-gray-900 mb-1">
                 Units Management
               </h1>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs text-gray-600">
                 Manage and organize your units, create new units, and track unit performance across your educational platform.
               </p>
             </div>
             {canCreate ? (
               <button
                 onClick={handleOpenAddForm}
-                className="px-3 py-1.5 bg-[#0056FF] hover:bg-[#0044CC] text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                className="px-2 py-1 bg-[#0056FF] hover:bg-[#0044CC] text-white rounded-lg text-xs font-medium transition-colors"
               >
-                <FaPlus className="w-4 h-4" />
-                <span>Add New Units</span>
+                Add New Units
               </button>
             ) : (
               <button
                 disabled
                 title={getPermissionMessage("create", role)}
-                className="px-3 py-1.5 bg-gray-300 text-gray-500 rounded-lg text-sm font-medium cursor-not-allowed flex items-center gap-2"
+                className="px-2 py-1 bg-gray-300 text-gray-500 rounded-lg text-xs font-medium cursor-not-allowed"
               >
-                <FaLock className="w-4 h-4" />
-                <span>Add New Units</span>
+                Add New Units
               </button>
             )}
           </div>
@@ -1046,12 +1043,11 @@ const UnitsManagement = () => {
               </div>
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition-colors"
               >
-                <FaFilter className="w-4 h-4" />
                 Filter Units
                 {activeFilterCount > 0 && (
-                  <span className="bg-white text-blue-600 px-2 py-0.5 rounded-full text-xs font-medium">
+                  <span className="bg-white text-blue-600 px-1.5 py-0.5 rounded-full text-xs font-medium ml-1.5">
                     {activeFilterCount}
                   </span>
                 )}
@@ -1153,7 +1149,7 @@ const UnitsManagement = () => {
             </div>
           )}
 
-          <div className="p-6">
+          <div className="p-2">
             {isDataLoading ? (
               <div className="flex items-center justify-center py-12">
                 <div className="text-center">

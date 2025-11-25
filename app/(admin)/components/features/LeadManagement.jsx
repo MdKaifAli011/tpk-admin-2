@@ -6,7 +6,7 @@ import {
   SkeletonPageContent,
   LoadingSpinner,
 } from "../ui/SkeletonLoader";
-import { FaFilter, FaTimes, FaClipboardList, FaEye } from "react-icons/fa";
+import { FaTimes, FaClipboardList, FaEye } from "react-icons/fa";
 import { ToastContainer, useToast } from "../ui/Toast";
 import api from "@/lib/api";
 import {
@@ -242,12 +242,11 @@ const LeadManagement = () => {
             </div>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+              className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition-colors"
             >
-              <FaFilter className="w-4 h-4" />
               Filter Leads
               {activeFilterCount > 0 && (
-                <span className="bg-white text-blue-600 px-2 py-0.5 rounded-full text-xs font-medium">
+                <span className="bg-white text-blue-600 px-1.5 py-0.5 rounded-full text-xs font-medium ml-1.5">
                   {activeFilterCount}
                 </span>
               )}
@@ -453,7 +452,7 @@ const LeadManagement = () => {
         )}
 
         {/* Table Content */}
-        <div className="p-6">
+        <div>
           {isDataLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">

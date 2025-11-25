@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import SubTopicsTable from "../table/SubTopicsTable";
 import { LoadingWrapper, SkeletonChaptersTable } from "../ui/SkeletonLoader";
-import { FaEdit, FaPlus, FaTimes, FaFilter, FaLock } from "react-icons/fa";
+import { FaEdit, FaPlus, FaTimes, FaLock } from "react-icons/fa";
 import api from "@/lib/api";
 import { usePermissions, getPermissionMessage } from "../../hooks/usePermissions";
 
@@ -1075,31 +1075,29 @@ const SubTopicsManagement = () => {
         )}
 
         {/* Header Section */}
-        <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-lg border border-gray-200 p-6 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-lg border border-gray-200 p-4 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+              <h1 className="text-xl font-semibold text-gray-900 mb-1">
                 Sub Topic Management
               </h1>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs text-gray-600">
                 Manage and organize your sub topics, create new sub topics, and track sub topic performance across your educational platform.
               </p>
             </div>
             {canCreate ? (
               <button
                 onClick={handleOpenAddForm}
-                className="px-3 py-1.5 bg-[#0056FF] hover:bg-[#0044CC] text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                className="px-2 py-1 bg-[#0056FF] hover:bg-[#0044CC] text-white rounded-lg text-xs font-medium transition-colors"
               >
-                <FaPlus className="w-4 h-4" />
                 Add New Sub Topic
               </button>
             ) : (
               <button
                 disabled
                 title={getPermissionMessage("create", role)}
-                className="px-3 py-1.5 bg-gray-300 text-gray-500 rounded-lg text-sm font-medium cursor-not-allowed flex items-center gap-2"
+                className="px-2 py-1 bg-gray-300 text-gray-500 rounded-lg text-xs font-medium cursor-not-allowed"
               >
-                <FaLock className="w-4 h-4" />
                 Add New Sub Topic
               </button>
             )}
@@ -1538,12 +1536,11 @@ const SubTopicsManagement = () => {
               </div>
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition-colors"
               >
-                <FaFilter className="w-4 h-4" />
                 Filter Sub Topics
                 {activeFilterCount > 0 && (
-                  <span className="bg-white text-blue-600 px-2 py-0.5 rounded-full text-xs font-medium">
+                  <span className="bg-white text-blue-600 px-1.5 py-0.5 rounded-full text-xs font-medium ml-1.5">
                     {activeFilterCount}
                   </span>
                 )}
@@ -1778,7 +1775,7 @@ const SubTopicsManagement = () => {
             </div>
           )}
 
-          <div className="p-6">
+          <div className="p-2">
             <SubTopicsTable
               subTopics={filteredSubTopics}
               onEdit={handleEditSubTopic}

@@ -9,7 +9,10 @@ import {
   FaPowerOff,
   FaLock,
 } from "react-icons/fa";
-import { usePermissions, getPermissionMessage } from "../../hooks/usePermissions";
+import {
+  usePermissions,
+  getPermissionMessage,
+} from "../../hooks/usePermissions";
 
 const ExamTable = ({ exams, onEdit, onDelete, onView, onToggleStatus }) => {
   const { canEdit, canDelete, canReorder, role } = usePermissions();
@@ -33,18 +36,18 @@ const ExamTable = ({ exams, onEdit, onDelete, onView, onToggleStatus }) => {
   };
   if (!exams || exams.length === 0) {
     return (
-      <div className="text-center py-16 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
-        <div className="text-6xl mb-4 animate-float">📝</div>
-        <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-2">
+      <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+        <div className="text-5xl mb-3 animate-float">📝</div>
+        <h3 className="text-sm sm:text-sm font-bold text-gray-800 mb-1.5">
           No Exams Found
         </h3>
-        <p className="text-gray-500 text-xs sm:text-sm max-w-md mx-auto">
+        <p className="text-gray-500 text-sm max-w-md mx-auto">
           Create your first exam to get started with organizing your assessments
           and tracking performance.
         </p>
-        <div className="mt-6">
-          <div className="inline-flex items-center gap-2 text-blue-600 text-xs font-medium">
-            <FaClipboardList className="w-4 h-4" />
+        <div className="mt-4">
+          <div className="inline-flex items-center gap-1.5 text-blue-600 text-sm font-medium">
+            <FaClipboardList className="w-3.5 h-3.5" />
             <span>Ready to create your first exam?</span>
           </div>
         </div>
@@ -56,16 +59,16 @@ const ExamTable = ({ exams, onEdit, onDelete, onView, onToggleStatus }) => {
     <div className="overflow-hidden">
       {/* Desktop Table View */}
       <div className="hidden md:block overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
+        <table className="min-w-full divide-y divide-gray-200 table-fixed">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Exam Details
               </th>
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">
                 Content
               </th>
-              <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 py-1 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                 Actions
               </th>
             </tr>
@@ -91,7 +94,7 @@ const ExamTable = ({ exams, onEdit, onDelete, onView, onToggleStatus }) => {
                       {exam.name}
                     </span>
                     <span
-                      className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                      className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                         exam.status === "active"
                           ? "bg-green-100 text-green-800"
                           : exam.status === "inactive"
@@ -106,29 +109,31 @@ const ExamTable = ({ exams, onEdit, onDelete, onView, onToggleStatus }) => {
                     </span>
                   </div>
                 </td>
-                <td className="px-3 py-2 whitespace-nowrap">
-                  <span className={`text-sm ${
-                    exam.contentInfo?.hasContent 
-                      ? "text-gray-700" 
-                      : "text-gray-400 italic"
-                  }`}>
+                <td className="px-2 py-1 whitespace-nowrap w-40">
+                  <span
+                    className={`text-sm ${
+                      exam.contentInfo?.hasContent
+                        ? "text-gray-700"
+                        : "text-gray-400 italic"
+                    }`}
+                  >
                     {formatContentDate(exam.contentInfo)}
                   </span>
                 </td>
-                <td className="px-3 py-2 whitespace-nowrap text-right">
-                  <div className="flex items-center justify-end gap-2">
+                <td className="px-2 py-1 whitespace-nowrap text-right w-32">
+                  <div className="flex items-center justify-end gap-1">
                     <button
                       onClick={() => handleExamClick(exam)}
-                      className="p-2 bg-green-50 text-green-600 rounded-lg transition-colors hover:bg-green-100"
+                      className="p-1 bg-green-50 text-green-600 rounded-lg transition-colors hover:bg-green-100"
                       title="View Exam Details"
                     >
                       <FaEye className="text-sm" />
                     </button>
-                    {onEdit && (
-                      canEdit ? (
+                    {onEdit &&
+                      (canEdit ? (
                         <button
                           onClick={() => onEdit(exam)}
-                          className="p-2 bg-blue-50 text-blue-600 rounded-lg transition-colors hover:bg-blue-100"
+                          className="p-1 bg-blue-50 text-blue-600 rounded-lg transition-colors hover:bg-blue-100"
                           title="Edit Exam"
                         >
                           <FaEdit className="text-sm" />
@@ -137,17 +142,16 @@ const ExamTable = ({ exams, onEdit, onDelete, onView, onToggleStatus }) => {
                         <button
                           disabled
                           title={getPermissionMessage("edit", role)}
-                          className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                          className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                         >
                           <FaLock className="text-sm" />
                         </button>
-                      )
-                    )}
-                    {onDelete && (
-                      canDelete ? (
+                      ))}
+                    {onDelete &&
+                      (canDelete ? (
                         <button
                           onClick={() => onDelete(exam)}
-                          className="p-2 bg-red-50 text-red-600 rounded-lg transition-colors hover:bg-red-100"
+                          className="p-1 bg-red-50 text-red-600 rounded-lg transition-colors hover:bg-red-100"
                           title="Delete Exam"
                         >
                           <FaTrash className="text-sm" />
@@ -156,17 +160,16 @@ const ExamTable = ({ exams, onEdit, onDelete, onView, onToggleStatus }) => {
                         <button
                           disabled
                           title={getPermissionMessage("delete", role)}
-                          className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                          className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                         >
                           <FaLock className="text-sm" />
                         </button>
-                      )
-                    )}
-                    {onToggleStatus && (
-                      canReorder ? (
+                      ))}
+                    {onToggleStatus &&
+                      (canReorder ? (
                         <button
                           onClick={() => onToggleStatus(exam)}
-                          className="p-2 bg-orange-50 text-orange-600 rounded-lg transition-colors hover:bg-orange-100"
+                          className="p-1 bg-orange-50 text-orange-600 rounded-lg transition-colors hover:bg-orange-100"
                           title={
                             exam.status === "active"
                               ? "Deactivate Exam"
@@ -179,12 +182,11 @@ const ExamTable = ({ exams, onEdit, onDelete, onView, onToggleStatus }) => {
                         <button
                           disabled
                           title={getPermissionMessage("reorder", role)}
-                          className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                          className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                         >
                           <FaLock className="text-sm" />
                         </button>
-                      )
-                    )}
+                      ))}
                   </div>
                 </td>
               </tr>
@@ -198,7 +200,7 @@ const ExamTable = ({ exams, onEdit, onDelete, onView, onToggleStatus }) => {
         {exams.map((exam, index) => (
           <div
             key={exam._id || exam.id || index}
-            className={`p-2 hover:bg-gray-50 transition-colors ${
+            className={`p-1.5 hover:bg-gray-50 transition-colors ${
               exam.status === "inactive" ? "opacity-60" : ""
             }`}
           >
@@ -206,7 +208,7 @@ const ExamTable = ({ exams, onEdit, onDelete, onView, onToggleStatus }) => {
               <div className="flex-1 min-w-0">
                 <h3
                   onClick={() => handleExamClick(exam)}
-                  className={`text-base font-semibold mb-2 cursor-pointer hover:text-blue-600 transition-colors ${
+                  className={`text-sm font-semibold mb-1 cursor-pointer hover:text-blue-600 transition-colors ${
                     exam.status === "inactive"
                       ? "text-gray-500 line-through"
                       : "text-gray-900"
@@ -214,9 +216,9 @@ const ExamTable = ({ exams, onEdit, onDelete, onView, onToggleStatus }) => {
                 >
                   {exam.name}
                 </h3>
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <span
-                    className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                    className={`px-2 py-0.5 rounded-full text-sm font-medium ${
                       exam.status === "active"
                         ? "bg-green-100 text-green-800"
                         : exam.status === "inactive"
@@ -229,28 +231,30 @@ const ExamTable = ({ exams, onEdit, onDelete, onView, onToggleStatus }) => {
                     {(exam.status || "active").charAt(0).toUpperCase() +
                       (exam.status || "active").slice(1)}
                   </span>
-                  <span className={`text-xs ${
-                    exam.contentInfo?.hasContent 
-                      ? "text-gray-600" 
-                      : "text-gray-400 italic"
-                  }`}>
+                  <span
+                    className={`text-sm ${
+                      exam.contentInfo?.hasContent
+                        ? "text-gray-600"
+                        : "text-gray-400 italic"
+                    }`}
+                  >
                     Content: {formatContentDate(exam.contentInfo)}
                   </span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 ml-4">
+              <div className="flex items-center gap-1 ml-3">
                 <button
                   onClick={() => handleExamClick(exam)}
-                  className="p-2 bg-green-50 text-green-600 rounded-lg transition-colors hover:bg-green-100"
+                  className="p-1 bg-green-50 text-green-600 rounded-lg transition-colors hover:bg-green-100"
                   title="View Exam Details"
                 >
                   <FaEye className="text-sm" />
                 </button>
-                {onEdit && (
-                  canEdit ? (
+                {onEdit &&
+                  (canEdit ? (
                     <button
                       onClick={() => onEdit(exam)}
-                      className="p-2 bg-blue-50 text-blue-600 rounded-lg transition-colors hover:bg-blue-100"
+                      className="p-1 bg-blue-50 text-blue-600 rounded-lg transition-colors hover:bg-blue-100"
                       title="Edit Exam"
                     >
                       <FaEdit className="text-sm" />
@@ -259,17 +263,16 @@ const ExamTable = ({ exams, onEdit, onDelete, onView, onToggleStatus }) => {
                     <button
                       disabled
                       title={getPermissionMessage("edit", role)}
-                      className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                      className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                     >
                       <FaLock className="text-sm" />
                     </button>
-                  )
-                )}
-                {onDelete && (
-                  canDelete ? (
+                  ))}
+                {onDelete &&
+                  (canDelete ? (
                     <button
                       onClick={() => onDelete(exam)}
-                      className="p-2 bg-red-50 text-red-600 rounded-lg transition-colors hover:bg-red-100"
+                      className="p-1 bg-red-50 text-red-600 rounded-lg transition-colors hover:bg-red-100"
                       title="Delete Exam"
                     >
                       <FaTrash className="text-sm" />
@@ -278,17 +281,16 @@ const ExamTable = ({ exams, onEdit, onDelete, onView, onToggleStatus }) => {
                     <button
                       disabled
                       title={getPermissionMessage("delete", role)}
-                      className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                      className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                     >
                       <FaLock className="text-sm" />
                     </button>
-                  )
-                )}
-                {onToggleStatus && (
-                  canReorder ? (
+                  ))}
+                {onToggleStatus &&
+                  (canReorder ? (
                     <button
                       onClick={() => onToggleStatus(exam)}
-                      className="p-2 bg-orange-50 text-orange-600 rounded-lg transition-colors hover:bg-orange-100"
+                      className="p-1 bg-orange-50 text-orange-600 rounded-lg transition-colors hover:bg-orange-100"
                       title={
                         exam.status === "active"
                           ? "Deactivate Exam"
@@ -301,12 +303,11 @@ const ExamTable = ({ exams, onEdit, onDelete, onView, onToggleStatus }) => {
                     <button
                       disabled
                       title={getPermissionMessage("reorder", role)}
-                      className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                      className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                     >
                       <FaLock className="text-sm" />
                     </button>
-                  )
-                )}
+                  ))}
               </div>
             </div>
           </div>

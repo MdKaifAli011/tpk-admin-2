@@ -47,9 +47,9 @@ const PracticeCategoryTable = ({
 
   if (!categories || categories.length === 0) {
     return (
-      <div className="text-center py-16 bg-white rounded-lg border border-gray-200 shadow-sm">
-        <div className="text-gray-400 text-6xl mb-4">📝</div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+      <div className="text-center py-12 bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div className="text-gray-400 text-5xl mb-3">📝</div>
+        <h3 className="text-sm font-semibold text-gray-900 mb-1">
           No Categories Found
         </h3>
         <p className="text-sm text-gray-500">
@@ -67,11 +67,11 @@ const PracticeCategoryTable = ({
           className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm"
         >
           {/* Breadcrumb Header */}
-          <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-            <div className="flex items-center gap-2.5 flex-wrap text-sm font-medium text-white">
+          <div className="bg-gray-50 px-3 py-2 border-b border-gray-200">
+            <div className="flex items-center gap-1.5 flex-wrap text-xs font-medium text-white">
               {/* Exam Name */}
               <span
-                className="px-2.5 py-1 rounded-full"
+                className="px-2 py-0.5 rounded-full"
                 style={{ backgroundColor: "#10B981" }}
               >
                 {group.examName}
@@ -79,7 +79,7 @@ const PracticeCategoryTable = ({
               <span className="text-gray-400">›</span>
               {/* Category Count */}
               <span
-                className="px-2.5 py-1 rounded-full"
+                className="px-2 py-0.5 rounded-full"
                 style={{ backgroundColor: "#6B7280" }}
               >
                 {group.categories.length}{" "}
@@ -90,28 +90,28 @@ const PracticeCategoryTable = ({
 
           {/* Desktop Table View */}
           <div className="hidden lg:block overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
+            <table className="min-w-full divide-y divide-gray-200 table-fixed">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     {group.examName} Paper Categories
                   </th>
-                  <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                     Subject
                   </th>
-                  <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
                     No. of Tests
                   </th>
-                  <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                     Mode
                   </th>
-                  <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
                     Duration
                   </th>
-                  <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-1 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-28">
                     Language
                   </th>
-                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-1 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                     Actions
                   </th>
                 </tr>
@@ -124,7 +124,7 @@ const PracticeCategoryTable = ({
                       category.status === "inactive" ? "opacity-60" : ""
                     }`}
                   >
-                    <td className="px-3 py-2 whitespace-nowrap">
+                    <td className="px-2 py-1 whitespace-nowrap">
                       <div
                         onClick={() => handleCategoryClick(category)}
                         className="text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer transition-colors"
@@ -135,36 +135,36 @@ const PracticeCategoryTable = ({
                         {category.name}
                       </div>
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap text-center">
+                    <td className="px-2 py-1 whitespace-nowrap text-center w-32">
                     <span
-                              className="px-2 py-0.5 rounded-md text-xs font-medium text-white"
+                              className="px-2 py-0.5 rounded-md text-sm font-medium text-white"
                               style={{ backgroundColor: "#3B82F6" }}
                             >
                               {category.subjectId?.name}
                             </span>
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap text-center">
+                    <td className="px-2 py-1 whitespace-nowrap text-center w-28">
                       <span className="text-sm text-gray-900">
                         {category.noOfTests || 0}
                       </span>
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap text-center">
+                    <td className="px-2 py-1 whitespace-nowrap text-center w-24">
                       <span className="text-sm text-gray-600">
                         {category.mode || "N/A"}
                       </span>
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap text-center">
+                    <td className="px-2 py-1 whitespace-nowrap text-center w-28">
                       <span className="text-sm text-gray-600">
                         {category.duration || "N/A"}
                       </span>
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap text-center">
+                    <td className="px-2 py-1 whitespace-nowrap text-center w-28">
                       <span className="text-sm text-gray-600">
                         {category.language || "N/A"}
                       </span>
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="px-2 py-1 whitespace-nowrap text-right w-32">
+                      <div className="flex items-center justify-end gap-1">
                         {onEdit &&
                           (canEdit ? (
                             <button
@@ -172,7 +172,7 @@ const PracticeCategoryTable = ({
                                 e.stopPropagation();
                                 onEdit(category);
                               }}
-                              className="p-2 bg-blue-50 text-blue-600 rounded-lg transition-colors hover:bg-blue-100"
+                              className="p-1 bg-blue-50 text-blue-600 rounded-lg transition-colors hover:bg-blue-100"
                               title="Edit Category"
                             >
                               <FaEdit className="text-sm" />
@@ -181,7 +181,7 @@ const PracticeCategoryTable = ({
                             <button
                               disabled
                               title={getPermissionMessage("edit", role)}
-                              className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                              className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                             >
                               <FaLock className="text-sm" />
                             </button>
@@ -193,7 +193,7 @@ const PracticeCategoryTable = ({
                                 e.stopPropagation();
                                 onDelete(category);
                               }}
-                              className="p-2 bg-red-50 text-red-600 rounded-lg transition-colors hover:bg-red-100"
+                              className="p-1 bg-red-50 text-red-600 rounded-lg transition-colors hover:bg-red-100"
                               title="Delete Category"
                             >
                               <FaTrash className="text-sm" />
@@ -202,7 +202,7 @@ const PracticeCategoryTable = ({
                             <button
                               disabled
                               title={getPermissionMessage("delete", role)}
-                              className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                              className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                             >
                               <FaLock className="text-sm" />
                             </button>
@@ -214,7 +214,7 @@ const PracticeCategoryTable = ({
                                 e.stopPropagation();
                                 onToggleStatus(category);
                               }}
-                              className="p-2 bg-orange-50 text-orange-600 rounded-lg transition-colors hover:bg-orange-100"
+                              className="p-1 bg-orange-50 text-orange-600 rounded-lg transition-colors hover:bg-orange-100"
                               title={
                                 category.status === "active"
                                   ? "Deactivate Category"
@@ -227,7 +227,7 @@ const PracticeCategoryTable = ({
                             <button
                               disabled
                               title={getPermissionMessage("reorder", role)}
-                              className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                              className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                             >
                               <FaLock className="text-sm" />
                             </button>
@@ -245,15 +245,15 @@ const PracticeCategoryTable = ({
             {group.categories.map((category, index) => (
               <div
                 key={category._id || category.id || index}
-                className={`p-2 hover:bg-gray-50 transition-colors ${
+                className={`p-1.5 hover:bg-gray-50 transition-colors ${
                   category.status === "inactive" ? "opacity-60" : ""
                 }`}
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <h3
                       onClick={() => handleCategoryClick(category)}
-                      className={`text-base font-semibold mb-2 cursor-pointer transition-colors ${
+                      className={`text-sm font-semibold mb-1 cursor-pointer transition-colors ${
                         category.status === "inactive"
                           ? "text-gray-500 line-through"
                           : "text-blue-600 hover:text-blue-800"
@@ -262,7 +262,7 @@ const PracticeCategoryTable = ({
                       {category.orderNumber ? `${category.orderNumber}. ` : ""}
                       {category.name}
                     </h3>
-                    <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                    <div className="grid grid-cols-2 gap-1 text-sm text-gray-600">
                       <div>
                         <span className="font-medium">Subject:</span>{" "}
                         {category.subjectId?.name || "N/A"}
@@ -285,7 +285,7 @@ const PracticeCategoryTable = ({
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1 shrink-0">
                     {onEdit &&
                       (canEdit ? (
                         <button
@@ -293,7 +293,7 @@ const PracticeCategoryTable = ({
                             e.stopPropagation();
                             onEdit(category);
                           }}
-                          className="p-2 bg-blue-50 text-blue-600 rounded-lg transition-colors hover:bg-blue-100"
+                          className="p-1 bg-blue-50 text-blue-600 rounded-lg transition-colors hover:bg-blue-100"
                           title="Edit Category"
                         >
                           <FaEdit className="text-sm" />
@@ -302,7 +302,7 @@ const PracticeCategoryTable = ({
                         <button
                           disabled
                           title={getPermissionMessage("edit", role)}
-                          className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                          className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                         >
                           <FaLock className="text-sm" />
                         </button>
@@ -314,7 +314,7 @@ const PracticeCategoryTable = ({
                             e.stopPropagation();
                             onDelete(category);
                           }}
-                          className="p-2 bg-red-50 text-red-600 rounded-lg transition-colors hover:bg-red-100"
+                          className="p-1 bg-red-50 text-red-600 rounded-lg transition-colors hover:bg-red-100"
                           title="Delete Category"
                         >
                           <FaTrash className="text-sm" />
@@ -323,7 +323,7 @@ const PracticeCategoryTable = ({
                         <button
                           disabled
                           title={getPermissionMessage("delete", role)}
-                          className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                          className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                         >
                           <FaLock className="text-sm" />
                         </button>
@@ -335,7 +335,7 @@ const PracticeCategoryTable = ({
                             e.stopPropagation();
                             onToggleStatus(category);
                           }}
-                          className="p-2 bg-orange-50 text-orange-600 rounded-lg transition-colors hover:bg-orange-100"
+                          className="p-1 bg-orange-50 text-orange-600 rounded-lg transition-colors hover:bg-orange-100"
                           title={
                             category.status === "active"
                               ? "Deactivate Category"
@@ -348,7 +348,7 @@ const PracticeCategoryTable = ({
                         <button
                           disabled
                           title={getPermissionMessage("reorder", role)}
-                          className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                          className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                         >
                           <FaLock className="text-sm" />
                         </button>

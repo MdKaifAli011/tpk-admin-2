@@ -52,9 +52,9 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
 
   if (!subjects || subjects.length === 0) {
     return (
-      <div className="text-center py-16 bg-white rounded-lg border border-gray-200 shadow-sm">
-        <div className="text-gray-400 text-6xl mb-4">📘</div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+      <div className="text-center py-12 bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div className="text-gray-400 text-5xl mb-3">📘</div>
+        <h3 className="text-sm font-semibold text-gray-900 mb-1">
           No Subjects Found
         </h3>
         <p className="text-sm text-gray-500">
@@ -72,15 +72,15 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
           className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm"
         >
           {/* Breadcrumb Header */}
-          <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-            <div className="flex items-center gap-2.5 flex-wrap text-sm font-medium text-white">
+          <div className="bg-gray-50 px-3 py-2 border-b border-gray-200">
+            <div className="flex items-center gap-1.5 flex-wrap text-xs font-medium text-white">
               {/* Exam Name */}
-              <span className="px-2.5 py-1 rounded-full" style={{ backgroundColor: '#10B981' }}>
+              <span className="px-2 py-0.5 rounded-full" style={{ backgroundColor: '#10B981' }}>
                 {group.examName}
               </span>
               <span className="text-gray-400">›</span>
               {/* Subject Count */}
-              <span className="px-2.5 py-1 rounded-full" style={{ backgroundColor: '#6B7280' }}>
+              <span className="px-2 py-0.5 rounded-full" style={{ backgroundColor: '#6B7280' }}>
                 {group.subjects.length}{" "}
                 {group.subjects.length === 1 ? "Subject" : "Subjects"}
               </span>
@@ -89,16 +89,16 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
 
           {/* Table */}
           <div className="hidden lg:block overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
+            <table className="min-w-full divide-y divide-gray-200 table-fixed">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Subject Name
                   </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">
                     Content
                   </th>
-                  <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-2 py-1 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
                     Actions
                   </th>
                 </tr>
@@ -114,7 +114,7 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
                     }`}
                   >
                     <td
-                      className={`px-3 py-2 whitespace-nowrap text-sm font-medium cursor-pointer hover:text-blue-600 transition-colors ${
+                      className={`px-2 py-1 whitespace-nowrap text-sm font-medium cursor-pointer hover:text-blue-600 transition-colors ${
                         subject.status === "inactive"
                           ? "text-gray-500 line-through"
                           : "text-gray-900"
@@ -124,7 +124,7 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
                     >
                       {subject.name}
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap">
+                    <td className="px-2 py-1 whitespace-nowrap w-40">
                       <span className={`text-sm ${
                         subject.contentInfo?.hasContent 
                           ? "text-gray-700" 
@@ -133,14 +133,14 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
                         {formatContentDate(subject.contentInfo)}
                       </span>
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="px-2 py-1 whitespace-nowrap text-right w-32">
+                      <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleSubjectClick(subject);
                           }}
-                          className="p-2 bg-green-50 text-green-600 rounded-lg transition-colors hover:bg-green-100"
+                          className="p-1 bg-green-50 text-green-600 rounded-lg transition-colors hover:bg-green-100"
                           title="View Subject Details"
                         >
                           <FaEye className="text-sm" />
@@ -152,7 +152,7 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
                                 e.stopPropagation();
                                 onEdit(subject);
                               }}
-                              className="p-2 bg-blue-50 text-blue-600 rounded-lg transition-colors hover:bg-blue-100"
+                              className="p-1 bg-blue-50 text-blue-600 rounded-lg transition-colors hover:bg-blue-100"
                               title="Edit Subject"
                             >
                               <FaEdit className="text-sm" />
@@ -161,7 +161,7 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
                             <button
                               disabled
                               title={getPermissionMessage("edit", role)}
-                              className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                              className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                             >
                               <FaLock className="text-sm" />
                             </button>
@@ -174,7 +174,7 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
                                 e.stopPropagation();
                                 onDelete(subject);
                               }}
-                              className="p-2 bg-red-50 text-red-600 rounded-lg transition-colors hover:bg-red-100"
+                              className="p-1 bg-red-50 text-red-600 rounded-lg transition-colors hover:bg-red-100"
                               title="Delete Subject"
                             >
                               <FaTrash className="text-sm" />
@@ -183,7 +183,7 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
                             <button
                               disabled
                               title={getPermissionMessage("delete", role)}
-                              className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                              className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                             >
                               <FaLock className="text-sm" />
                             </button>
@@ -196,7 +196,7 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
                                 e.stopPropagation();
                                 onToggleStatus(subject);
                               }}
-                              className="p-2 bg-orange-50 text-orange-600 rounded-lg transition-colors hover:bg-orange-100"
+                              className="p-1 bg-orange-50 text-orange-600 rounded-lg transition-colors hover:bg-orange-100"
                               title={
                                 subject.status === "active"
                                   ? "Deactivate Subject"
@@ -209,7 +209,7 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
                             <button
                               disabled
                               title={getPermissionMessage("reorder", role)}
-                              className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                              className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                             >
                               <FaLock className="text-sm" />
                             </button>
@@ -228,19 +228,19 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
             {group.subjects.map((subject, index) => (
               <div
                 key={subject._id || subject.id || index}
-                className={`p-2 hover:bg-gray-50 transition-colors ${
+                className={`p-1.5 hover:bg-gray-50 transition-colors ${
                   subject.status === "inactive" 
                     ? "opacity-60" 
                     : ""
                 }`}
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start justify-between gap-2">
                   <div
                     className="flex-1 min-w-0 pr-2 cursor-pointer hover:text-blue-600 transition-colors"
                     onClick={() => handleSubjectClick(subject)}
                   >
                     <h3 
-                      className={`text-base font-semibold mb-2 ${
+                      className={`text-sm font-semibold mb-1 ${
                         subject.status === "inactive" 
                           ? "text-gray-500 line-through" 
                           : "text-gray-900"
@@ -249,15 +249,15 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
                     >
                       {subject.name}
                     </h3>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                    <div className="flex items-center gap-1 flex-wrap">
+                      <span className={`px-2 py-0.5 rounded-full text-sm font-medium ${
                         subject.status === "active" 
                           ? "bg-green-100 text-green-800" 
                           : "bg-red-100 text-red-800"
                       }`}>
                         {subject.status === "active" ? "Active" : "Inactive"}
                       </span>
-                      <span className={`text-xs ${
+                      <span className={`text-sm ${
                         subject.contentInfo?.hasContent 
                           ? "text-gray-600" 
                           : "text-gray-400 italic"
@@ -266,13 +266,13 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-1 flex-shrink-0">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleSubjectClick(subject);
                       }}
-                      className="p-2 bg-green-50 text-green-600 rounded-lg transition-colors hover:bg-green-100"
+                      className="p-1 bg-green-50 text-green-600 rounded-lg transition-colors hover:bg-green-100"
                       title="View Subject Details"
                     >
                       <FaEye className="text-sm" />
@@ -284,7 +284,7 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
                             e.stopPropagation();
                             onEdit(subject);
                           }}
-                          className="p-2 bg-blue-50 text-blue-600 rounded-lg transition-colors hover:bg-blue-100"
+                          className="p-1 bg-blue-50 text-blue-600 rounded-lg transition-colors hover:bg-blue-100"
                           title="Edit Subject"
                         >
                           <FaEdit className="text-sm" />
@@ -293,7 +293,7 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
                         <button
                           disabled
                           title={getPermissionMessage("edit", role)}
-                          className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                          className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                         >
                           <FaLock className="text-sm" />
                         </button>
@@ -306,7 +306,7 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
                             e.stopPropagation();
                             onDelete(subject);
                           }}
-                          className="p-2 bg-red-50 text-red-600 rounded-lg transition-colors hover:bg-red-100"
+                          className="p-1 bg-red-50 text-red-600 rounded-lg transition-colors hover:bg-red-100"
                           title="Delete Subject"
                         >
                           <FaTrash className="text-sm" />
@@ -315,7 +315,7 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
                         <button
                           disabled
                           title={getPermissionMessage("delete", role)}
-                          className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                          className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                         >
                           <FaLock className="text-sm" />
                         </button>
@@ -328,7 +328,7 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
                             e.stopPropagation();
                             onToggleStatus(subject);
                           }}
-                          className="p-2 bg-orange-50 text-orange-600 rounded-lg transition-colors hover:bg-orange-100"
+                          className="p-1 bg-orange-50 text-orange-600 rounded-lg transition-colors hover:bg-orange-100"
                           title={
                             subject.status === "active"
                               ? "Deactivate Subject"
@@ -341,7 +341,7 @@ const SubjectTable = ({ subjects, onEdit, onDelete, onToggleStatus }) => {
                         <button
                           disabled
                           title={getPermissionMessage("reorder", role)}
-                          className="p-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
+                          className="p-1 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed"
                         >
                           <FaLock className="text-sm" />
                         </button>

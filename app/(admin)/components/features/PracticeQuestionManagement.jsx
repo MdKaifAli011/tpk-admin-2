@@ -763,19 +763,19 @@ What is the capital of India?,Mumbai,Delhi,Kolkata,Chennai,B,https://example.com
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <div className="space-y-6">
         {/* Header Section */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+              <h1 className="text-xl font-semibold text-gray-900 mb-1">
                 {currentSubCategory?.name || "Practice Question Management"}
               </h1>
-              <p className="text-sm text-gray-600">
+              <p className="text-xs text-gray-600">
                 {currentSubCategory
                   ? `Manage questions for ${currentSubCategory.name}. Add, edit, and organize practice questions for this paper.`
                   : "Manage and organize your practice questions, create new questions, and track question performance across your educational platform."}
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {/* Import/Export buttons - Only for admin and super_moderator */}
               {canImport && (
                 <>
@@ -789,19 +789,19 @@ What is the capital of India?,Mumbai,Delhi,Kolkata,Chennai,B,https://example.com
                       }
                       setShowDownloadModal(true);
                     }}
-                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                    className="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-medium transition-colors"
                     title="Download CSV Template"
                   >
-                    <FaDownload className="w-4 h-4" />
                     <span className="hidden sm:inline">Download Template</span>
+                    <span className="sm:hidden">Download</span>
                   </button>
                   <button
                     onClick={() => setShowImportModal(true)}
-                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                    className="px-2 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-medium transition-colors"
                     title="Import from CSV"
                   >
-                    <FaUpload className="w-4 h-4" />
                     <span className="hidden sm:inline">Import CSV</span>
+                    <span className="sm:hidden">Import</span>
                   </button>
                 </>
               )}
@@ -810,37 +810,35 @@ What is the capital of India?,Mumbai,Delhi,Kolkata,Chennai,B,https://example.com
                   <button
                     disabled
                     title="Only administrators and super moderators can download CSV templates"
-                    className="px-4 py-2 bg-gray-100 text-gray-400 rounded-lg text-sm font-medium cursor-not-allowed flex items-center gap-2"
+                    className="px-2 py-1 bg-gray-100 text-gray-400 rounded-lg text-xs font-medium cursor-not-allowed"
                   >
-                    <FaLock className="w-4 h-4" />
                     <span className="hidden sm:inline">Download Template</span>
+                    <span className="sm:hidden">Download</span>
                   </button>
                   <button
                     disabled
                     title="Only administrators and super moderators can import data"
-                    className="px-4 py-2 bg-gray-100 text-gray-400 rounded-lg text-sm font-medium cursor-not-allowed flex items-center gap-2"
+                    className="px-2 py-1 bg-gray-100 text-gray-400 rounded-lg text-xs font-medium cursor-not-allowed"
                   >
-                    <FaLock className="w-4 h-4" />
                     <span className="hidden sm:inline">Import CSV</span>
+                    <span className="sm:hidden">Import</span>
                   </button>
                 </>
               )}
               {canCreate ? (
                 <button
                   onClick={() => setShowAddForm(true)}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                  className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition-colors"
                 >
-                  <FaPlus className="w-4 h-4" />
-                  <span>Add Question</span>
+                  Add Question
                 </button>
               ) : (
                 <button
                   disabled
                   title={getPermissionMessage("create", role)}
-                  className="px-4 py-2 bg-gray-100 text-gray-400 rounded-lg text-sm font-medium cursor-not-allowed flex items-center gap-2"
+                  className="px-2 py-1 bg-gray-100 text-gray-400 rounded-lg text-xs font-medium cursor-not-allowed"
                 >
-                  <FaLock className="w-4 h-4" />
-                  <span>Add Question</span>
+                  Add Question
                 </button>
               )}
             </div>
