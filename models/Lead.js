@@ -13,7 +13,7 @@ const leadSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      match: [/^\S+@\S+\.\S+$/, "Please provide a valid email"],
+      match: [/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, "Please provide a valid email"],
     },
     country: {
       type: String,
@@ -27,35 +27,36 @@ const leadSchema = new mongoose.Schema(
     },
     phoneNumber: {
       type: String,
-      trim: true,
-    },
-    message: {
-      type: String,
-      required: [true, "Message is required"],
+      required: [true, "Phone number is required"],
       trim: true,
     },
     status: {
       type: String,
-      enum: ["new", "contacted", "converted", "archived"],
+      enum: ["new", "contacted", "converted", "archived", "updated"],
       default: "new",
+    },
+    updateCount: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
   },
   { timestamps: true }
 );
 
-// Index for status (for filtering)
 leadSchema.index({ status: 1 });
-
-// Index for createdAt (for date filtering and sorting)
 leadSchema.index({ createdAt: -1 });
-
-// Index for country (for filtering)
 leadSchema.index({ country: 1 });
-
-// Index for className (for filtering)
 leadSchema.index({ className: 1 });
 
-const Lead = mongoose.models.Lead || mongoose.model("Lead", leadSchema);
+if (mongoose.models?.Lead) {
+  delete mongoose.models.Lead;
+}
+if (mongoose.modelSchemas?.Lead) {
+  delete mongoose.modelSchemas.Lead;
+}
+
+const Lead = mongoose.model("Lead", leadSchema);
 
 export default Lead;
 

@@ -7,12 +7,10 @@ import {
   errorResponse,
   handleApiError,
 } from "@/utils/apiResponse";
-import { requireAuth, requireUserManagement } from "@/middleware/authMiddleware";
+import { requireAuth } from "@/middleware/authMiddleware";
 
-// ✅ GET: Fetch all leads with pagination and filters
 export async function GET(request) {
   try {
-    // Check authentication (all authenticated users can view leads)
     const authCheck = await requireAuth(request);
     if (authCheck.error) {
       return NextResponse.json(authCheck, { status: authCheck.status || 401 });
@@ -21,10 +19,7 @@ export async function GET(request) {
     await connectDB();
     const { searchParams } = new URL(request.url);
 
-    // Parse pagination
     const { page, limit, skip } = parsePagination(searchParams);
-
-    // Get filters
     const countryFilter = searchParams.get("country");
     const classNameFilter = searchParams.get("className");
     const statusFilter = searchParams.get("status");
@@ -32,7 +27,6 @@ export async function GET(request) {
     const dateFrom = searchParams.get("dateFrom");
     const dateTo = searchParams.get("dateTo");
 
-    // Build query
     const query = {};
 
     if (countryFilter) {
@@ -55,26 +49,21 @@ export async function GET(request) {
       ];
     }
 
-    // Date range filter
     if (dateFrom || dateTo) {
       query.createdAt = {};
       if (dateFrom) {
         query.createdAt.$gte = new Date(dateFrom);
       }
       if (dateTo) {
-        // Add one day to include the entire end date
         const endDate = new Date(dateTo);
         endDate.setHours(23, 59, 59, 999);
         query.createdAt.$lte = endDate;
       }
     }
 
-    // Get total count
     const total = await Lead.countDocuments(query);
-
-    // Fetch leads with pagination
     const leads = await Lead.find(query)
-      .sort({ createdAt: -1 }) // Newest first
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
@@ -87,65 +76,84 @@ export async function GET(request) {
   }
 }
 
-// ✅ POST: Create new lead (public, no authentication required)
 export async function POST(request) {
   try {
     await connectDB();
     const body = await request.json();
 
-    // Validate required fields
-    if (!body.name || body.name.trim() === "") {
+    if (!body.name?.trim()) {
       return errorResponse("Name is required", 400);
     }
 
-    if (!body.email || body.email.trim() === "") {
+    if (!body.email?.trim()) {
       return errorResponse("Email is required", 400);
     }
 
-    // Validate email format
-    const emailRegex = /^\S+@\S+\.\S+$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(body.email)) {
-      return errorResponse("Please provide a valid email", 400);
+      return errorResponse("Please provide a valid email address", 400);
     }
 
-    if (!body.country || body.country.trim() === "") {
+    if (!body.country?.trim()) {
       return errorResponse("Country is required", 400);
     }
 
-    if (!body.className || body.className.trim() === "") {
+    if (!body.className?.trim()) {
       return errorResponse("Class name is required", 400);
     }
 
-    if (!body.message || body.message.trim() === "") {
-      return errorResponse("Message is required", 400);
+    if (!body.phoneNumber?.trim()) {
+      return errorResponse("Phone number is required", 400);
     }
 
-    // Check if lead with this email already exists
-    const existingLead = await Lead.findOne({
-      email: body.email.toLowerCase().trim(),
-    });
+    const email = body.email.toLowerCase().trim();
+    const existingLead = await Lead.findOne({ email });
+
+    let lead;
+    let message;
+    let isUpdated = false;
+    let previousStatus = null;
 
     if (existingLead) {
-      return errorResponse("Lead with this email already exists", 409);
+      previousStatus = existingLead.status;
+      const newUpdateCount = (existingLead.updateCount || 0) + 1;
+
+      lead = await Lead.findOneAndUpdate(
+        { email },
+        {
+          name: body.name.trim(),
+          country: body.country.trim(),
+          className: body.className.trim(),
+          phoneNumber: body.phoneNumber.trim(),
+          status: "updated",
+          updateCount: newUpdateCount,
+        },
+        { new: true, runValidators: true }
+      );
+
+      message = `Lead updated successfully. This is update #${newUpdateCount}.`;
+      isUpdated = true;
+    } else {
+      lead = await Lead.create({
+        name: body.name.trim(),
+        email,
+        country: body.country.trim(),
+        className: body.className.trim(),
+        phoneNumber: body.phoneNumber.trim(),
+        status: "new",
+        updateCount: 0,
+      });
+      message = "Lead submitted successfully";
     }
 
-    // Create new lead
-    const newLead = await Lead.create({
-      name: body.name.trim(),
-      email: body.email.toLowerCase().trim(),
-      country: body.country.trim(),
-      className: body.className.trim(),
-      phoneNumber: body.phoneNumber ? body.phoneNumber.trim() : undefined,
-      message: body.message.trim(),
-      status: "new", // Default status
-    });
+    const responseData = {
+      ...lead.toObject(),
+      isUpdated,
+      previousStatus: previousStatus || null,
+    };
 
-    return successResponse(newLead, "Lead submitted successfully", 201);
+    return successResponse(responseData, message, isUpdated ? 200 : 201);
   } catch (error) {
-    // Handle duplicate email error
-    if (error.code === 11000) {
-      return errorResponse("Lead with this email already exists", 409);
-    }
     return handleApiError(error, "Failed to submit lead");
   }
 }

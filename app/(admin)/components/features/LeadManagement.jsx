@@ -324,6 +324,7 @@ const LeadManagement = () => {
                 >
                   <option value="all">All Status</option>
                   <option value="new">New</option>
+                  <option value="updated">Updated</option>
                   <option value="contacted">Contacted</option>
                   <option value="converted">Converted</option>
                   <option value="archived">Archived</option>
@@ -634,6 +635,8 @@ const LeadManagement = () => {
               className={`mt-1 inline-block px-3 py-1 rounded-full text-xs font-medium ${
                 selectedLead.status === "new"
                   ? "bg-blue-100 text-blue-700"
+                  : selectedLead.status === "updated"
+                  ? "bg-purple-100 text-purple-700"
                   : selectedLead.status === "contacted"
                   ? "bg-yellow-100 text-yellow-700"
                   : selectedLead.status === "converted"
@@ -641,7 +644,9 @@ const LeadManagement = () => {
                   : "bg-gray-100 text-gray-700"
               }`}
             >
-              {selectedLead.status || "new"}
+              {selectedLead.status === "updated"
+                ? `Updated, ${selectedLead.updateCount > 0 ? selectedLead.updateCount : 1} time${(selectedLead.updateCount > 0 ? selectedLead.updateCount : 1) === 1 ? '' : 's'}`
+                : selectedLead.status || "new"}
             </span>
           </div>
 
@@ -659,14 +664,6 @@ const LeadManagement = () => {
               })}
             </p>
           </div>
-        </div>
-
-        {/* Message Box */}
-        <div>
-          <label className="text-sm font-medium text-gray-600">Message</label>
-          <p className="mt-2 text-sm text-gray-900 whitespace-pre-wrap p-4 rounded-xl bg-gray-50 border">
-            {selectedLead.message}
-          </p>
         </div>
       </div>
 

@@ -19,17 +19,17 @@ const LeadTable = ({ leads, onView, onDelete }) => {
     });
   };
 
-  // Helper function to truncate text
-  const truncateText = (text, maxLength = 50) => {
-    if (!text) return "";
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + "...";
-  };
-
   // Helper function to get status badge color
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (status, updateCount = 0) => {
     const statusConfig = {
       new: { bg: "bg-blue-100", text: "text-blue-800", label: "New" },
+      updated: {
+        bg: "bg-purple-100",
+        text: "text-purple-800",
+        label: updateCount > 0
+          ? `Updated, ${updateCount} time${updateCount === 1 ? "" : "s"}`
+          : "Updated, 1 time",
+      },
       contacted: {
         bg: "bg-yellow-100",
         text: "text-yellow-800",
@@ -92,9 +92,6 @@ const LeadTable = ({ leads, onView, onDelete }) => {
               <th className="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-36">
                 Phone Number
               </th>
-              <th className="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Message
-              </th>
               <th className="px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                 Status
               </th>
@@ -133,16 +130,8 @@ const LeadTable = ({ leads, onView, onDelete }) => {
                     )}
                   </div>
                 </td>
-                <td className="px-2 py-1">
-                  <div
-                    className="text-sm text-gray-600 max-w-xs truncate"
-                    title={lead.message}
-                  >
-                    {truncateText(lead.message, 50)}
-                  </div>
-                </td>
                 <td className="px-2 py-1 whitespace-nowrap w-24">
-                  {getStatusBadge(lead.status || "new")}
+                  {getStatusBadge(lead.status || "new", lead.updateCount || 0)}
                 </td>
                 <td className="px-2 py-1 whitespace-nowrap w-40">
                   <div className="text-sm text-gray-500">
@@ -203,8 +192,8 @@ const LeadTable = ({ leads, onView, onDelete }) => {
                   </h3>
                   <div className="text-sm text-gray-600 mb-1">{lead.email}</div>
                 </div>
-                <div className="flex-shrink-0">
-                  {getStatusBadge(lead.status || "new")}
+                <div className="shrink-0">
+                  {getStatusBadge(lead.status || "new", lead.updateCount || 0)}
                 </div>
               </div>
 
@@ -224,10 +213,6 @@ const LeadTable = ({ leads, onView, onDelete }) => {
                     <span className="text-gray-900">{lead.phoneNumber}</span>
                   </div>
                 )}
-                <div>
-                  <span className="text-gray-500 font-medium">Message:</span>
-                  <p className="text-gray-900 mt-1">{lead.message}</p>
-                </div>
                 <div className="flex items-center gap-1">
                   <span className="text-gray-500 font-medium">Date:</span>
                   <span className="text-gray-900">
