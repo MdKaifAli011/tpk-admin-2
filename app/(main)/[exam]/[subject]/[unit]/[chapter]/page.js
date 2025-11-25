@@ -24,7 +24,7 @@ import {
   getPreviousChapter,
 } from "../../../../lib/hierarchicalNavigation";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 const ChapterPage = async ({ params }) => {
@@ -57,10 +57,7 @@ const ChapterPage = async ({ params }) => {
   const subject = fullSubjectData || foundSubject;
 
   // Fetch units for this subject
-  const fetchedUnits = await fetchUnitsBySubject(
-    foundSubject._id,
-    examIdValue
-  );
+  const fetchedUnits = await fetchUnitsBySubject(foundSubject._id, examIdValue);
 
   // Find unit by slug
   const foundUnit = findByIdOrSlug(fetchedUnits, unitSlug);
@@ -182,6 +179,11 @@ const ChapterPage = async ({ params }) => {
           chapterId={chapter._id}
           entityName={chapter.name}
           entityType="chapter"
+          topics={fetchedTopics}
+          examSlug={examSlug}
+          subjectSlug={subjectSlugValue}
+          unitSlug={unitSlugValue}
+          chapterSlug={chapterSlugValue}
         />
 
         {/* Topics Section */}
@@ -189,7 +191,8 @@ const ChapterPage = async ({ params }) => {
           <div className="flex items-center gap-3 mb-6">
             <FaBook className="text-xl text-indigo-600" />
             <h2 className="text-xl font-semibold text-gray-900">
-              {fetchedExam.name} &gt; {subject.name} &gt; {unit.name} &gt; {chapter.name} Topics
+              {fetchedExam.name} &gt; {subject.name} &gt; {unit.name} &gt;{" "}
+              {chapter.name} Topics
             </h2>
           </div>
 

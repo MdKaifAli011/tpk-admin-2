@@ -35,6 +35,7 @@ const TabsClient = ({
   subTopicSlug,
   subtopics = [],
   chapters = [],
+  topics = [],
   unitName,
 }) => {
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -155,10 +156,9 @@ const TabsClient = ({
                             >
                               {chapter.name}
                             </h4>
-                           
                           </div>
                           {chapterUrl && (
-                            <div className="ml-3 flex-shrink-0 text-indigo-600">
+                            <div className="ml-3 shrink-0 text-indigo-600">
                               <svg
                                 className="w-5 h-5"
                                 fill="none"
@@ -184,6 +184,67 @@ const TabsClient = ({
                       </Link>
                     ) : (
                       <div key={chapter._id || index}>{ChapterCard}</div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Topics Grid - for chapter type */}
+            {entityType === "chapter" && topics && topics.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Topics
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {topics.map((topic, index) => {
+                    const topicSlugValue = topic.slug || createSlug(topic.name);
+                    const topicUrl =
+                      examSlug && subjectSlug && unitSlug && chapterSlug
+                        ? `/${examSlug}/${subjectSlug}/${unitSlug}/${chapterSlug}/${topicSlugValue}`
+                        : null;
+
+                    const TopicCard = (
+                      <div className="bg-white rounded-lg p-4 border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all shadow-sm hover:shadow-md">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <h4
+                              className={`font-medium text-gray-900 text-base ${
+                                topicUrl
+                                  ? "hover:text-indigo-600 transition-colors cursor-pointer"
+                                  : ""
+                              }`}
+                            >
+                              {topic.name}
+                            </h4>
+                          </div>
+                          {topicUrl && (
+                            <div className="ml-3 shrink-0 text-indigo-600">
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 5l7 7-7 7"
+                                />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+
+                    return topicUrl ? (
+                      <Link key={topic._id || index} href={topicUrl}>
+                        {TopicCard}
+                      </Link>
+                    ) : (
+                      <div key={topic._id || index}>{TopicCard}</div>
                     );
                   })}
                 </div>
