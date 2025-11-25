@@ -30,6 +30,13 @@ const subjectDetailsSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    // Status: publish, unpublish, draft
+    status: {
+      type: String,
+      enum: ["publish", "unpublish", "draft"],
+      default: "draft",
+      trim: true,
+    },
   },
   { timestamps: true }
 );

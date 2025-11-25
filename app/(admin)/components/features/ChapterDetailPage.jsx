@@ -1,12 +1,12 @@
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { FaArrowLeft, FaSave, FaEdit, FaLock } from "react-icons/fa";
 import { ToastContainer, useToast } from "../ui/Toast";
 import { LoadingSpinner } from "../ui/SkeletonLoader";
 import RichTextEditor from "../ui/RichTextEditor";
 import api from "@/lib/api";
 import { usePermissions, getPermissionMessage } from "../../hooks/usePermissions";
+import { FaArrowLeft } from "react-icons/fa";
 
 const ChapterDetailPage = () => {
   const params = useParams();
@@ -25,6 +25,7 @@ const ChapterDetailPage = () => {
     title: "",
     metaDescription: "",
     keywords: "",
+    status: "draft",
   });
   const { toasts, removeToast, success, error: showError } = useToast();
   const isFetchingRef = useRef(false);
@@ -50,6 +51,7 @@ const ChapterDetailPage = () => {
           title: "",
           metaDescription: "",
           keywords: "",
+          status: "draft",
         };
         
         setFormData({
@@ -58,6 +60,7 @@ const ChapterDetailPage = () => {
           title: details.title || "",
           metaDescription: details.metaDescription || "",
           keywords: details.keywords || "",
+          status: details.status || "draft",
         });
       } else setError(chapterRes.data?.message || "Failed to fetch chapter details");
     } catch (err) {
@@ -94,6 +97,7 @@ const ChapterDetailPage = () => {
           title: formData.title,
           metaDescription: formData.metaDescription,
           keywords: formData.keywords,
+          status: formData.status,
         }),
       ]);
       
@@ -114,7 +118,7 @@ const ChapterDetailPage = () => {
   if (isLoading)
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
-        <div className="text-center bg-white/70 backdrop-blur-xl rounded-2xl shadow-2xl p-12 border border-blue-100 animate-fadeInUp">
+        <div className="text-center bg-white/70 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-blue-100 animate-fadeInUp">
           <LoadingSpinner size="large" />
           <h3 className="text-xl font-bold text-gray-900 mt-6">
             Loading Chapter...
@@ -129,8 +133,7 @@ const ChapterDetailPage = () => {
   if (error)
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 to-pink-50">
-        <div className="text-center bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl p-10 border border-red-100 animate-fadeInUp">
-          <span className="text-3xl mb-4 inline-block">⚠️</span>
+        <div className="text-center bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl p-5 border border-red-100 animate-fadeInUp">
           <h3 className="text-xl font-bold text-gray-900 mb-2">
             Error Loading Chapter
           </h3>
@@ -148,8 +151,7 @@ const ChapterDetailPage = () => {
   if (!chapter)
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-        <div className="text-center bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl p-10 border border-gray-100 animate-fadeInUp">
-          <span className="text-3xl mb-4 inline-block">📘</span>
+        <div className="text-center bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl p-5 border border-gray-100 animate-fadeInUp">
           <h3 className="text-xl font-bold text-gray-900 mb-2">
             Chapter Not Found
           </h3>
@@ -171,16 +173,16 @@ const ChapterDetailPage = () => {
       <ToastContainer toasts={toasts} removeToast={removeToast} />
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl shadow-lg border border-blue-100 p-4 mb-8 flex justify-between items-center animate-fadeInUp">
-        <div className="flex items-center gap-4">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl shadow-lg border border-blue-100 px-4 py-3 mb-2 flex justify-between items-center animate-fadeInUp">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => router.back()}
-            className="text-gray-700 hover:text-gray-900 p-3 rounded-xl hover:bg-white/70 transition-all duration-200"
+            className="text-gray-700 hover:text-gray-900 p-2 rounded-xl hover:bg-white/70 transition-all duration-200"
           >
-            <FaArrowLeft className="w-5 h-5" />
+            <FaArrowLeft className="w-4 h-4" />
           </button>
           <div>
-            <h1 className="text-xl font-extrabold text-gray-900">
+            <h1 className="text-xl font-semibold text-gray-900">
               {isEditing ? "Edit Chapter" : chapter.name}
             </h1>
             <p className="text-sm text-gray-600 mt-1">
@@ -198,11 +200,32 @@ const ChapterDetailPage = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Status Dropdown */}
+          <select
+            value={formData.status}
+            onChange={handleChange}
+            name="status"
+            disabled={!isEditing}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg border shadow-sm transition-all duration-200 ${
+              isEditing
+                ? "border-gray-300 bg-white text-gray-700 hover:border-blue-400 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                : "border-gray-200 bg-white/50 text-gray-500 cursor-not-allowed"
+            } ${
+              formData.status === "publish" ? "text-green-700" :
+              formData.status === "unpublish" ? "text-red-700" :
+              "text-gray-600"
+            }`}
+          >
+            <option value="draft">Draft</option>
+            <option value="publish">Publish</option>
+            <option value="unpublish">Unpublish</option>
+          </select>
+
           {isEditing ? (
             <>
               <button
                 onClick={() => setIsEditing(false)}
-                className="px-2 py-2 bg-white border border-gray-300 rounded-xl hover:shadow-md text-gray-800 font-semibold transition-all duration-200"
+                className="px-2 py-1.5 bg-white border border-gray-300 rounded-xl hover:shadow-md text-gray-800 text-sm font-semibold transition-all duration-200"
               >
                 Cancel
               </button>
@@ -210,22 +233,19 @@ const ChapterDetailPage = () => {
                 <button
                   onClick={handleSave}
                   disabled={isSaving}
-                  className="px-2 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:scale-105 hover:shadow-lg text-white rounded-xl font-semibold flex items-center gap-2 transition-all duration-200 disabled:opacity-50"
+                  className="px-2 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:scale-105 hover:shadow-lg text-white text-sm rounded-xl font-semibold flex items-center gap-2 transition-all duration-200 disabled:opacity-50"
                 >
                   {isSaving ? (
                     <LoadingSpinner size="small" />
-                  ) : (
-                    <FaSave className="w-4 h-4" />
-                  )}
+                  ) : null}
                   {isSaving ? "Saving..." : "Save Changes"}
                 </button>
               ) : (
                 <button
                   disabled
                   title={getPermissionMessage("edit", role)}
-                  className="px-2 py-2 bg-gray-300 text-gray-500 rounded-xl font-semibold flex items-center gap-2 cursor-not-allowed transition-all duration-200"
+                  className="px-2 py-1.5 bg-gray-300 text-gray-500 text-sm rounded-xl font-semibold flex items-center gap-2 cursor-not-allowed transition-all duration-200"
                 >
-                  <FaLock className="w-4 h-4" />
                   Save Changes
                 </button>
               )}
@@ -239,9 +259,8 @@ const ChapterDetailPage = () => {
                   showError(getPermissionMessage("edit", role));
                 }
               }}
-              className="px-2 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:scale-105 hover:shadow-lg text-white rounded-xl font-semibold flex items-center gap-2 transition-all duration-200"
+              className="px-2 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:scale-105 hover:shadow-lg text-white text-sm rounded-xl font-semibold flex items-center gap-2 transition-all duration-200"
             >
-              <FaEdit className="w-4 h-4" />
               Edit Chapter
             </button>
           ) : (
@@ -250,20 +269,18 @@ const ChapterDetailPage = () => {
               title={getPermissionMessage("edit", role)}
               className="px-2 py-2 bg-gray-300 text-gray-500 rounded-xl font-semibold flex items-center gap-2 cursor-not-allowed transition-all duration-200"
             >
-              <FaLock className="w-4 h-4" />
-              Edit Chapter
+                  Edit Chapter
             </button>
           )}
         </div>
       </div>
 
       {/* Content */}
-      <div className="space-y-8 animate-fadeInUp">
+      <div className="space-y-4 animate-fadeInUp">
         {/* Chapter Content */}
-        <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <span className="text-emerald-500 text-2xl">📘</span> Chapter
-            Content
+        <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-gray-100 p-4 hover:shadow-2xl transition-all duration-300">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Chapter Content
           </h2>
           <RichTextEditor
             value={formData.content}
@@ -275,12 +292,12 @@ const ChapterDetailPage = () => {
 
         {/* SEO Meta Section */}
         <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl border border-gray-100 p-8 hover:shadow-2xl transition-all duration-300">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <span className="text-orange-500 text-2xl">🔍</span> SEO Meta
+          <h3 className="text-2xl font-bold text-gray-900 mb-3">
+            SEO Meta
           </h3>
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Title
               </label>
               <input
@@ -290,7 +307,7 @@ const ChapterDetailPage = () => {
                 onChange={handleChange}
                 disabled={!isEditing}
                 placeholder="Enter page title for SEO..."
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed shadow-sm text-sm"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed shadow-sm text-sm"
               />
               <p className="text-xs text-gray-500 mt-1">
                 {formData.title.length}/60 characters
@@ -307,7 +324,7 @@ const ChapterDetailPage = () => {
                 onChange={handleChange}
                 disabled={!isEditing}
                 placeholder="keyword1, keyword2, keyword3"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed shadow-sm text-sm"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed shadow-sm text-sm"
               />
               <p className="text-xs text-gray-500 mt-1">
                 Separate keywords with commas
@@ -324,7 +341,7 @@ const ChapterDetailPage = () => {
                 disabled={!isEditing}
                 rows={3}
                 placeholder="Write a compelling meta description for SEO..."
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed shadow-sm text-sm"
+                className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed shadow-sm text-sm"
               />
               <p className="text-xs text-gray-500 mt-1">
                 {formData.metaDescription.length}/160 characters

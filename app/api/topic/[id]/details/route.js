@@ -45,6 +45,7 @@ export async function GET(request, { params }) {
         title: "",
         metaDescription: "",
         keywords: "",
+        status: "draft",
       };
     }
 
@@ -77,7 +78,7 @@ export async function PUT(request, { params }) {
       return notFoundResponse(ERROR_MESSAGES.TOPIC_NOT_FOUND);
     }
 
-    const { content, title, metaDescription, keywords } = body;
+    const { content, title, metaDescription, keywords, status } = body;
 
     // Prepare update data
     const updateData = {
@@ -86,6 +87,7 @@ export async function PUT(request, { params }) {
       title: title || "",
       metaDescription: metaDescription || "",
       keywords: keywords || "",
+      status: status || "draft",
     };
 
     // Use upsert to create or update
