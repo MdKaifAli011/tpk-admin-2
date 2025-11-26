@@ -192,18 +192,18 @@ const SubTopicPage = async ({ params }) => {
 
   return (
     <MainLayout>
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Header */}
-        <section className="bg-linear-to-b from-purple-50/40 via-white to-purple-50/30 border border-purple-100 rounded-xl p-5">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <section className="bg-linear-to-b from-purple-50/40 via-white to-purple-50/30 border border-purple-100 rounded-xl p-4 sm:p-5">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <FaFileAlt className="text-2xl text-indigo-600" />
+              <div className="flex items-center gap-2.5 mb-1.5">
+                <FaFileAlt className="text-xl text-indigo-600" />
                 <div>
-                  <h1 className="text-2xl font-bold text-indigo-900">
+                  <h1 className="text-xl sm:text-2xl font-bold text-indigo-900">
                     {subTopic.name}
                   </h1>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-xs sm:text-sm text-gray-600 mt-1">
                     {fetchedExam.name} &gt; {subject.name} &gt; {unit.name} &gt;{" "}
                     {chapter.name} &gt; {topic.name} &gt; {subTopic.name}
                   </p>
@@ -213,10 +213,10 @@ const SubTopicPage = async ({ params }) => {
 
             {/* Progress */}
             <div className="text-right">
-              <p className="text-xs text-gray-500 mb-1">Sub Topic Progress</p>
-              <div className="flex items-center gap-3">
-                <span className="font-semibold text-gray-700">0%</span>
-                <div className="w-28 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <p className="text-xs text-gray-500 mb-1.5">Sub Topic Progress</p>
+              <div className="flex items-center gap-2.5">
+                <span className="font-semibold text-sm text-gray-700">0%</span>
+                <div className="w-24 sm:w-28 h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-blue-500 transition-all duration-300"
                     style={{ width: "0%" }}

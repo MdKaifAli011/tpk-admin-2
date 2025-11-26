@@ -90,30 +90,30 @@ const SubjectPage = async ({ params }) => {
 
   return (
     <MainLayout>
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Header */}
-        <section className="bg-linear-to-b from-purple-50/40 via-white to-purple-50/30 border border-purple-100 rounded-xl p-5 sm:p-6 md:p-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
+        <section className="bg-linear-to-b from-purple-50/40 via-white to-purple-50/30 border border-purple-100 rounded-xl p-4 sm:p-5">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
             <div className="flex-1 w-full">
-              <div className="flex items-center gap-3 mb-2">
-                <FaGraduationCap className="text-2xl text-indigo-600" />
-                <h1 className="text-2xl font-bold text-indigo-900">
+              <div className="flex items-center gap-2.5 mb-1.5">
+                <FaGraduationCap className="text-xl text-indigo-600" />
+                <h1 className="text-xl sm:text-2xl font-bold text-indigo-900">
                   {subject.name}
                 </h1>
               </div>
-              <p className="text-sm text-gray-600 ml-0 md:ml-11">
+              <p className="text-xs sm:text-sm text-gray-600 ml-0 md:ml-9">
                 {fetchedExam.name} &gt; {subject.name}
               </p>
             </div>
 
             {/* Progress */}
             <div className="w-full md:w-auto text-left md:text-right">
-              <p className="text-xs text-gray-500 mb-2 md:mb-1 uppercase tracking-wide">
+              <p className="text-xs text-gray-500 mb-1.5 uppercase tracking-wide">
                 My Preparation
               </p>
-              <div className="flex items-center gap-3 md:justify-end">
-                <span className="font-semibold text-gray-700">0%</span>
-                <div className="w-full max-w-[160px] h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div className="flex items-center gap-2.5 md:justify-end">
+                <span className="font-semibold text-sm text-gray-700">0%</span>
+                <div className="w-full max-w-[140px] sm:max-w-[160px] h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-blue-500 transition-all duration-300"
                     style={{ width: "0%" }}

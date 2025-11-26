@@ -754,7 +754,7 @@ const TabsClient = ({
   };
 
   return (
-    <section className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+    <section className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
       {/* Tab Navigation */}
       <nav className="flex overflow-x-auto sm:overflow-visible border-b border-gray-200 bg-gray-50">
         <div className="flex min-w-max sm:min-w-0 w-full justify-start sm:justify-around">
@@ -764,7 +764,7 @@ const TabsClient = ({
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`relative px-4 sm:px-5 py-2.5 sm:py-3 text-sm sm:text-base font-medium whitespace-nowrap transition-colors border-b-2 ${
+                className={`relative px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${
                   isActive
                     ? "text-indigo-600 border-indigo-600 bg-white"
                     : "text-gray-500 hover:text-gray-700 border-transparent"
