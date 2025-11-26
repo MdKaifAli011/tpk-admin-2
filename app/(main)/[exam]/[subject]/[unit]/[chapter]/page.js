@@ -2,10 +2,10 @@ import React from "react";
 import { notFound } from "next/navigation";
 import MainLayout from "../../../../layout/MainLayout";
 import { FaBook } from "react-icons/fa";
-import ListItem from "../../../../components/ListItem";
 import TabsClient from "../../../../components/TabsClient";
 import NavigationClient from "../../../../components/NavigationClient";
-import { ERROR_MESSAGES } from "@/constants";
+import ChaptersSectionClient from "../../../../components/ChaptersSectionClient";
+import UnitProgressClient from "../../../../components/UnitProgressClient";
 import {
   fetchExamById,
   fetchSubjectsByExam,
@@ -155,18 +155,7 @@ const ChapterPage = async ({ params }) => {
             </div>
 
             {/* Progress */}
-            <div className="text-right">
-              <p className="text-xs text-gray-500 mb-1.5">Chapter Progress</p>
-              <div className="flex items-center gap-2.5">
-                <span className="font-semibold text-sm text-gray-700">0%</span>
-                <div className="w-24 sm:w-28 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-blue-500 transition-all duration-300"
-                    style={{ width: "0%" }}
-                  ></div>
-                </div>
-              </div>
-            </div>
+            <UnitProgressClient unitId={unit._id} initialProgress={0} />
           </div>
         </section>
 
@@ -186,42 +175,17 @@ const ChapterPage = async ({ params }) => {
           chapterSlug={chapterSlugValue}
         />
 
-        {/* Topics Section */}
-        <section className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 md:p-8">
-          <div className="flex items-center gap-3 mb-6">
-            <FaBook className="text-xl text-indigo-600" />
-            <h2 className="text-xl font-semibold text-gray-900">
-              {fetchedExam.name} &gt; {subject.name} &gt; {unit.name} &gt;{" "}
-              {chapter.name} Topics
-            </h2>
-          </div>
-
-          <div className="space-y-3">
-            {fetchedTopics.length > 0 ? (
-              fetchedTopics.map((topic, index) => {
-                const topicSlug = topic.slug || createSlug(topic.name);
-                return (
-                  <ListItem
-                    key={topic._id || index}
-                    item={{
-                      name: topic.name,
-                      weightage: topic.weightage || "20%",
-                      engagement: topic.engagement || "2.2K",
-                      isCompleted: topic.isCompleted || false,
-                      progress: topic.progress || 0,
-                    }}
-                    index={index}
-                    href={`/${examSlug}/${subjectSlugValue}/${unitSlugValue}/${chapterSlugValue}/${topicSlug}`}
-                  />
-                );
-              })
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                No topics available for this chapter.
-              </div>
-            )}
-          </div>
-        </section>
+        {/* Chapters Section */}
+        <ChaptersSectionClient
+          chapters={fetchedChapters}
+          unitId={unit._id}
+          examSlug={examSlug}
+          subjectSlug={subjectSlugValue}
+          unitSlug={unitSlugValue}
+          examName={fetchedExam.name}
+          subjectName={subject.name}
+          unitName={unit.name}
+        />
 
         {/* Navigation */}
         <NavigationClient

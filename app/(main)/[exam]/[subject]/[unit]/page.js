@@ -6,6 +6,7 @@ import TabsClient from "../../../components/TabsClient";
 import NavigationClient from "../../../components/NavigationClient";
 import ChaptersSectionClient from "../../../components/ChaptersSectionClient";
 import UnitProgressClient from "../../../components/UnitProgressClient";
+import UnitCompletionTracker from "../../../components/UnitCompletionTracker";
 import { ERROR_MESSAGES } from "@/constants";
 import {
   fetchExamById,
@@ -168,6 +169,9 @@ const UnitPage = async ({ params }) => {
           prevNav={prevNav}
           nextNav={nextNav}
         />
+
+        {/* Unit Completion Tracker */}
+        <UnitCompletionTracker unitId={unit._id} unitName={unit.name} />
       </div>
     </MainLayout>
   );

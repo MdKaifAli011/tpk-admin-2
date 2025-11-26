@@ -46,9 +46,17 @@ const UnitProgressClient = ({ unitId, initialProgress = 0 }) => {
 
     // Listen for custom progress-updated event
     const handleProgressUpdate = (event) => {
-      if (event.detail.unitId === unitId) {
+      if (event.detail?.unitId === unitId) {
         setProgress(event.detail.unitProgress);
+      } else {
+        // Also recalculate if event doesn't have unitId (might be from chapters)
+        calculateProgress();
       }
+    };
+
+    // Listen for chapterProgressUpdate event
+    const handleChapterProgressUpdate = () => {
+      calculateProgress();
     };
 
     // Listen for storage events (from other tabs/windows)
@@ -59,6 +67,7 @@ const UnitProgressClient = ({ unitId, initialProgress = 0 }) => {
     };
 
     window.addEventListener("progress-updated", handleProgressUpdate);
+    window.addEventListener("chapterProgressUpdate", handleChapterProgressUpdate);
     window.addEventListener("storage", handleStorageChange);
 
     // Poll for changes as backup (since storage event doesn't fire in same tab)
@@ -66,6 +75,7 @@ const UnitProgressClient = ({ unitId, initialProgress = 0 }) => {
 
     return () => {
       window.removeEventListener("progress-updated", handleProgressUpdate);
+      window.removeEventListener("chapterProgressUpdate", handleChapterProgressUpdate);
       window.removeEventListener("storage", handleStorageChange);
       clearInterval(interval);
     };

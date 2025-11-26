@@ -4,7 +4,8 @@ import MainLayout from "../../../../../../../layout/MainLayout";
 import { FaBookOpen } from "react-icons/fa";
 import TabsClient from "../../../../../../../components/TabsClient";
 import NavigationClient from "../../../../../../../components/NavigationClient";
-import { ERROR_MESSAGES } from "@/constants";
+import ChaptersSectionClient from "../../../../../../../components/ChaptersSectionClient";
+import UnitProgressClient from "../../../../../../../components/UnitProgressClient";
 import {
   fetchExamById,
   fetchSubjectsByExam,
@@ -213,18 +214,7 @@ const DefinitionPage = async ({ params }) => {
             </div>
 
             {/* Progress */}
-            <div className="text-right">
-              <p className="text-xs text-gray-500 mb-1.5">Definition Progress</p>
-              <div className="flex items-center gap-2.5">
-                <span className="font-semibold text-sm text-gray-700">0%</span>
-                <div className="w-24 sm:w-28 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-blue-500 transition-all duration-300"
-                    style={{ width: "0%" }}
-                  ></div>
-                </div>
-              </div>
-            </div>
+            <UnitProgressClient unitId={unit._id} initialProgress={0} />
           </div>
         </section>
 
@@ -247,6 +237,18 @@ const DefinitionPage = async ({ params }) => {
           chapterSlug={chapterSlugValue}
           topicSlug={topicSlugValue}
           subTopicSlug={subTopicSlugValue}
+        />
+
+        {/* Chapters Section */}
+        <ChaptersSectionClient
+          chapters={fetchedChapters}
+          unitId={unit._id}
+          examSlug={examSlug}
+          subjectSlug={subjectSlugValue}
+          unitSlug={unitSlugValue}
+          examName={fetchedExam.name}
+          subjectName={subject.name}
+          unitName={unit.name}
         />
 
         {/* Navigation */}

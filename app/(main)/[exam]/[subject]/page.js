@@ -1,11 +1,12 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import MainLayout from "../../layout/MainLayout";
-import { FaBook, FaGraduationCap, FaChartLine, FaTrophy } from "react-icons/fa";
-import ListItem from "../../components/ListItem";
+import { FaGraduationCap } from "react-icons/fa";
 import TabsClient from "../../components/TabsClient";
 import NavigationClient from "../../components/NavigationClient";
-import { ERROR_MESSAGES } from "@/constants";
+import UnitsSectionClient from "../../components/UnitsSectionClient";
+import SubjectProgressClient from "../../components/SubjectProgressClient";
+import SubjectCompletionTracker from "../../components/SubjectCompletionTracker";
 import {
   fetchExamById,
   fetchSubjectsByExam,
@@ -107,20 +108,11 @@ const SubjectPage = async ({ params }) => {
             </div>
 
             {/* Progress */}
-            <div className="w-full md:w-auto text-left md:text-right">
-              <p className="text-xs text-gray-500 mb-1.5 uppercase tracking-wide">
-                My Preparation
-              </p>
-              <div className="flex items-center gap-2.5 md:justify-end">
-                <span className="font-semibold text-sm text-gray-700">0%</span>
-                <div className="w-full max-w-[140px] sm:max-w-[160px] h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-blue-500 transition-all duration-300"
-                    style={{ width: "0%" }}
-                  ></div>
-                </div>
-              </div>
-            </div>
+            <SubjectProgressClient
+              subjectId={subject._id}
+              unitIds={fetchedUnits.map((unit) => unit._id)}
+              initialProgress={0}
+            />
           </div>
         </section>
 
@@ -138,54 +130,14 @@ const SubjectPage = async ({ params }) => {
         />
 
         {/* Units Section */}
-        <section className="bg-transparent">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
-              <div className="flex items-start gap-2">
-                <FaBook className="text-lg sm:text-xl text-indigo-600" />
-                <div>
-                  <h2 className="text-base sm:text-lg font-semibold text-gray-900">
-                    {fetchedExam.name} &gt; {subject.name} Units
-                  </h2>
-                  <p className="mt-1 text-xs sm:text-sm text-gray-500">
-                    Review each unit, its weightage, and completion progress.
-                  </p>
-                </div>
-              </div>
-              <div className="mt-3 hidden sm:grid sm:grid-cols-[minmax(0,1fr)_140px_180px] gap-6 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                <span className="text-left">Unit</span>
-                <span className="text-center">Status</span>
-                <span className="text-center">Progress</span>
-              </div>
-            </div>
-
-            {fetchedUnits.length > 0 ? (
-              <div className="divide-y divide-gray-100">
-                {fetchedUnits.map((unit, index) => {
-                  const unitSlug = unit.slug || createSlug(unit.name);
-                  return (
-                    <ListItem
-                      key={unit._id}
-                      item={{
-                        name: unit.name,
-                        weightage: unit.weightage || "20%",
-                        engagement: unit.engagement || "2.2K",
-                        isCompleted: unit.isCompleted || false,
-                        progress: unit.progress || 0,
-                      }}
-                      index={index}
-                      href={`/${examSlug}/${subjectSlugValue}/${unitSlug}`}
-                    />
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="px-4 sm:px-6 py-10 text-center text-gray-500">
-                No units available for this subject.
-              </div>
-            )}
-          </div>
-        </section>
+        <UnitsSectionClient
+          units={fetchedUnits}
+          subjectId={subject._id}
+          examSlug={examSlug}
+          subjectSlug={subjectSlugValue}
+          examName={fetchedExam.name}
+          subjectName={subject.name}
+        />
 
         {/* Navigation */}
         <NavigationClient
@@ -193,6 +145,13 @@ const SubjectPage = async ({ params }) => {
           backLabel={`Back to ${fetchedExam.name}`}
           prevNav={prevNav}
           nextNav={nextNav}
+        />
+
+        {/* Subject Completion Tracker */}
+        <SubjectCompletionTracker
+          subjectId={subject._id}
+          subjectName={subject.name}
+          unitIds={fetchedUnits.map((unit) => unit._id)}
         />
       </div>
     </MainLayout>
