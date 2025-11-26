@@ -31,9 +31,11 @@ const TextEllipsis = ({
     ? truncateText(children, truncateChars)
     : children;
 
+  const maxWidthClass = maxW === "max-w-full" ? "w-full" : maxW;
+  
   return (
     <span
-      className={`truncate whitespace-nowrap overflow-hidden block ${maxW} ${fontSize} ${className}`}
+      className={`truncate whitespace-nowrap overflow-hidden block ${maxWidthClass} ${fontSize} ${className}`}
       title={typeof children === "string" ? children : undefined}
       style={style}
     >

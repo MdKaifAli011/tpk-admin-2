@@ -395,15 +395,15 @@ export default function Sidebar({ isOpen = true, onClose }) {
 
   // render helpers
   const renderLoading = () => (
-    <div className="px-2.5 sm:px-3 py-3 sm:py-4 space-y-2">
+    <div className="px-2 py-2 space-y-1.5">
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="h-3 sm:h-3.5 rounded-md bg-gray-200/70 animate-pulse" />
+        <div key={i} className="h-3 rounded-md bg-gray-200/70 animate-pulse" />
       ))}
     </div>
   );
 
   const renderEmpty = () => (
-    <div className="px-2.5 sm:px-3 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 text-center">
+    <div className="px-2 py-2 text-xs text-gray-600 text-center">
       {activeExam
         ? "No navigation data available for this exam."
         : "Select an exam to view its content."}
@@ -467,9 +467,9 @@ export default function Sidebar({ isOpen = true, onClose }) {
         aria-label="Exam navigation sidebar"
         style={{ boxShadow: "0 8px 24px rgba(15, 23, 42, 0.12)" }}
       >
-        <div className="flex h-full flex-col overflow-y-auto overflow-x-hidden p-2.5 sm:p-3 min-h-0 min-w-[280px] sm:min-w-[300px] max-w-[280px] sm:max-w-[300px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="flex h-full flex-col overflow-y-auto overflow-x-hidden p-2 sm:p-2.5 min-h-0 min-w-[280px] sm:min-w-[300px] max-w-[280px] sm:max-w-[300px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {/* Exam dropdown */}
-          <div className="mb-2.5 sm:mb-3">
+          <div className="mb-2">
             <ExamDropdown
               exams={exams}
               activeExamId={activeExamId}
@@ -484,16 +484,16 @@ export default function Sidebar({ isOpen = true, onClose }) {
 
           {/* Search */}
           {tree.length > 0 && (
-            <div className="mb-2.5 sm:mb-3">
+            <div className="mb-2">
               <div className="relative">
-                <FaSearch className="pointer-events-none absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm" />
+                <FaSearch className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="search"
                   aria-label="Search subjects, units, chapters, and topics"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search..."
-                  className="w-full rounded-lg border border-gray-200 bg-white px-7 sm:px-8 py-2 sm:py-2.5 text-sm sm:text-base text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/60 focus:border-blue-400 transition-all touch-manipulation"
+                  className="w-full rounded-lg border border-gray-200 bg-white px-7 py-1.5 text-xs sm:text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/60 focus:border-blue-400 transition-all touch-manipulation"
                 />
               </div>
             </div>
@@ -504,7 +504,7 @@ export default function Sidebar({ isOpen = true, onClose }) {
             {treeLoading && renderLoading()}
 
             {!treeLoading && error && (
-              <div className="px-2.5 sm:px-3 py-3 sm:py-4 text-xs sm:text-sm text-red-600 font-medium">
+              <div className="px-2 py-2 text-xs text-red-600 font-medium">
                 {error}
               </div>
             )}
