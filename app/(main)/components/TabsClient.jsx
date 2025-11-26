@@ -270,65 +270,111 @@ const TabsClient = ({
                 </div>
               )}
 
-            {/* SubTopics Grid - for topic type */}
+            {/* SubTopics List - for topic type */}
             {entityType === "topic" && subtopics && subtopics.length > 0 && (
-              <div className="mt-6">
-                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">
-                  Subtopics
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {subtopics.map((subTopic, index) => {
-                    const subTopicSlugValue =
-                      subTopic.slug || createSlug(subTopic.name);
-                    const subTopicUrl =
-                      examSlug &&
-                      subjectSlug &&
-                      unitSlug &&
-                      chapterSlug &&
-                      topicSlug
-                        ? `/${examSlug}/${subjectSlug}/${unitSlug}/${chapterSlug}/${topicSlug}/${subTopicSlugValue}`
-                        : null;
+              <>
+                <div className="mt-6">
+                  <div className="space-y-6">
+                    {subtopics.map((subTopic, index) => {
+                      const subTopicSlugValue =
+                        subTopic.slug || createSlug(subTopic.name);
+                      const subTopicUrl =
+                        examSlug &&
+                        subjectSlug &&
+                        unitSlug &&
+                        chapterSlug &&
+                        topicSlug
+                          ? `/${examSlug}/${subjectSlug}/${unitSlug}/${chapterSlug}/${topicSlug}/${subTopicSlugValue}`
+                          : null;
 
-                    const SubTopicCard = (
-                      <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all duration-200 p-4">
-                        <div className="flex items-center justify-between">
-                          <h4
-                            className="text-sm font-medium text-gray-900 line-clamp-1 flex-1"
-                            title={subTopic.name}
-                          >
-                            {subTopic.name}
-                          </h4>
-                          {subTopicUrl && (
-                            <div className="ml-3 shrink-0 text-indigo-600">
-                              <svg
-                                className="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M9 5l7 7-7 7"
-                                />
-                              </svg>
+                      return (
+                        <div key={subTopic._id || index} className="space-y-3">
+                          {subTopicUrl ? (
+                            <Link href={subTopicUrl}>
+                              <h3 className="text-xl sm:text-2xl font-bold text-indigo-700 hover:text-indigo-600 transition-colors cursor-pointer">
+                                {subTopic.name}
+                              </h3>
+                            </Link>
+                          ) : (
+                            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
+                              {subTopic.name}
+                            </h3>
+                          )}
+                          {subTopic.content && (
+                            <div className="prose prose-sm sm:prose max-w-none">
+                              <RichContent
+                                key={`subtopic-list-${
+                                  subTopic._id || index
+                                }-${activeTab}`}
+                                html={subTopic.content}
+                              />
                             </div>
                           )}
                         </div>
-                      </div>
-                    );
-
-                    return subTopicUrl ? (
-                      <Link key={subTopic._id || index} href={subTopicUrl}>
-                        {SubTopicCard}
-                      </Link>
-                    ) : (
-                      <div key={subTopic._id || index}>{SubTopicCard}</div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+
+                {/* SubTopics Grid - for topic type */}
+                <div className="mt-8">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Subtopics
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {subtopics.map((subTopic, index) => {
+                      const subTopicSlugValue =
+                        subTopic.slug || createSlug(subTopic.name);
+                      const subTopicUrl =
+                        examSlug &&
+                        subjectSlug &&
+                        unitSlug &&
+                        chapterSlug &&
+                        topicSlug
+                          ? `/${examSlug}/${subjectSlug}/${unitSlug}/${chapterSlug}/${topicSlug}/${subTopicSlugValue}`
+                          : null;
+
+                      const SubTopicCard = (
+                        <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all duration-200 p-4">
+                          <div className="flex items-center justify-between">
+                            <h4
+                              className="text-sm font-medium text-gray-900 line-clamp-1 flex-1"
+                              title={subTopic.name}
+                            >
+                              {subTopic.name}
+                            </h4>
+                            {subTopicUrl && (
+                              <div className="ml-3 shrink-0 text-indigo-600">
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 5l7 7-7 7"
+                                  />
+                                </svg>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+
+                      return subTopicUrl ? (
+                        <Link key={subTopic._id || index} href={subTopicUrl}>
+                          {SubTopicCard}
+                        </Link>
+                      ) : (
+                        <div key={subTopic._id || index}>{SubTopicCard}</div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
             )}
 
             {/* Chapters Grid - for unit type */}
@@ -523,20 +569,14 @@ const TabsClient = ({
                             : null;
 
                         const DefinitionCard = (
-                          <div className="bg-white rounded-lg p-4 border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all shadow-sm hover:shadow-md">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1 min-w-0">
-                                <h4
-                                  className={`font-bold text-indigo-700 text-lg sm:text-xl ${
-                                    definitionUrl
-                                      ? "hover:text-indigo-600 transition-colors cursor-pointer"
-                                      : ""
-                                  }`}
-                                  title={definition.name}
-                                >
-                                  {definition.name}
-                                </h4>
-                              </div>
+                          <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all duration-200 p-4">
+                            <div className="flex items-center justify-between">
+                              <h4
+                                className="text-sm font-medium text-gray-900 line-clamp-1 flex-1"
+                                title={definition.name}
+                              >
+                                {definition.name}
+                              </h4>
                               {definitionUrl && (
                                 <div className="ml-3 shrink-0 text-indigo-600">
                                   <svg
