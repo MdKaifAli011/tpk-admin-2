@@ -2,9 +2,10 @@ import React from "react";
 import { notFound } from "next/navigation";
 import MainLayout from "../../../layout/MainLayout";
 import { FaBook } from "react-icons/fa";
-import ListItem from "../../../components/ListItem";
 import TabsClient from "../../../components/TabsClient";
 import NavigationClient from "../../../components/NavigationClient";
+import ChaptersSectionClient from "../../../components/ChaptersSectionClient";
+import UnitProgressClient from "../../../components/UnitProgressClient";
 import { ERROR_MESSAGES } from "@/constants";
 import {
   fetchExamById,
@@ -129,18 +130,7 @@ const UnitPage = async ({ params }) => {
             </div>
 
             {/* Progress */}
-            <div className="text-right">
-              <p className="text-xs text-gray-500 mb-1.5">Unit Progress</p>
-              <div className="flex items-center gap-2.5">
-                <span className="font-semibold text-sm text-gray-700">0%</span>
-                <div className="w-24 sm:w-28 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-blue-500 transition-all duration-300"
-                    style={{ width: "0%" }}
-                  ></div>
-                </div>
-              </div>
-            </div>
+            <UnitProgressClient unitId={unit._id} initialProgress={0} />
           </div>
         </section>
 
@@ -160,56 +150,16 @@ const UnitPage = async ({ params }) => {
         />
 
         {/* Chapters Section */}
-        <section className="bg-transparent">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
-              <div className="flex items-start gap-2">
-                <FaBook className="text-lg sm:text-xl text-indigo-600" />
-                <div>
-                  <h2 className="text-base sm:text-lg font-semibold text-gray-900">
-                    {fetchedExam.name} &gt; {subject.name} &gt; {unit.name}{" "}
-                    Chapters
-                  </h2>
-                  <p className="mt-1 text-xs sm:text-sm text-gray-500">
-                    Review your status and progress for each chapter in this
-                    unit.
-                  </p>
-                </div>
-              </div>
-              <div className="mt-3 hidden sm:grid sm:grid-cols-[minmax(0,1fr)_140px_180px] gap-6 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                <span className="text-left">Chapter</span>
-                <span className="text-center">Status</span>
-                <span className="text-center">Progress</span>
-              </div>
-            </div>
-
-            {fetchedChapters.length > 0 ? (
-              <div className="divide-y divide-gray-100">
-                {fetchedChapters.map((chapter, index) => {
-                  const chapterSlug = chapter.slug || createSlug(chapter.name);
-                  return (
-                    <ListItem
-                      key={chapter._id}
-                      item={{
-                        name: chapter.name,
-                        weightage: chapter.weightage || "20%",
-                        engagement: chapter.engagement || "2.2K",
-                        isCompleted: chapter.isCompleted || false,
-                        progress: chapter.progress || 0,
-                      }}
-                      index={index}
-                      href={`/${examSlug}/${subjectSlugValue}/${unitSlugValue}/${chapterSlug}`}
-                    />
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="px-4 sm:px-6 py-10 text-center text-gray-500">
-                No chapters available for this unit.
-              </div>
-            )}
-          </div>
-        </section>
+        <ChaptersSectionClient
+          chapters={fetchedChapters}
+          unitId={unit._id}
+          examSlug={examSlug}
+          subjectSlug={subjectSlugValue}
+          unitSlug={unitSlugValue}
+          examName={fetchedExam.name}
+          subjectName={subject.name}
+          unitName={unit.name}
+        />
 
         {/* Navigation */}
         <NavigationClient

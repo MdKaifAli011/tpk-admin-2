@@ -62,6 +62,7 @@ module.exports = {
         'fade-in': 'fadeIn 0.3s ease-in-out',
         'fade-in-scale': 'fadeInScale 0.3s ease-out',
         'slide-in-left': 'slideInLeft 0.4s ease-out',
+        'spin-slow': 'spin 3s linear infinite',
       },
       keyframes: {
         fadeIn: {
