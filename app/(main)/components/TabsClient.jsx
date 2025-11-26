@@ -37,6 +37,7 @@ const TabsClient = ({
   chapters = [],
   topics = [],
   unitName,
+  subjectsWithUnits = [],
 }) => {
   const [activeTab, setActiveTab] = useState(initialTab);
 
@@ -54,7 +55,7 @@ const TabsClient = ({
 
             <div className="prose prose-sm sm:prose max-w-none">
               {content ? (
-                <RichContent key={`overview-${activeTab}-${entityType}`} html={content} />
+                <RichContent html={content} />
               ) : (
                 <>
                   {entityType === "subject" ? (
@@ -80,6 +81,96 @@ const TabsClient = ({
                 </>
               )}
             </div>
+
+            {/* Subjects and Units Grid - only for exam type */}
+            {entityType === "exam" &&
+              subjectsWithUnits &&
+              subjectsWithUnits.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">
+                    Subjects & Units
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {subjectsWithUnits
+                      .filter(
+                        (subject) => subject.units && subject.units.length > 0
+                      )
+                      .map((subject, subjectIndex) => {
+                        const subjectSlugValue =
+                          subject.slug || createSlug(subject.name);
+                        const subjectUrl = examSlug
+                          ? `/${examSlug}/${subjectSlugValue}`
+                          : null;
+
+                        return (
+                          <div
+                            key={subject._id || subjectIndex}
+                            className="bg-white rounded-lg border border-gray-100 shadow-sm hover:shadow-md hover:border-gray-200 transition-all duration-300 flex flex-col overflow-hidden"
+                          >
+                            {/* Subject Header */}
+                            <div className="bg-linear-to-r from-indigo-600 to-purple-600 px-4 py-3.5">
+                              {subjectUrl ? (
+                                <Link href={subjectUrl}>
+                                  <div className="flex items-center justify-between gap-3">
+                                    <h4 className="text-sm font-semibold text-white line-clamp-1 flex-1">
+                                      {subject.name}
+                                    </h4>
+                                    <span className="bg-white/25 text-white text-xs font-medium px-2 py-0.5 rounded-md whitespace-nowrap shrink-0">
+                                      {subject.units.length}
+                                    </span>
+                                  </div>
+                                </Link>
+                              ) : (
+                                <div className="flex items-center justify-between gap-3">
+                                  <h4 className="text-sm font-semibold text-white line-clamp-1 flex-1">
+                                    {subject.name}
+                                  </h4>
+                                  <span className="bg-white/25 text-white text-xs font-medium px-2 py-0.5 rounded-md whitespace-nowrap shrink-0">
+                                    {subject.units.length}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Units List */}
+                            <div className="flex-1 px-4 py-3 space-y-1">
+                              {subject.units.map((unit, unitIndex) => {
+                                const unitSlugValue =
+                                  unit.slug || createSlug(unit.name);
+                                const unitUrl =
+                                  examSlug && subjectSlugValue
+                                    ? `/${examSlug}/${subjectSlugValue}/${unitSlugValue}`
+                                    : null;
+
+                                return (
+                                  <div key={unit._id || unitIndex}>
+                                    {unitUrl ? (
+                                      <Link href={unitUrl}>
+                                        <div className="flex items-center gap-2.5 py-2 px-2 -mx-2 rounded-md hover:bg-gray-50 transition-colors group">
+                                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0"></div>
+                                          <p className="text-sm font-medium text-gray-700 group-hover:text-indigo-600 transition-colors line-clamp-1 flex-1">
+                                            {unit.name}
+                                          </p>
+                                        </div>
+                                      </Link>
+                                    ) : (
+                                      <div className="flex items-center gap-2.5 py-2 px-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-gray-300 shrink-0"></div>
+                                        <p className="text-sm font-medium text-gray-500 line-clamp-1">
+                                          {unit.name}
+                                        </p>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
 
             {/* Subject Stats - only for subject type */}
             {entityType === "subject" && unitsCount !== undefined && (
@@ -140,7 +231,7 @@ const TabsClient = ({
                           )}
                           {subTopic.content && (
                             <div className="prose prose-sm sm:prose max-w-none">
-                              <RichContent key={`subtopic-${subTopic._id || index}-${activeTab}`} html={subTopic.content} />
+                              <RichContent html={subTopic.content} />
                             </div>
                           )}
                         </div>
@@ -172,7 +263,7 @@ const TabsClient = ({
                           <div className="flex items-start justify-between">
                             <div className="flex-1 min-w-0">
                               <h4
-                                className={`font-normal text-base text-indigo-700 ${
+                                className={`font-bold text-indigo-700 text-lg sm:text-xl ${
                                   subTopicUrl
                                     ? "hover:text-indigo-600 transition-colors cursor-pointer"
                                     : ""
@@ -376,7 +467,7 @@ const TabsClient = ({
                             )}
                             {definition.content && (
                               <div className="prose prose-sm sm:prose max-w-none">
-                                <RichContent key={`definition-${definition._id || index}-${activeTab}`} html={definition.content} />
+                                <RichContent html={definition.content} />
                               </div>
                             )}
                           </div>
@@ -409,7 +500,7 @@ const TabsClient = ({
                             <div className="flex items-start justify-between">
                               <div className="flex-1 min-w-0">
                                 <h4
-                                  className={`font-normal text-base text-indigo-700 ${
+                                  className={`font-bold text-indigo-700 text-lg sm:text-xl ${
                                     definitionUrl
                                       ? "hover:text-indigo-600 transition-colors cursor-pointer"
                                       : ""
@@ -456,8 +547,6 @@ const TabsClient = ({
                   </div>
                 </>
               )}
-
-          
           </div>
         );
 

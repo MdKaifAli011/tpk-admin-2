@@ -11,13 +11,14 @@ import {
   createSlug,
   fetchExams,
   fetchExamDetailsById,
+  fetchUnitsBySubject,
 } from "../lib/api";
 import { ERROR_MESSAGES, PLACEHOLDERS } from "@/constants";
 import { getNextExam, getPreviousExam } from "../lib/hierarchicalNavigation";
 import Link from "next/link";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 const ExamPage = async ({ params }) => {
@@ -39,6 +40,19 @@ const ExamPage = async ({ params }) => {
     })),
     fetchSubjectsByExam(exam._id || examId),
   ]);
+
+  // Fetch units for each subject
+  const subjectsWithUnits = await Promise.all(
+    subjects.map(async (subject) => {
+      const units = await fetchUnitsBySubject(subject._id, exam._id).catch(
+        () => []
+      );
+      return {
+        ...subject,
+        units: units || [],
+      };
+    })
+  );
 
   // Calculate navigation
   const allExams = await fetchExams({ limit: 100 });
@@ -98,52 +112,9 @@ const ExamPage = async ({ params }) => {
           examId={exam._id}
           entityName={exam.name}
           entityType="exam"
+          examSlug={examSlug}
+          subjectsWithUnits={subjectsWithUnits}
         />
-
-        {/* Subjects Section */}
-        <section className="bg-transparent">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
-              <div className="flex items-start gap-2">
-                <FaGraduationCap className="text-lg sm:text-xl text-indigo-600" />
-                <div>
-                  <h2 className="text-base sm:text-lg font-semibold text-gray-900">
-                    {exam.name} Subjects
-                  </h2>
-                  <p className="mt-1 text-xs sm:text-sm text-gray-500">
-                    Explore subjects and track completion progress for this
-                    exam.
-                  </p>
-                </div>
-              </div>
-              <div className="mt-3 hidden sm:grid sm:grid-cols-[minmax(0,1fr)_140px_180px] gap-6 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                <span className="text-left">Subject</span>
-                <span className="text-center">Status</span>
-                <span className="text-center">Progress</span>
-              </div>
-            </div>
-
-            {subjects && subjects.length > 0 ? (
-              <div className="divide-y divide-gray-100">
-                {subjects.map((subject, index) => {
-                  const subjectSlug = subject.slug || createSlug(subject.name);
-                  return (
-                    <ListItem
-                      key={subject._id}
-                      item={subject}
-                      index={index}
-                      href={`/${examSlug}/${subjectSlug}`}
-                    />
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="px-4 sm:px-6 py-10 text-center text-gray-500">
-                {PLACEHOLDERS.NO_DATA}
-              </div>
-            )}
-          </div>
-        </section>
 
         {/* Navigation */}
         <NavigationClient
