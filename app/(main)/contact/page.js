@@ -320,7 +320,7 @@ const ContactPage = () => {
               courses, admissions, or support services.
             </p>
           </div>
-          <ContactForm />
+      <ContactForm />
         </section>
 
         {/* Why Contact Us */}

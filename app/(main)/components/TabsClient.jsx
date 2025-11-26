@@ -38,6 +38,7 @@ const TabsClient = ({
   topics = [],
   unitName,
   subjectsWithUnits = [],
+  units = [],
 }) => {
   const [activeTab, setActiveTab] = useState(initialTab);
 
@@ -112,7 +113,10 @@ const TabsClient = ({
                               {subjectUrl ? (
                                 <Link href={subjectUrl}>
                                   <div className="flex items-center justify-between gap-3">
-                                    <h4 className="text-sm font-semibold text-white line-clamp-1 flex-1">
+                                    <h4
+                                      className="text-sm font-semibold text-white line-clamp-1 flex-1"
+                                      title={subject.name}
+                                    >
                                       {subject.name}
                                     </h4>
                                     <span className="bg-white/25 text-white text-xs font-medium px-2 py-0.5 rounded-md whitespace-nowrap shrink-0">
@@ -122,7 +126,10 @@ const TabsClient = ({
                                 </Link>
                               ) : (
                                 <div className="flex items-center justify-between gap-3">
-                                  <h4 className="text-sm font-semibold text-white line-clamp-1 flex-1">
+                                  <h4
+                                    className="text-sm font-semibold text-white line-clamp-1 flex-1"
+                                    title={subject.name}
+                                  >
                                     {subject.name}
                                   </h4>
                                   <span className="bg-white/25 text-white text-xs font-medium px-2 py-0.5 rounded-md whitespace-nowrap shrink-0">
@@ -148,7 +155,10 @@ const TabsClient = ({
                                       <Link href={unitUrl}>
                                         <div className="flex items-center gap-2.5 py-2 px-2 -mx-2 rounded-md hover:bg-gray-50 transition-colors group">
                                           <div className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0"></div>
-                                          <p className="text-sm font-medium text-gray-700 group-hover:text-indigo-600 transition-colors line-clamp-1 flex-1">
+                                          <p
+                                            className="text-sm font-medium text-gray-700 group-hover:text-indigo-600 transition-colors line-clamp-1 flex-1"
+                                            title={unit.name}
+                                          >
                                             {unit.name}
                                           </p>
                                         </div>
@@ -156,7 +166,10 @@ const TabsClient = ({
                                     ) : (
                                       <div className="flex items-center gap-2.5 py-2 px-2">
                                         <div className="w-1.5 h-1.5 rounded-full bg-gray-300 shrink-0"></div>
-                                        <p className="text-sm font-medium text-gray-500 line-clamp-1">
+                                        <p
+                                          className="text-sm font-medium text-gray-500 line-clamp-1"
+                                          title={unit.name}
+                                        >
                                           {unit.name}
                                         </p>
                                       </div>
@@ -172,138 +185,150 @@ const TabsClient = ({
                 </div>
               )}
 
-            {/* Subject Stats - only for subject type */}
-            {entityType === "subject" && unitsCount !== undefined && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                <div className="bg-linear-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
-                  <FaBook className="text-blue-600 text-2xl mb-2" />
-                  <h4 className="font-semibold text-gray-900 mb-1">Units</h4>
-                  <p className="text-sm text-gray-600">{unitsCount} Units</p>
-                </div>
-                <div className="bg-linear-to-br from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-100">
-                  <FaChartLine className="text-purple-600 text-2xl mb-2" />
-                  <h4 className="font-semibold text-gray-900 mb-1">
-                    Subject Overview
-                  </h4>
-                  <p className="text-sm text-gray-600">Explore all units</p>
-                </div>
-                <div className="bg-linear-to-br from-green-50 to-emerald-50 rounded-lg p-4 border border-green-100">
-                  <FaTrophy className="text-green-600 text-2xl mb-2" />
-                  <h4 className="font-semibold text-gray-900 mb-1">
-                    Study Resources
-                  </h4>
-                  <p className="text-sm text-gray-600">
-                    Access study materials
-                  </p>
+            {/* Units Grid - only for subject type */}
+            {entityType === "subject" && units && units.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">
+                  Units
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {units.map((unit, unitIndex) => {
+                    const unitSlugValue = unit.slug || createSlug(unit.name);
+                    const unitUrl =
+                      examSlug && subjectSlug
+                        ? `/${examSlug}/${subjectSlug}/${unitSlugValue}`
+                        : null;
+
+                    const UnitCard = (
+                      <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all duration-200 p-4">
+                        <div className="flex items-center justify-between">
+                          <h4
+                            className="text-sm font-medium text-gray-900 line-clamp-1 flex-1"
+                            title={unit.name}
+                          >
+                            {unit.name}
+                          </h4>
+                          {unitUrl && (
+                            <div className="ml-3 shrink-0 text-indigo-600">
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 5l7 7-7 7"
+                                />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+
+                    return unitUrl ? (
+                      <Link key={unit._id || unitIndex} href={unitUrl}>
+                        {UnitCard}
+                      </Link>
+                    ) : (
+                      <div key={unit._id || unitIndex}>{UnitCard}</div>
+                    );
+                  })}
                 </div>
               </div>
             )}
 
-            {/* SubTopics List - for topic type */}
+            {/* Subject Stats - only for subject type (fallback if no units) */}
+            {entityType === "subject" &&
+              unitsCount !== undefined &&
+              (!units || units.length === 0) && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                  <div className="bg-linear-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
+                    <FaBook className="text-blue-600 text-2xl mb-2" />
+                    <h4 className="font-semibold text-gray-900 mb-1">Units</h4>
+                    <p className="text-sm text-gray-600">{unitsCount} Units</p>
+                  </div>
+                  <div className="bg-linear-to-br from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-100">
+                    <FaChartLine className="text-purple-600 text-2xl mb-2" />
+                    <h4 className="font-semibold text-gray-900 mb-1">
+                      Subject Overview
+                    </h4>
+                    <p className="text-sm text-gray-600">Explore all units</p>
+                  </div>
+                  <div className="bg-linear-to-br from-green-50 to-emerald-50 rounded-lg p-4 border border-green-100">
+                    <FaTrophy className="text-green-600 text-2xl mb-2" />
+                    <h4 className="font-semibold text-gray-900 mb-1">
+                      Study Resources
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      Access study materials
+                    </p>
+                  </div>
+                </div>
+              )}
+
+            {/* SubTopics Grid - for topic type */}
             {entityType === "topic" && subtopics && subtopics.length > 0 && (
-              <>
-                <div className="mt-6">
-                  <div className="space-y-6">
-                    {subtopics.map((subTopic, index) => {
-                      const subTopicSlugValue =
-                        subTopic.slug || createSlug(subTopic.name);
-                      const subTopicUrl =
-                        examSlug &&
-                        subjectSlug &&
-                        unitSlug &&
-                        chapterSlug &&
-                        topicSlug
-                          ? `/${examSlug}/${subjectSlug}/${unitSlug}/${chapterSlug}/${topicSlug}/${subTopicSlugValue}`
-                          : null;
+              <div className="mt-6">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">
+                  Subtopics
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {subtopics.map((subTopic, index) => {
+                    const subTopicSlugValue =
+                      subTopic.slug || createSlug(subTopic.name);
+                    const subTopicUrl =
+                      examSlug &&
+                      subjectSlug &&
+                      unitSlug &&
+                      chapterSlug &&
+                      topicSlug
+                        ? `/${examSlug}/${subjectSlug}/${unitSlug}/${chapterSlug}/${topicSlug}/${subTopicSlugValue}`
+                        : null;
 
-                      return (
-                        <div key={subTopic._id || index} className="space-y-3">
-                          {subTopicUrl ? (
-                            <Link href={subTopicUrl}>
-                              <h3 className="text-xl sm:text-2xl font-bold text-indigo-700 hover:text-indigo-600 transition-colors cursor-pointer">
-                                {subTopic.name}
-                              </h3>
-                            </Link>
-                          ) : (
-                            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
-                              {subTopic.name}
-                            </h3>
-                          )}
-                          {subTopic.content && (
-                            <div className="prose prose-sm sm:prose max-w-none">
-                              <RichContent html={subTopic.content} />
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* SubTopics Grid - for topic type */}
-                <div className="mt-8">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    Subtopics
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {subtopics.map((subTopic, index) => {
-                      const subTopicSlugValue =
-                        subTopic.slug || createSlug(subTopic.name);
-                      const subTopicUrl =
-                        examSlug &&
-                        subjectSlug &&
-                        unitSlug &&
-                        chapterSlug &&
-                        topicSlug
-                          ? `/${examSlug}/${subjectSlug}/${unitSlug}/${chapterSlug}/${topicSlug}/${subTopicSlugValue}`
-                          : null;
-
-                      const SubTopicCard = (
-                        <div className="bg-white rounded-lg p-4 border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all shadow-sm hover:shadow-md">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1 min-w-0">
-                              <h4
-                                className={`font-bold text-indigo-700 text-lg sm:text-xl ${
-                                  subTopicUrl
-                                    ? "hover:text-indigo-600 transition-colors cursor-pointer"
-                                    : ""
-                                }`}
+                    const SubTopicCard = (
+                      <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all duration-200 p-4">
+                        <div className="flex items-center justify-between">
+                          <h4
+                            className="text-sm font-medium text-gray-900 line-clamp-1 flex-1"
+                            title={subTopic.name}
+                          >
+                            {subTopic.name}
+                          </h4>
+                          {subTopicUrl && (
+                            <div className="ml-3 shrink-0 text-indigo-600">
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
                               >
-                                {subTopic.name}
-                              </h4>
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9 5l7 7-7 7"
+                                />
+                              </svg>
                             </div>
-                            {subTopicUrl && (
-                              <div className="ml-3 shrink-0 text-indigo-600">
-                                <svg
-                                  className="w-5 h-5"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M9 5l7 7-7 7"
-                                  />
-                                </svg>
-                              </div>
-                            )}
-                          </div>
+                          )}
                         </div>
-                      );
+                      </div>
+                    );
 
-                      return subTopicUrl ? (
-                        <Link key={subTopic._id || index} href={subTopicUrl}>
-                          {SubTopicCard}
-                        </Link>
-                      ) : (
-                        <div key={subTopic._id || index}>{SubTopicCard}</div>
-                      );
-                    })}
-                  </div>
+                    return subTopicUrl ? (
+                      <Link key={subTopic._id || index} href={subTopicUrl}>
+                        {SubTopicCard}
+                      </Link>
+                    ) : (
+                      <div key={subTopic._id || index}>{SubTopicCard}</div>
+                    );
+                  })}
                 </div>
-              </>
+              </div>
             )}
 
             {/* Chapters Grid - for unit type */}
@@ -331,6 +356,7 @@ const TabsClient = ({
                                   ? "hover:text-indigo-600 transition-colors cursor-pointer"
                                   : ""
                               }`}
+                              title={chapter.name}
                             >
                               {chapter.name}
                             </h4>
@@ -392,6 +418,7 @@ const TabsClient = ({
                                   ? "hover:text-indigo-600 transition-colors cursor-pointer"
                                   : ""
                               }`}
+                              title={topic.name}
                             >
                               {topic.name}
                             </h4>
@@ -505,6 +532,7 @@ const TabsClient = ({
                                       ? "hover:text-indigo-600 transition-colors cursor-pointer"
                                       : ""
                                   }`}
+                                  title={definition.name}
                                 >
                                   {definition.name}
                                 </h4>

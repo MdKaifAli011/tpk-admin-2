@@ -135,14 +135,14 @@ export async function POST(request) {
       isUpdated = true;
     } else {
       lead = await Lead.create({
-        name: body.name.trim(),
+      name: body.name.trim(),
         email,
-        country: body.country.trim(),
-        className: body.className.trim(),
+      country: body.country.trim(),
+      className: body.className.trim(),
         phoneNumber: body.phoneNumber.trim(),
         status: "new",
         updateCount: 0,
-      });
+    });
       message = "Lead submitted successfully";
     }
 

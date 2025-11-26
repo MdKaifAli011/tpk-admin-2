@@ -1,12 +1,7 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import MainLayout from "../../layout/MainLayout";
-import {
-  FaBook,
-  FaGraduationCap,
-  FaChartLine,
-  FaTrophy,
-} from "react-icons/fa";
+import { FaBook, FaGraduationCap, FaChartLine, FaTrophy } from "react-icons/fa";
 import ListItem from "../../components/ListItem";
 import TabsClient from "../../components/TabsClient";
 import NavigationClient from "../../components/NavigationClient";
@@ -25,7 +20,7 @@ import {
   getPreviousSubject,
 } from "../../lib/hierarchicalNavigation";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 const SubjectPage = async ({ params }) => {
@@ -137,6 +132,9 @@ const SubjectPage = async ({ params }) => {
           entityName={subject.name}
           entityType="subject"
           unitsCount={fetchedUnits.length}
+          examSlug={examSlug}
+          subjectSlug={subjectSlugValue}
+          units={fetchedUnits}
         />
 
         {/* Units Section */}

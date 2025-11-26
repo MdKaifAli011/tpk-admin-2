@@ -58,7 +58,8 @@ const RichContent = ({ html }) => {
     <>
       {mathJaxError && (
         <div className="text-yellow-600 text-sm mb-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
-          Note: Math equations may not render correctly. Please refresh the page.
+          Note: Math equations may not render correctly. Please refresh the
+          page.
         </div>
       )}
       <div
@@ -71,4 +72,3 @@ const RichContent = ({ html }) => {
 };
 
 export default RichContent;
-
