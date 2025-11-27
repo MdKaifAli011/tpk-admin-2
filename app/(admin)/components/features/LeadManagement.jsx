@@ -506,65 +506,62 @@ const LeadManagement = () => {
                 onView={handleViewLead}
                 onDelete={handleDeleteLead}
               />
-
-              {/* Pagination */}
-              {pagination.totalPages > 0 && (
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
-                    <div className="text-sm text-gray-600">
-                      Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
-                      {Math.min(
-                        pagination.page * pagination.limit,
-                        pagination.total
-                      )}{" "}
-                      of {pagination.total} leads
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm text-gray-600">
-                          Items per page:
-                        </label>
-                        <select
-                          value={pagination.limit}
-                          onChange={(e) => {
-                            setPagination((prev) => ({
-                              ...prev,
-                              limit: parseInt(e.target.value),
-                              page: 1,
-                            }));
-                          }}
-                          className="px-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                        >
-                          <option value="10">10</option>
-                          <option value="25">25</option>
-                          <option value="50">50</option>
-                          <option value="100">100</option>
-                        </select>
-                      </div>
-                      {pagination.totalPages > 1 && (
-                        <div className="text-sm text-gray-600">
-                          Page {pagination.page} of {pagination.totalPages}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  {pagination.totalPages > 1 && (
-                    <Pagination
-                      currentPage={pagination.page}
-                      totalPages={pagination.totalPages}
-                      onPageChange={(newPage) => {
-                        setPagination((prev) => ({ ...prev, page: newPage }));
-                      }}
-                      showPrevNext={true}
-                      maxVisible={5}
-                    />
-                  )}
-                </div>
-              )}
             </>
           )}
         </div>
       </div>
+
+      {/* Pagination Footer - Separate Card */}
+      {!isDataLoading && !error && leads.length > 0 && pagination.total > 0 && (
+        <>
+          <div className="mt-4 bg-white rounded-lg border border-gray-200 shadow-sm px-4 py-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="text-sm text-gray-600">
+                Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
+                {Math.min(
+                  pagination.page * pagination.limit,
+                  pagination.total
+                )}{" "}
+                of {pagination.total} leads
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600 whitespace-nowrap">
+                  Items per page:
+                </span>
+                <select
+                  value={pagination.limit}
+                  onChange={(e) => {
+                    setPagination((prev) => ({
+                      ...prev,
+                      limit: parseInt(e.target.value),
+                      page: 1,
+                    }));
+                  }}
+                  className="px-3 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 4 5%22><path fill=%22%23666%22 d=%22M2 0L0 2h4zm0 5L0 3h4z%22/></svg>')] bg-[length:12px] bg-[right:8px_center] bg-no-repeat pr-8"
+                >
+                  <option value="10">10</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          {pagination.totalPages > 1 && (
+            <div className="mt-3 flex justify-center">
+              <Pagination
+                currentPage={pagination.page}
+                totalPages={pagination.totalPages}
+                onPageChange={(newPage) => {
+                  setPagination((prev) => ({ ...prev, page: newPage }));
+                }}
+                showPrevNext={true}
+                maxVisible={5}
+              />
+            </div>
+          )}
+        </>
+      )}
 
       {/* View Lead Modal */}
    {showViewModal && selectedLead && (
