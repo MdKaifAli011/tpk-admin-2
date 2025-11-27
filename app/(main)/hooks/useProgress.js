@@ -67,11 +67,14 @@ export const useProgress = (unitId, chapters = []) => {
         dataToSave._unitProgress = newUnitProgress;
         localStorage.setItem(storageKey, JSON.stringify(dataToSave));
         
-        // Dispatch custom event for real-time updates
+        // Dispatch custom event for real-time updates (deferred to avoid render phase updates)
         if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent('progress-updated', {
-            detail: { unitId, unitProgress: newUnitProgress }
-          }));
+          // Use setTimeout to defer event dispatch until after render cycle
+          setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('progress-updated', {
+              detail: { unitId, unitProgress: newUnitProgress }
+            }));
+          }, 0);
         }
       } catch (error) {
         console.error("Error saving progress:", error);
@@ -110,6 +113,7 @@ export const useProgress = (unitId, chapters = []) => {
   useEffect(() => {
     const newUnitProgress = calculateUnitProgress(chaptersProgress);
     setUnitProgress(newUnitProgress);
+    // Note: Event dispatch is handled by updateChapterProgress to avoid render phase updates
   }, [chaptersProgress, calculateUnitProgress]);
 
   return {
