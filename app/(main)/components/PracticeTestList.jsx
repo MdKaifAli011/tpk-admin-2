@@ -607,8 +607,11 @@ const PracticeTestList = ({
   // Show test list loading
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center py-8">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-6 w-6 border-3 border-blue-600 border-t-transparent mb-3"></div>
+          <p className="text-xs text-gray-600">Loading practice tests...</p>
+        </div>
       </div>
     );
   }
@@ -618,8 +621,8 @@ const PracticeTestList = ({
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
         <div className="flex items-center gap-2 text-red-700">
-          <FaTimesCircle />
-          <p className="text-sm">{error}</p>
+          <FaTimesCircle className="text-sm" />
+          <p className="text-xs font-medium">{error}</p>
         </div>
       </div>
     );
@@ -630,8 +633,11 @@ const PracticeTestList = ({
     // Loading test
     if (isLoadingTest) {
       return (
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="flex items-center justify-center py-8">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-6 w-6 border-3 border-blue-600 border-t-transparent mb-3"></div>
+            <p className="text-xs text-gray-600">Loading practice test...</p>
+          </div>
         </div>
       );
     }
@@ -639,16 +645,18 @@ const PracticeTestList = ({
     // Error loading test
     if (error || !test) {
       return (
-        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
             <div className="flex items-center gap-2 text-red-700">
-              <FaTimesCircle />
-              <p className="text-sm">{error || "Practice test not found"}</p>
+              <FaTimesCircle className="text-sm" />
+              <p className="text-xs font-medium">
+                {error || "Practice test not found"}
+              </p>
             </div>
           </div>
           <button
             onClick={handleBackToList}
-            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg text-sm font-medium transition-colors"
+            className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg text-xs font-medium transition-colors"
           >
             Back to Tests
           </button>
@@ -659,18 +667,18 @@ const PracticeTestList = ({
     // No questions
     if (questions.length === 0) {
       return (
-        <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-          <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">📝</div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+          <div className="text-center py-8">
+            <div className="text-gray-400 text-4xl mb-3">📝</div>
+            <h3 className="text-base font-semibold text-gray-900 mb-1.5">
               No Questions Available
             </h3>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-xs text-gray-600 mb-3">
               This practice test doesn&apos;t have any questions yet.
             </p>
             <button
               onClick={handleBackToList}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg text-sm font-medium transition-colors"
+              className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg text-xs font-medium transition-colors"
             >
               Back to Tests
             </button>
@@ -684,54 +692,54 @@ const PracticeTestList = ({
       return (
         <div className="space-y-6">
           {/* Results Header */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
             <div className="text-center">
-              <h1 className="text-3xl font-semibold text-gray-900 mb-2">
+              <h1 className="text-2xl font-semibold text-gray-900 mb-1.5">
                 Test Results
               </h1>
-              <p className="text-sm text-gray-600">{test.name}</p>
+              <p className="text-xs text-gray-600">{test.name}</p>
             </div>
           </div>
 
           {/* Score Card */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="text-3xl font-semibold text-gray-900 mb-1">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div className="text-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="text-2xl font-semibold text-gray-900 mb-0.5">
                   {results.percentage}%
                 </div>
-                <div className="text-sm text-gray-600">Score</div>
+                <div className="text-xs text-gray-600">Score</div>
               </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="text-3xl font-semibold text-gray-900 mb-1">
+              <div className="text-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="text-2xl font-semibold text-gray-900 mb-0.5">
                   {results.correctCount}
                 </div>
-                <div className="text-sm text-gray-600">Correct</div>
+                <div className="text-xs text-gray-600">Correct</div>
               </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="text-3xl font-semibold text-gray-900 mb-1">
+              <div className="text-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="text-2xl font-semibold text-gray-900 mb-0.5">
                   {results.incorrectCount}
                 </div>
-                <div className="text-sm text-gray-600">Incorrect</div>
+                <div className="text-xs text-gray-600">Incorrect</div>
               </div>
-              <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="text-3xl font-semibold text-gray-900 mb-1">
+              <div className="text-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="text-2xl font-semibold text-gray-900 mb-0.5">
                   {results.unansweredCount}
                 </div>
-                <div className="text-sm text-gray-600">Unanswered</div>
+                <div className="text-xs text-gray-600">Unanswered</div>
               </div>
             </div>
 
-            <div className="mt-6 pt-6 border-t border-gray-200">
+            <div className="mt-4 pt-4 border-t border-gray-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-2xl font-semibold text-gray-900">
+                  <div className="text-xl font-semibold text-gray-900">
                     {results.totalMarks.toFixed(2)} / {results.maximumMarks}
                   </div>
-                  <div className="text-sm text-gray-600">Total Marks</div>
+                  <div className="text-xs text-gray-600">Total Marks</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-sm text-gray-600">
+                  <div className="text-xs text-gray-600">
                     Time Taken: {Math.floor(results.timeTaken / 60)}m{" "}
                     {results.timeTaken % 60}s
                   </div>
@@ -741,11 +749,11 @@ const PracticeTestList = ({
           </div>
 
           {/* Question-wise Results */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
               Question-wise Results
             </h2>
-            <div className="space-y-6">
+            <div className="space-y-4">
               {results.questionResults.map((result, index) => {
                 const question = questions.find(
                   (q) => q._id === result.questionId
@@ -753,14 +761,14 @@ const PracticeTestList = ({
                 return (
                   <div
                     key={result.questionId}
-                    className="border border-gray-200 rounded-lg p-6 bg-white"
+                    className="border border-gray-200 rounded-lg p-4 bg-white"
                   >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <span className="flex items-center justify-center w-10 h-10 rounded-full font-medium bg-gray-100 text-gray-900 border border-gray-200">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="flex items-center justify-center w-8 h-8 rounded-full font-medium bg-gray-100 text-gray-900 border border-gray-200 text-xs">
                           {index + 1}
                         </span>
-                        <h3 className="text-lg font-semibold text-gray-900">
+                        <h3 className="text-base font-semibold text-gray-900">
                           {result.question}
                         </h3>
                       </div>
@@ -785,7 +793,7 @@ const PracticeTestList = ({
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                       {["A", "B", "C", "D"].map((option) => {
                         const optionKey = `option${option}`;
                         const optionText = question[optionKey];
@@ -831,11 +839,11 @@ const PracticeTestList = ({
                     </div>
 
                     {question.detailsExplanation && (
-                      <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                        <h4 className="text-sm font-semibold text-gray-900 mb-2">
+                      <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                        <h4 className="text-xs font-semibold text-gray-900 mb-1.5">
                           Explanation:
                         </h4>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-xs text-gray-600">
                           {question.detailsExplanation}
                         </p>
                       </div>
@@ -860,10 +868,10 @@ const PracticeTestList = ({
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex items-center justify-center gap-3">
             <button
               onClick={handleBackToList}
-              className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg text-sm font-medium transition-colors"
+              className="px-4 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg text-xs font-medium transition-colors"
             >
               Back to Tests
             </button>
@@ -879,7 +887,7 @@ const PracticeTestList = ({
                   setTimeRemaining(durationSeconds);
                 }
               }}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+              className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition-colors"
             >
               Retake Test
             </button>
@@ -891,70 +899,70 @@ const PracticeTestList = ({
     // Pre-test start screen
     if (!isTestStarted) {
       return (
-        <div className="max-w-7xl mx-auto space-y-6">
-          <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+        <div className="max-w-7xl mx-auto space-y-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
             {/* Header */}
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-semibold text-gray-900 mb-2 leading-tight">
+            <div className="text-center mb-4">
+              <h1 className="text-xl font-semibold text-gray-900 mb-1.5 leading-tight">
                 {test.name}
               </h1>
             </div>
 
             {/* Test Details Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                <div className="flex items-center gap-3 mb-3">
-                  <FaClock className="text-gray-600 text-base" />
-                  <span className="text-sm font-medium text-gray-600">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <FaClock className="text-gray-600 text-xs" />
+                  <span className="text-xs font-medium text-gray-600">
                     Duration
                   </span>
                 </div>
-                <div className="text-2xl font-semibold text-gray-900">
+                <div className="text-base font-semibold text-gray-900">
                   {test.duration || "No Limit"}
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-sm font-medium text-gray-600">
+              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-medium text-gray-600">
                     Total Questions
                   </span>
                 </div>
-                <div className="text-2xl font-semibold text-gray-900">
+                <div className="text-base font-semibold text-gray-900">
                   {questions.length}
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-sm font-medium text-gray-600">
+              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-medium text-gray-600">
                     Maximum Marks
                   </span>
                 </div>
-                <div className="text-2xl font-semibold text-gray-900">
+                <div className="text-base font-semibold text-gray-900">
                   {test.maximumMarks || 0}
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-sm font-medium text-gray-600">
+              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs font-medium text-gray-600">
                     Negative Marks
                   </span>
                 </div>
-                <div className="text-2xl font-semibold text-gray-900">
+                <div className="text-base font-semibold text-gray-900">
                   {test.negativeMarks || 0} per wrong answer
                 </div>
               </div>
             </div>
 
             {/* Instructions Section */}
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+              <h3 className="text-base font-semibold text-gray-900 mb-3">
                 Instructions
               </h3>
               {test.description && test.description.trim() ? (
-                <ul className="text-sm text-gray-600 space-y-2 list-disc list-inside leading-relaxed">
+                <ul className="text-xs text-gray-600 space-y-1.5 list-disc list-inside leading-relaxed">
                   {test.description
                     .split("\n")
                     .filter((line) => line.trim())
@@ -963,7 +971,7 @@ const PracticeTestList = ({
                     ))}
                 </ul>
               ) : (
-                <ul className="text-sm text-gray-600 space-y-2 list-disc list-inside leading-relaxed">
+                <ul className="text-xs text-gray-600 space-y-1.5 list-disc list-inside leading-relaxed">
                   <li>
                     Read each question carefully before selecting your answer
                   </li>
@@ -991,18 +999,18 @@ const PracticeTestList = ({
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center justify-center gap-4 pt-4 border-t border-gray-200">
+            <div className="flex items-center justify-center gap-3 pt-3 border-t border-gray-200">
               <button
                 onClick={handleBackToList}
-                className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg text-sm font-medium transition-colors"
+                className="px-4 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg text-xs font-medium transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleStartTest}
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5"
               >
-                <FaCheck className="text-sm" />
+                <FaCheck className="text-xs" />
                 Start Test
               </button>
             </div>
@@ -1026,21 +1034,21 @@ const PracticeTestList = ({
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-60 h-screen">
             <div className="bg-white rounded-lg border border-gray-200 shadow-lg max-w-md w-full mx-4">
               {/* Modal Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+                <h3 className="text-base font-semibold text-gray-900">
                   Submit Test?
                 </h3>
                 <button
                   onClick={() => setShowSubmitModal(false)}
                   className="text-gray-400 hover:text-gray-600 transition-colors p-1"
                 >
-                  <FaTimes />
+                  <FaTimes className="text-sm" />
                 </button>
               </div>
 
               {/* Modal Body */}
-              <div className="px-6 py-6">
-                <p className="text-sm text-gray-600">
+              <div className="px-4 py-4">
+                <p className="text-xs text-gray-600">
                   {unansweredCount > 0 ? (
                     <>
                       You have{" "}
@@ -1064,16 +1072,16 @@ const PracticeTestList = ({
               </div>
 
               {/* Modal Footer */}
-              <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200">
+              <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-gray-200">
                 <button
                   onClick={() => setShowSubmitModal(false)}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg text-sm font-medium transition-colors"
+                  className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg text-xs font-medium transition-colors"
                 >
                   Keep working
                 </button>
                 <button
                   onClick={() => handleSubmitTest(false)}
-                  className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white rounded-lg text-sm font-medium transition-colors"
+                  className="px-3 py-1.5 bg-gray-900 hover:bg-gray-800 text-white rounded-lg text-xs font-medium transition-colors"
                 >
                   Submit
                 </button>
@@ -1082,13 +1090,13 @@ const PracticeTestList = ({
           </div>
         )}
         {/* Test Header */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm sticky top-0 z-10">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm sticky top-0 z-10">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
             <div className="flex-1">
-              <h1 className="text-xl font-bold text-gray-900 mb-1">
+              <h1 className="text-base font-semibold text-gray-900 mb-1">
                 {test.name}
               </h1>
-              <div className="flex items-center gap-4 text-sm text-gray-600">
+              <div className="flex items-center gap-3 text-xs text-gray-600">
                 <span>
                   Question {currentQuestionIndex + 1} of {questions.length}
                 </span>
@@ -1105,19 +1113,19 @@ const PracticeTestList = ({
 
             {timeRemaining !== null && (
               <div
-                className={`flex items-center gap-3 px-4 py-2 rounded-lg border ${
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${
                   timeRemaining < 300
                     ? "bg-red-50 border-red-200"
                     : "bg-gray-50 border-gray-200"
                 }`}
               >
                 <FaClock
-                  className={
+                  className={`text-xs ${
                     timeRemaining < 300 ? "text-red-600" : "text-gray-600"
-                  }
+                  }`}
                 />
                 <span
-                  className={`text-lg font-semibold ${
+                  className={`text-sm font-semibold ${
                     timeRemaining < 300 ? "text-red-600" : "text-gray-900"
                   }`}
                 >
@@ -1132,31 +1140,31 @@ const PracticeTestList = ({
           {/* Main Question Area */}
           <div className="lg:col-span-3 space-y-4">
             {/* Question Card */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-              <div className="flex items-start justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <span className="flex items-center justify-center w-10 h-10 rounded-full font-medium bg-gray-100 text-gray-900 border border-gray-200">
+            <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center justify-center w-8 h-8 rounded-full font-medium bg-gray-100 text-gray-900 border border-gray-200 text-xs">
                     {currentQuestionIndex + 1}
                   </span>
-                  <h2 className="text-lg font-semibold text-gray-900">
+                  <h2 className="text-base font-semibold text-gray-900">
                     {currentQuestion.question}
                   </h2>
                 </div>
                 <button
                   onClick={() => handleToggleMarked(currentQuestion._id)}
-                  className={`p-2 rounded-lg transition-colors ${
+                  className={`p-1.5 rounded-lg transition-colors ${
                     markedForReview.has(currentQuestion._id)
                       ? "bg-gray-100 text-gray-900"
                       : "bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
                   }`}
                   title="Mark for Review"
                 >
-                  <FaFlag />
+                  <FaFlag className="text-xs" />
                 </button>
               </div>
 
               {/* Options */}
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {["A", "B", "C", "D"].map((option) => {
                   const optionKey = `option${option}`;
                   const optionText = currentQuestion[optionKey];
@@ -1168,27 +1176,27 @@ const PracticeTestList = ({
                       onClick={() =>
                         handleAnswerSelect(currentQuestion._id, option)
                       }
-                      className={`w-full text-left p-4 rounded-lg border transition-colors ${
+                      className={`w-full text-left p-3 rounded-lg border transition-colors ${
                         isSelected
                           ? "bg-blue-50 border-blue-500"
                           : "bg-white border-gray-200 hover:border-blue-300 hover:bg-blue-50"
                       }`}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
                         <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm ${
+                          className={`w-7 h-7 rounded-full flex items-center justify-center font-semibold text-xs ${
                             isSelected
-                              ? "bg-blue-500 text-white"
+                              ? "bg-blue-600 text-white"
                               : "bg-gray-200 text-gray-700"
                           }`}
                         >
                           {option}
                         </div>
-                        <span className="text-sm font-medium text-gray-800 flex-1">
+                        <span className="text-xs font-medium text-gray-800 flex-1">
                           {optionText}
                         </span>
                         {isSelected && (
-                          <FaCheckCircle className="text-blue-600" />
+                          <FaCheckCircle className="text-blue-600 text-xs" />
                         )}
                       </div>
                     </button>
@@ -1198,22 +1206,22 @@ const PracticeTestList = ({
             </div>
 
             {/* Navigation Buttons */}
-            <div className="flex items-center justify-between bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+            <div className="flex items-center justify-between bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
               <button
                 onClick={() => goToQuestion(currentQuestionIndex - 1)}
                 disabled={currentQuestionIndex === 0}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <FaArrowLeft />
+                <FaArrowLeft className="text-xs" />
                 <span>Previous</span>
               </button>
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleShowSubmitModal}
-                  className="flex items-center gap-2 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+                  className="flex items-center gap-1.5 px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition-colors"
                 >
-                  <FaSave />
+                  <FaSave className="text-xs" />
                   <span>Submit Test</span>
                 </button>
               </div>
@@ -1221,21 +1229,21 @@ const PracticeTestList = ({
               <button
                 onClick={() => goToQuestion(currentQuestionIndex + 1)}
                 disabled={currentQuestionIndex === questions.length - 1}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span>Next</span>
-                <FaArrowRight />
+                <FaArrowRight className="text-xs" />
               </button>
             </div>
           </div>
 
           {/* Question Navigator Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm sticky top-24">
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">
+            <div className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm sticky top-24">
+              <h3 className="text-xs font-semibold text-gray-900 mb-2">
                 Question Navigator
               </h3>
-              <div className="grid grid-cols-5 gap-2 max-h-96 overflow-y-auto">
+              <div className="grid grid-cols-5 gap-1.5 max-h-80 overflow-y-auto">
                 {questions.map((question, index) => {
                   const isAnswered = answers[question._id] !== null;
                   const isMarked = markedForReview.has(question._id);
@@ -1245,9 +1253,9 @@ const PracticeTestList = ({
                     <button
                       key={question._id}
                       onClick={() => goToQuestion(index)}
-                      className={`w-10 h-10 rounded-lg text-sm font-medium transition-all ${
+                      className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${
                         isCurrent
-                          ? "bg-blue-600 text-white ring-2 ring-blue-500 shadow-md scale-105"
+                          ? "bg-blue-600 text-white ring-2 ring-blue-500 shadow-md"
                           : isAnswered && isMarked
                           ? "bg-purple-500 text-white border-2 border-purple-600 hover:bg-purple-600"
                           : isAnswered
@@ -1266,31 +1274,31 @@ const PracticeTestList = ({
                 })}
               </div>
 
-              <div className="mt-4 pt-4 border-t border-gray-200 space-y-2 text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded bg-green-500"></div>
+              <div className="mt-3 pt-3 border-t border-gray-200 space-y-1.5 text-xs">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded bg-green-500"></div>
                   <span className="text-gray-600">Answered</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded bg-yellow-400 border-2 border-yellow-500"></div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded bg-yellow-400 border-2 border-yellow-500"></div>
                   <span className="text-gray-600">Marked</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded bg-purple-500"></div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded bg-purple-500"></div>
                   <span className="text-gray-600">Answered & Marked</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded bg-blue-100 border border-blue-200"></div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded bg-blue-100 border border-blue-200"></div>
                   <span className="text-gray-600">Unanswered</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded bg-blue-600 ring-2 ring-blue-500"></div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-3 h-3 rounded bg-blue-600 ring-2 ring-blue-500"></div>
                   <span className="text-gray-600">Current</span>
                 </div>
               </div>
 
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <div className="text-xs text-gray-600 space-y-1">
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <div className="text-xs text-gray-600 space-y-0.5">
                   <div>
                     Answered: {answeredCount} / {questions.length}
                   </div>
@@ -1311,12 +1319,12 @@ const PracticeTestList = ({
   // Show test list
   if (groupedData.length === 0 && !isLoading) {
     return (
-      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 text-center">
-        <FaFileAlt className="text-3xl text-gray-400 mx-auto mb-2" />
-        <h3 className="text-sm font-semibold text-gray-900 mb-1">
+      <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm text-center">
+        <FaFileAlt className="text-3xl text-gray-400 mx-auto mb-3" />
+        <h3 className="text-base font-semibold text-gray-900 mb-1.5">
           No Practice Categories Available
         </h3>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-gray-600">
           There are no practice categories available for this section yet. Check
           back later!
         </p>
@@ -1330,11 +1338,11 @@ const PracticeTestList = ({
       {groupedData.map((group, groupIndex) => (
         <div
           key={group.category._id || group.category.id || groupIndex}
-          className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm"
+          className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
         >
           {/* Category Header */}
-          <div className="bg-blue-50 px-3 py-2 border-b border-gray-200">
-            <h2 className="text-base font-semibold text-gray-900">
+          <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+            <h2 className="text-sm font-semibold text-gray-900">
               {group.category.name}
             </h2>
           </div>
@@ -1343,34 +1351,34 @@ const PracticeTestList = ({
           <div className="overflow-x-auto">
             {group.tests.length === 0 ? (
               <div className="text-center py-6">
-                <FaFileAlt className="text-2xl text-gray-400 mx-auto mb-1.5" />
+                <FaFileAlt className="text-2xl text-gray-400 mx-auto mb-2" />
                 <p className="text-xs text-gray-500">
                   No papers available in this category
                 </p>
               </div>
             ) : (
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-blue-50">
+                <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-3 py-2 text-left text-xs font-semibold text-gray-900">
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Paper Name
                     </th>
-                    <th className="px-2 py-2 text-center text-xs font-semibold text-gray-900">
+                    <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Questions
                     </th>
-                    <th className="px-2 py-2 text-center text-xs font-semibold text-gray-900">
+                    <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Max. Marks
                     </th>
-                    <th className="px-2 py-2 text-center text-xs font-semibold text-gray-900">
+                    <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Duration
                     </th>
-                    <th className="px-2 py-2 text-center text-xs font-semibold text-gray-900">
+                    <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Attempted
                     </th>
-                    <th className="px-2 py-2 text-right text-xs font-semibold text-gray-900">
+                    <th className="px-2 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Practice
                     </th>
-                    <th className="px-3 py-2 text-right text-xs font-semibold text-gray-900">
+                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       My Score
                     </th>
                   </tr>
@@ -1382,41 +1390,45 @@ const PracticeTestList = ({
                       className="hover:bg-gray-50 transition-colors"
                     >
                       <td className="px-3 py-2 whitespace-nowrap">
-                        <div className="text-xs font-medium text-gray-900">
-                          {test.orderNumber ? `${test.orderNumber} ` : ""}
+                        <div className="text-xs font-semibold text-gray-900">
+                          {test.orderNumber ? (
+                            <span className="text-blue-600 font-semibold mr-1">
+                              {test.orderNumber}.
+                            </span>
+                          ) : null}
                           {test.name}
                         </div>
                       </td>
                       <td className="px-2 py-2 whitespace-nowrap text-center">
-                        <span className="text-xs text-gray-600">
+                        <span className="text-xs font-semibold text-gray-600">
                           {test.numberOfQuestions || 0}
                         </span>
                       </td>
                       <td className="px-2 py-2 whitespace-nowrap text-center">
-                        <span className="text-xs text-gray-600">
+                        <span className="text-xs font-semibold text-gray-600">
                           {test.maximumMarks || 0}
                         </span>
                       </td>
                       <td className="px-2 py-2 whitespace-nowrap text-center">
-                        <span className="text-xs text-gray-600">
+                        <span className="text-xs font-semibold text-gray-600">
                           {test.duration || "N/A"}
                         </span>
                       </td>
                       <td className="px-2 py-2 whitespace-nowrap text-center">
-                        <span className="text-xs text-gray-600">
+                        <span className="text-xs font-semibold text-gray-600">
                           {/* TODO: Add attempted count from API */}-
                         </span>
                       </td>
                       <td className="px-2 py-2 whitespace-nowrap text-right">
                         <button
                           onClick={() => setSelectedTest(test._id)}
-                          className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium transition-colors"
+                          className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold transition-colors"
                         >
                           Start Test
                         </button>
                       </td>
                       <td className="px-3 py-2 whitespace-nowrap text-right">
-                        <span className="text-xs font-medium text-gray-900">
+                        <span className="text-xs font-semibold text-gray-600">
                           {/* TODO: Add user score from API - Color code: blue for good scores (>=70%), red for low scores (<50%), black for NA */}
                           NA
                         </span>

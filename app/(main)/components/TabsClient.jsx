@@ -756,8 +756,8 @@ const TabsClient = ({
   return (
     <section className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
       {/* Tab Navigation */}
-      <nav className="flex overflow-x-auto sm:overflow-visible border-b border-gray-200 bg-gray-50">
-        <div className="flex min-w-max sm:min-w-0 w-full justify-start sm:justify-around">
+      <nav className="flex  overflow-x-auto sm:overflow-visible border-b border-gray-200 bg-gray-50">
+        <div className="flex  min-w-max sm:min-w-0 w-full justify-start sm:justify-around">
           {TABS.map((tab) => {
             const isActive = activeTab === tab;
             return (
@@ -778,7 +778,7 @@ const TabsClient = ({
       </nav>
 
       {/* Tab Content */}
-      <div className="p-3 sm:p-4 text-gray-700 text-sm sm:text-base">
+      <div className="px-3 sm:px-4 py-3 sm:py-4 text-gray-700 text-sm sm:text-base">
         {renderTabContent()}
       </div>
     </section>

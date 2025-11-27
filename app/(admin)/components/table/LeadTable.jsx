@@ -133,7 +133,7 @@ const LeadTable = ({ leads, onView, onDelete }) => {
                       <FaUser className="w-3.5 h-3.5 text-blue-600" />
                     </div>
                     <span className="text-sm font-medium text-gray-900">
-                      {lead.name}
+                    {lead.name}
                     </span>
                   </div>
                 </td>
@@ -173,7 +173,7 @@ const LeadTable = ({ leads, onView, onDelete }) => {
                     </div>
                   ) : (
                     <span className="text-sm text-gray-400 italic">N/A</span>
-                  )}
+                    )}
                 </td>
                 <td className="px-2 py-2 whitespace-nowrap">
                   {getStatusBadge(lead.status || "new", lead.updateCount || 0)}
@@ -182,7 +182,7 @@ const LeadTable = ({ leads, onView, onDelete }) => {
                   <div className="flex items-center gap-1.5">
                     <FaCalendarAlt className="w-3 h-3 text-gray-400 flex-shrink-0" />
                     <time className="text-sm text-gray-500" dateTime={lead.createdAt}>
-                      {formatDate(lead.createdAt)}
+                    {formatDate(lead.createdAt)}
                     </time>
                   </div>
                 </td>
@@ -248,11 +248,11 @@ const LeadTable = ({ leads, onView, onDelete }) => {
                     {lead.email}
                   </a>
                 </div>
+                </div>
+                <div className="shrink-0">
+                  {getStatusBadge(lead.status || "new", lead.updateCount || 0)}
+                </div>
               </div>
-              <div className="shrink-0">
-                {getStatusBadge(lead.status || "new", lead.updateCount || 0)}
-              </div>
-            </div>
 
             {/* Details Grid */}
             <div className="grid grid-cols-2 gap-2 mb-3">
@@ -270,8 +270,8 @@ const LeadTable = ({ leads, onView, onDelete }) => {
                 <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-700">
                   {lead.className}
                 </span>
-              </div>
-              {lead.phoneNumber && (
+                </div>
+                {lead.phoneNumber && (
                 <div className="flex items-center gap-1.5">
                   <FaPhone className="w-3 h-3 text-gray-400 flex-shrink-0" />
                   <div className="min-w-0">
@@ -283,8 +283,8 @@ const LeadTable = ({ leads, onView, onDelete }) => {
                       {lead.phoneNumber}
                     </a>
                   </div>
-                </div>
-              )}
+                  </div>
+                )}
               <div className="flex items-center gap-1.5">
                 <FaCalendarAlt className="w-3 h-3 text-gray-400 flex-shrink-0" />
                 <div className="min-w-0">
@@ -293,40 +293,40 @@ const LeadTable = ({ leads, onView, onDelete }) => {
                     {formatDateShort(lead.createdAt)}
                   </time>
                 </div>
+                </div>
               </div>
-            </div>
 
-            {/* Actions */}
+              {/* Actions */}
             <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
-              {onView && (
-                <button
-                  onClick={() => onView(lead)}
+                {onView && (
+                  <button
+                    onClick={() => onView(lead)}
                   className="flex-1 px-3 py-1.5 bg-green-50 text-green-600 rounded-lg transition-colors hover:bg-green-100 text-xs font-medium flex items-center justify-center gap-1.5"
-                >
+                  >
                   <FaEye className="w-3.5 h-3.5" />
-                  View
-                </button>
-              )}
-              {onDelete && (
-                canDelete ? (
-                  <button
-                    onClick={() => onDelete(lead)}
+                    View
+                  </button>
+                )}
+                {onDelete && (
+                  canDelete ? (
+                    <button
+                      onClick={() => onDelete(lead)}
                     className="flex-1 px-3 py-1.5 bg-red-50 text-red-600 rounded-lg transition-colors hover:bg-red-100 text-xs font-medium flex items-center justify-center gap-1.5"
-                  >
+                    >
                     <FaTrash className="w-3.5 h-3.5" />
-                    Delete
-                  </button>
-                ) : (
-                  <button
-                    disabled
-                    title={getPermissionMessage("delete", role)}
+                      Delete
+                    </button>
+                  ) : (
+                    <button
+                      disabled
+                      title={getPermissionMessage("delete", role)}
                     className="flex-1 px-3 py-1.5 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed text-xs font-medium flex items-center justify-center gap-1.5"
-                  >
+                    >
                     <FaLock className="w-3.5 h-3.5" />
-                    Delete
-                  </button>
-                )
-              )}
+                      Delete
+                    </button>
+                  )
+                )}
             </div>
           </div>
         ))}
