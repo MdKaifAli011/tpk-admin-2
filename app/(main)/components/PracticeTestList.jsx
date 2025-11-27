@@ -16,6 +16,7 @@ import {
 } from "react-icons/fa";
 import {
   fetchPracticeTests,
+  fetchPracticeCategories,
   fetchPracticeTestById,
   fetchPracticeTestQuestions,
 } from "../lib/api";
@@ -31,6 +32,8 @@ const PracticeTestList = ({
   subTopicId,
 }) => {
   const [practiceTests, setPracticeTests] = useState([]);
+  const [practiceCategories, setPracticeCategories] = useState([]);
+  const [groupedData, setGroupedData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -52,12 +55,22 @@ const PracticeTestList = ({
   const startTimeRef = useRef(null);
 
   useEffect(() => {
-    const loadPracticeTests = async () => {
+    const loadPracticeData = async () => {
       try {
         setIsLoading(true);
         setError(null);
 
-        const filters = {
+        // Fetch categories first based on examId and subjectId
+        const categoryFilters = {
+          examId,
+          subjectId,
+          status: "active",
+        };
+        const categories = await fetchPracticeCategories(categoryFilters);
+        setPracticeCategories(categories);
+
+        // Fetch all subcategories (papers) with hierarchical filters
+        const testFilters = {
           examId,
           subjectId,
           unitId,
@@ -66,11 +79,26 @@ const PracticeTestList = ({
           subTopicId,
           status: "active",
         };
-
-        const tests = await fetchPracticeTests(filters);
+        const tests = await fetchPracticeTests(testFilters);
         setPracticeTests(tests);
+
+        // Group tests by category - Show ALL categories even if they have no papers
+        const grouped = categories.map((category) => {
+          const categoryTests = tests.filter(
+            (test) =>
+              (test.categoryId?._id || test.categoryId) ===
+              (category._id || category.id)
+          );
+          return {
+            category,
+            tests: categoryTests,
+          };
+        });
+
+        // Show all categories (even if they have no papers)
+        setGroupedData(grouped);
       } catch (err) {
-        logger.error("Error loading practice tests:", err);
+        logger.error("Error loading practice data:", err);
         setError("Failed to load practice tests. Please try again later.");
       } finally {
         setIsLoading(false);
@@ -78,7 +106,7 @@ const PracticeTestList = ({
     };
 
     if (examId || subjectId || unitId || chapterId || topicId || subTopicId) {
-      loadPracticeTests();
+      loadPracticeData();
     } else {
       setIsLoading(false);
     }
@@ -1042,15 +1070,15 @@ const PracticeTestList = ({
   }
 
   // Show test list
-  if (practiceTests.length === 0) {
+  if (groupedData.length === 0 && !isLoading) {
     return (
-      <div className="bg-gray-50 rounded-lg p-6 border border-gray-200 text-center">
-        <FaFileAlt className="text-4xl text-gray-400 mx-auto mb-3" />
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          No Practice Tests Available
+      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 text-center">
+        <FaFileAlt className="text-3xl text-gray-400 mx-auto mb-2" />
+        <h3 className="text-sm font-semibold text-gray-900 mb-1">
+          No Practice Categories Available
         </h3>
-        <p className="text-sm text-gray-500">
-          There are no practice tests available for this section yet. Check back
+        <p className="text-xs text-gray-500">
+          There are no practice categories available for this section yet. Check back
           later!
         </p>
       </div>
@@ -1059,137 +1087,110 @@ const PracticeTestList = ({
 
   return (
     <div className="space-y-4">
-      {/* Card View - All Screen Sizes */}
-      {practiceTests.map((test, index) => {
-        const hierarchyPath = getHierarchyPath(test);
-        return (
-          <div
-            key={test._id || index}
-            className="bg-white rounded-xl border border-gray-200 shadow-md hover:shadow-lg transition-all duration-200 overflow-hidden group"
-          >
-            <div className="p-5">
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <div className="flex-1 min-w-0">
-                  {test.orderNumber && (
-                    <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-700 text-xs font-bold mb-2">
-                      {test.orderNumber}
-                    </div>
-                  )}
-                  <h3 className="text-base font-bold text-gray-900 group-hover:text-blue-700 transition-colors line-clamp-2 mb-3">
-                    {test.name}
-                  </h3>
-                  {/* Hierarchy Path */}
-                  <div className="mb-4">
-                    {hierarchyPath ? (
-                      <div className="inline-flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-semibold text-gray-500 uppercase">
-                          {hierarchyPath.label}:
-                        </span>
-                        <span
-                          className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white shadow-sm"
-                          style={
-                            hierarchyPath.label === "Topic"
-                              ? {
-                                  backgroundColor: "#F59E0B",
-                                  boxShadow:
-                                    "0 2px 4px rgba(245, 158, 11, 0.3)",
-                                }
-                              : hierarchyPath.label === "Subtopic"
-                              ? {
-                                  backgroundColor: "#06B6D4",
-                                  boxShadow: "0 2px 4px rgba(6, 182, 212, 0.3)",
-                                }
-                              : hierarchyPath.label === "Chapter"
-                              ? {
-                                  backgroundColor: "#EC4899",
-                                  boxShadow:
-                                    "0 2px 4px rgba(236, 72, 153, 0.3)",
-                                }
-                              : {
-                                  backgroundColor: "#8B5CF6",
-                                  boxShadow:
-                                    "0 2px 4px rgba(139, 92, 246, 0.3)",
-                                }
-                          }
-                        >
-                          {hierarchyPath.name}
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="inline-flex items-center px-3 py-1.5 bg-gray-50 text-gray-400 italic rounded-md text-xs">
-                        Not Assigned
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Test Details Grid */}
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="flex items-center gap-2 p-2.5 bg-gray-50 rounded-lg">
-                  <FaClock className="text-gray-500 text-xs flex-shrink-0" />
-                  <div className="min-w-0">
-                    <div className="text-xs text-gray-500 font-medium">
-                      Duration
-                    </div>
-                    <div className="text-sm font-semibold text-gray-900">
-                      {test.duration || "N/A"}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 p-2.5 bg-indigo-50 rounded-lg">
-                  <div className="w-5 h-5 rounded bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs font-bold text-indigo-700">M</span>
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs text-indigo-600 font-medium">
-                      Max Marks
-                    </div>
-                    <div className="text-sm font-bold text-indigo-900">
-                      {test.maximumMarks || 0}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 p-2.5 bg-purple-50 rounded-lg">
-                  <div className="w-5 h-5 rounded bg-purple-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs font-bold text-purple-700">Q</span>
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs text-purple-600 font-medium">
-                      Questions
-                    </div>
-                    <div className="text-sm font-bold text-purple-900">
-                      {test.numberOfQuestions || 0}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 p-2.5 bg-red-50 rounded-lg">
-                  <div className="w-5 h-5 rounded bg-red-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs font-bold text-red-700">-</span>
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs text-red-600 font-medium">
-                      Negative
-                    </div>
-                    <div className="text-sm font-bold text-red-900">
-                      {test.negativeMarks || 0}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Button */}
-              <button
-                onClick={() => setSelectedTest(test._id)}
-                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]"
-              >
-                <FaPlay className="text-xs" />
-                <span>Start Test</span>
-              </button>
-            </div>
+      {/* Group by Category */}
+      {groupedData.map((group, groupIndex) => (
+        <div
+          key={group.category._id || group.category.id || groupIndex}
+          className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm"
+        >
+          {/* Category Header */}
+          <div className="bg-blue-50 px-3 py-2 border-b border-gray-200">
+            <h2 className="text-base font-semibold text-gray-900">
+              {group.category.name}
+            </h2>
           </div>
-        );
-      })}
+
+          {/* Papers/SubCategories Table */}
+          <div className="overflow-x-auto">
+            {group.tests.length === 0 ? (
+              <div className="text-center py-6">
+                <FaFileAlt className="text-2xl text-gray-400 mx-auto mb-1.5" />
+                <p className="text-xs text-gray-500">
+                  No papers available in this category
+                </p>
+              </div>
+            ) : (
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-blue-50">
+                  <tr>
+                    <th className="px-3 py-2 text-left text-xs font-semibold text-gray-900">
+                      {group.category.name}
+                    </th>
+                    <th className="px-2 py-2 text-center text-xs font-semibold text-gray-900">
+                      Questions
+                    </th>
+                    <th className="px-2 py-2 text-center text-xs font-semibold text-gray-900">
+                      Max. Marks
+                    </th>
+                    <th className="px-2 py-2 text-center text-xs font-semibold text-gray-900">
+                      Duration
+                    </th>
+                    <th className="px-2 py-2 text-center text-xs font-semibold text-gray-900">
+                      Attempted
+                    </th>
+                    <th className="px-2 py-2 text-right text-xs font-semibold text-gray-900">
+                      Practice
+                    </th>
+                    <th className="px-3 py-2 text-right text-xs font-semibold text-gray-900">
+                      My Score
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {group.tests.map((test, testIndex) => (
+                    <tr
+                      key={test._id || testIndex}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-3 py-2 whitespace-nowrap">
+                        <div className="text-xs font-medium text-gray-900">
+                          {test.orderNumber ? `${test.orderNumber} ` : ""}
+                          {test.name}
+                        </div>
+                      </td>
+                      <td className="px-2 py-2 whitespace-nowrap text-center">
+                        <span className="text-xs text-gray-600">
+                          {test.numberOfQuestions || 0}
+                        </span>
+                      </td>
+                      <td className="px-2 py-2 whitespace-nowrap text-center">
+                        <span className="text-xs text-gray-600">
+                          {test.maximumMarks || 0}
+                        </span>
+                      </td>
+                      <td className="px-2 py-2 whitespace-nowrap text-center">
+                        <span className="text-xs text-gray-600">
+                          {test.duration || "N/A"}
+                        </span>
+                      </td>
+                      <td className="px-2 py-2 whitespace-nowrap text-center">
+                        <span className="text-xs text-gray-600">
+                          {/* TODO: Add attempted count from API */}
+                          -
+                        </span>
+                      </td>
+                      <td className="px-2 py-2 whitespace-nowrap text-right">
+                        <button
+                          onClick={() => setSelectedTest(test._id)}
+                          className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium transition-colors"
+                        >
+                          Start Test
+                        </button>
+                      </td>
+                      <td className="px-3 py-2 whitespace-nowrap text-right">
+                        <span className="text-xs font-medium text-gray-900">
+                          {/* TODO: Add user score from API - Color code: blue for good scores (>=70%), red for low scores (<50%), black for NA */}
+                          NA
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      ))}
     </div>
   );
 };
