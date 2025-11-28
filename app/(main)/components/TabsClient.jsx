@@ -116,7 +116,7 @@ const TabsClient = ({
       </nav>
 
       {/* Tab Content */}
-      <div className="px-3 sm:px-4 py-3 sm:py-4 text-gray-700 text-sm sm:text-base">
+      <div className=" text-gray-700 text-sm sm:text-base">
         {renderTabContent()}
       </div>
     </section>

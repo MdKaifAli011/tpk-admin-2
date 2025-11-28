@@ -517,7 +517,7 @@ const PracticeTestList = ({
     setShowSubmitModal(true);
   };
 
-  // Submit test (called after confirmation)
+  // Submit test (called after confirmation) and calculate results
   const handleSubmitTest = React.useCallback(
     (autoSubmit = false) => {
       if (timerIntervalRef.current) {
@@ -533,7 +533,7 @@ const PracticeTestList = ({
     [calculateResults]
   );
 
-  // Timer effect
+  // Timer effect to submit test automatically if time is up
   useEffect(() => {
     if (isTestStarted && timeRemaining !== null && timeRemaining > 0) {
       timerIntervalRef.current = setInterval(() => {
@@ -571,7 +571,7 @@ const PracticeTestList = ({
     }
   };
 
-  // Helper function to get the deepest hierarchy level
+  // Helper function to get the deepest hierarchy level of a test
   const getHierarchyPath = (test) => {
     if (test.subTopicId?.name) {
       return {
@@ -604,7 +604,7 @@ const PracticeTestList = ({
     return null;
   };
 
-  // Show test list loading
+  // Show test list loading if tests are not loaded
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -616,7 +616,7 @@ const PracticeTestList = ({
     );
   }
 
-  // Show error
+  // Show error if test is not found
   if (error && !selectedTest) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -628,7 +628,7 @@ const PracticeTestList = ({
     );
   }
 
-  // Show test taking interface
+  // Show test taking interface if test is selected
   if (selectedTest) {
     // Loading test
     if (isLoadingTest) {
@@ -642,7 +642,7 @@ const PracticeTestList = ({
       );
     }
 
-    // Error loading test
+    // Show error loading test if test is not found
     if (error || !test) {
       return (
         <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
@@ -664,7 +664,7 @@ const PracticeTestList = ({
       );
     }
 
-    // No questions
+    // Show no questions available if test has no questions
     if (questions.length === 0) {
       return (
         <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
@@ -687,7 +687,7 @@ const PracticeTestList = ({
       );
     }
 
-    // Results view
+    // Show results view if test is submitted
     if (isTestSubmitted && results) {
       return (
         <div className="space-y-6">
@@ -896,126 +896,159 @@ const PracticeTestList = ({
       );
     }
 
-    // Pre-test start screen
-    if (!isTestStarted) {
+    // Show pre-test start screen if test is not started
+ if (!isTestStarted) {
       return (
-        <div className="max-w-7xl mx-auto space-y-4">
-          <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-            {/* Header */}
-            <div className="text-center mb-4">
-              <h1 className="text-xl font-semibold text-gray-900 mb-1.5 leading-tight">
-                {test.name}
-              </h1>
-            </div>
+<div className="">
 
-            {/* Test Details Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <FaClock className="text-gray-600 text-xs" />
-                  <span className="text-xs font-medium text-gray-600">
-                    Duration
-                  </span>
-                </div>
-                <div className="text-base font-semibold text-gray-900">
-                  {test.duration || "No Limit"}
-                </div>
-              </div>
+{/* OUTER WRAPPER */}
+<div className="">
 
-              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-medium text-gray-600">
-                    Total Questions
-                  </span>
-                </div>
-                <div className="text-base font-semibold text-gray-900">
-                  {questions.length}
-                </div>
-              </div>
+  {/* TITLE */}
+  <div className="py-4 text-center border-b border-gray-200">
+    <h1 className="text-lg md:text-xl font-bold text-gray-900">
+      {test.name}
+    </h1>
 
-              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-medium text-gray-600">
-                    Maximum Marks
-                  </span>
-                </div>
-                <div className="text-base font-semibold text-gray-900">
-                  {test.maximumMarks || 0}
-                </div>
-              </div>
+    <p className="text-[11px] md:text-xs text-gray-500 mt-1">
+      Let's boost your preparation today 🚀
+    </p>
+  </div>
 
-              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-medium text-gray-600">
-                    Negative Marks
-                  </span>
-                </div>
-                <div className="text-base font-semibold text-gray-900">
-                  {test.negativeMarks || 0} per wrong answer
-                </div>
-              </div>
-            </div>
+  {/* HIGHLIGHT STRIP */}
+  <div className="
+    bg-gradient-to-r from-blue-50 to-indigo-50 
+    border-b border-gray-200 
+    px-3 md:px-6 py-2 flex items-center justify-between
+  ">
+    <span className="text-[10px] md:text-sm font-medium text-gray-700">
+      ⭐ Recommended: Attempt calmly & review before submission
+    </span>
 
-            {/* Instructions Section */}
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
-              <h3 className="text-base font-semibold text-gray-900 mb-3">
-                Instructions
-              </h3>
-              {test.description && test.description.trim() ? (
-                <ul className="text-xs text-gray-600 space-y-1.5 list-disc list-inside leading-relaxed">
-                  {test.description
-                    .split("\n")
-                    .filter((line) => line.trim())
-                    .map((line, index) => (
-                      <li key={index}>{line.trim()}</li>
-                    ))}
-                </ul>
-              ) : (
-                <ul className="text-xs text-gray-600 space-y-1.5 list-disc list-inside leading-relaxed">
-                  <li>
-                    Read each question carefully before selecting your answer
-                  </li>
-                  <li>
-                    You can navigate between questions using the navigation
-                    buttons
-                  </li>
-                  <li>
-                    Mark questions for review if you want to come back to them
-                    later
-                  </li>
-                  <li>
-                    {test.duration
-                      ? `You have ${test.duration} to complete the test`
-                      : "There is no time limit for this test"}
-                  </li>
-                  <li>
-                    {test.negativeMarks > 0
-                      ? `Incorrect answers will result in -${test.negativeMarks} marks`
-                      : "There are no negative marks for incorrect answers"}
-                  </li>
-                  <li>Review your answers before submitting</li>
-                </ul>
-              )}
-            </div>
+    <span className="
+      px-2 py-[3px] md:px-3 md:py-1
+      text-[10px] md:text-xs
+      font-semibold text-white 
+      bg-blue-600 
+      rounded-full shadow-sm
+    ">
+      Practice Mode
+    </span>
+  </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center justify-center gap-3 pt-3 border-t border-gray-200">
-              <button
-                onClick={handleBackToList}
-                className="px-4 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg text-xs font-medium transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleStartTest}
-                className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5"
-              >
-                <FaCheck className="text-xs" />
-                Start Test
-              </button>
-            </div>
-          </div>
-        </div>
+  {/* STATS GRID — FULLY RESPONSIVE */}
+  <div className="
+    grid grid-cols-2 md:grid-cols-4 
+    text-center text-xs md:text-sm 
+    border-b border-gray-200
+  ">
+    <div className="p-3 md:p-4 border-b md:border-b-0 border-r border-gray-200">
+      <p className="text-gray-500 text-[10px] md:text-xs">Duration</p>
+      <p className="text-sm md:text-lg font-bold text-gray-900">{test.duration}</p>
+    </div>
+
+    <div className="p-3 md:p-4 border-b md:border-b-0 border-r border-gray-200">
+      <p className="text-gray-500 text-[10px] md:text-xs">Questions</p>
+      <p className="text-sm md:text-lg font-bold text-gray-900">{questions.length}</p>
+    </div>
+
+    <div className="p-3 md:p-4 border-b md:border-b-0 border-r border-gray-200">
+      <p className="text-gray-500 text-[10px] md:text-xs">Max Marks</p>
+      <p className="text-sm md:text-lg font-bold text-gray-900">{test.maximumMarks}</p>
+    </div>
+
+    <div className="p-3 md:p-4">
+      <p className="text-gray-500 text-[10px] md:text-xs">Negative</p>
+      <p className="text-sm md:text-lg font-bold text-gray-900">{test.negativeMarks}</p>
+    </div>
+  </div>
+
+  {/* INSTRUCTIONS */}
+  <div className="p-4 md:p-6">
+    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 md:p-5">
+
+      <h3 className="text-sm md:text-base font-semibold text-gray-900 mb-2 md:mb-3">
+        Important Instructions
+      </h3>
+
+      <ul className="text-[11px] md:text-sm text-gray-700 space-y-1.5 md:space-y-2 leading-relaxed">
+        {(test.description?.trim()
+          ? test.description.split("\n").map(line => line.trim())
+          : [
+              "Read each question carefully.",
+              "You may navigate between questions anytime.",
+              "Use “Mark for Review” for doubtful questions.",
+              test.duration
+                ? `Complete the test within ${test.duration}.`
+                : "No time limit.",
+              test.negativeMarks > 0
+                ? `Each incorrect answer deducts ${test.negativeMarks} marks.`
+                : "No negative marking.",
+              "Review answers before final submission."
+            ]
+        ).map((line, index) => (
+          <li key={index} className="flex gap-2">
+            <span className="mt-[2px] text-gray-400">•</span>
+            <span>{line}</span>
+          </li>
+        ))}
+      </ul>
+
+    </div>
+  </div>
+
+  {/* ACTION BUTTONS */}
+  <div
+    className="
+      px-4 md:px-6 py-3 
+      border-t border-gray-200 
+      bg-gray-50 
+      flex flex-col md:flex-row 
+      justify-center 
+      gap-2 md:gap-4
+    "
+  >
+    {/* CANCEL BUTTON */}
+    <button
+      onClick={handleBackToList}
+      className="
+        px-4 py-2 
+        bg-white 
+        border border-gray-300 
+        text-gray-700 
+        rounded-md 
+        text-[11px] md:text-xs font-medium 
+        hover:bg-gray-100 
+        transition
+      "
+    >
+      Cancel
+    </button>
+
+    {/* START BUTTON (OWO LEVEL) */}
+    <button
+      onClick={handleStartTest}
+      className="
+        px-5 py-2 
+        bg-gradient-to-r from-blue-600 to-indigo-600
+        text-white 
+        rounded-md 
+        text-[11px] md:text-xs font-semibold shadow 
+        hover:from-blue-700 hover:to-indigo-700
+        flex items-center justify-center 
+        gap-1.5 md:gap-2 transition
+      "
+    >
+      <FaCheck className="text-[10px] md:text-xs" />
+      Start Test
+    </button>
+  </div>
+
+</div>
+</div>
+
+      
+      
       );
     }
 
@@ -1332,15 +1365,17 @@ const PracticeTestList = ({
     );
   }
 
+
+  // Show practice test list
   return (
-    <div className="space-y-6">
+    <div className="space-y-2">
     {groupedData.map((group, groupIndex) => (
       <div
         key={groupIndex}
         className="
           bg-white 
-          rounded-xl 
-          border border-gray-200 
+        
+          
           shadow-sm 
           hover:shadow-md 
           transition-all 

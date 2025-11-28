@@ -28,7 +28,7 @@ const OverviewTab = ({
   activeTab,
 }) => {
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 px-3 sm:px-4 py-3 sm:py-4">
       {/* Download Button - only for unit type */}
       {entityType === "unit" && unitName && (
         <div className="flex justify-end mb-2">

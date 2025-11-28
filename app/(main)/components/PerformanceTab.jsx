@@ -32,7 +32,7 @@ const PerformanceTab = ({ entityType, entityName }) => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 px-3 sm:px-4 py-3 sm:py-4">
       <div>
         <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
           Performance Analytics
