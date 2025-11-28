@@ -1333,115 +1333,178 @@ const PracticeTestList = ({
   }
 
   return (
-    <div className="space-y-4">
-      {/* Group by Category */}
-      {groupedData.map((group, groupIndex) => (
-        <div
-          key={group.category._id || group.category.id || groupIndex}
-          className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
-        >
-          {/* Category Header */}
-          <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
-            <h2 className="text-sm font-semibold text-gray-900">
-              {group.category.name}
-            </h2>
-          </div>
-
-          {/* Papers/SubCategories Table */}
-          <div className="overflow-x-auto">
-            {group.tests.length === 0 ? (
-              <div className="text-center py-6">
-                <FaFileAlt className="text-2xl text-gray-400 mx-auto mb-2" />
-                <p className="text-xs text-gray-500">
-                  No papers available in this category
-                </p>
-              </div>
-            ) : (
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Paper Name
-                    </th>
-                    <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Questions
-                    </th>
-                    <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Max. Marks
-                    </th>
-                    <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Duration
-                    </th>
-                    <th className="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Attempted
-                    </th>
-                    <th className="px-2 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Practice
-                    </th>
-                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      My Score
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {group.tests.map((test, testIndex) => (
-                    <tr
-                      key={test._id || testIndex}
-                      className="hover:bg-gray-50 transition-colors"
+    <div className="space-y-6">
+    {groupedData.map((group, groupIndex) => (
+      <div
+        key={groupIndex}
+        className="
+          bg-white 
+          rounded-xl 
+          border border-gray-200 
+          shadow-sm 
+          hover:shadow-md 
+          transition-all 
+          duration-200
+          overflow-hidden
+        "
+      >
+        {/* TABLE FOR DESKTOP */}
+        <div className="overflow-x-auto hidden md:block">
+          <table className="min-w-full table-fixed">
+            
+            {/* FIXED HEADER */}
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr className="text-[11px] font-semibold text-gray-600 uppercase tracking-wide">
+                
+                {/* Column 1 */}
+                <th className="px-4 py-2 text-left w-[28%] text-sm text-blue-600">
+                  {group.category.name}
+                </th>
+  
+                {/* Column 2 */}
+                <th className="px-3 py-2 text-center w-[10%]">Questions</th>
+  
+                {/* Column 3 */}
+                <th className="px-3 py-2 text-center w-[12%]">Max. Marks</th>
+  
+                {/* Column 4 */}
+                <th className="px-3 py-2 text-center w-[12%]">Duration</th>
+  
+                {/* Column 5 */}
+                <th className="px-3 py-2 text-center w-[12%]">Attempted</th>
+  
+                {/* Column 6 */}
+                <th className="px-3 py-2 text-right w-[13%]">Practice</th>
+  
+                {/* Column 7 */}
+                <th className="px-4 py-2 text-right w-[13%]">My Score</th>
+              </tr>
+            </thead>
+  
+            {/* BODY */}
+            <tbody className="divide-y divide-gray-200 bg-white">
+              {group.tests.map((test, i) => (
+                <tr key={i} className="hover:bg-gray-50 transition-all">
+  
+                  {/* Col 1 */}
+                  <td className="px-4 py-2 w-[28%]">
+                    <div className="text-sm font-semibold text-gray-900">
+                      <span className="mr-1">
+                        {test.orderNumber}.
+                      </span>
+                      {test.name}
+                    </div>
+                  </td>
+  
+                  {/* Col 2 */}
+                  <td className="px-3 py-2 text-center text-sm text-gray-700 w-[10%]">
+                    {test.numberOfQuestions || 0}
+                  </td>
+  
+                  {/* Col 3 */}
+                  <td className="px-3 py-2 text-center text-sm text-gray-700 w-[12%]">
+                    {test.maximumMarks || 0}
+                  </td>
+  
+                  {/* Col 4 */}
+                  <td className="px-3 py-2 text-center text-sm text-gray-700 w-[12%]">
+                    {test.duration || "N/A"}
+                  </td>
+  
+                  {/* Col 5 */}
+                  <td className="px-3 py-2 text-center text-sm text-gray-500 w-[12%]">
+                    –
+                  </td>
+  
+                  {/* Col 6 */}
+                  <td className="px-3 py-2 text-right w-[13%]">
+                    <button
+                      onClick={() => setSelectedTest(test._id)}
+                      className="
+                        px-4 py-1.5
+                        bg-blue-600 
+                        hover:bg-blue-700 
+                        text-white 
+                        text-xs font-semibold 
+                        rounded-md 
+                        shadow-sm 
+                        hover:shadow
+                        transition-all
+                      "
                     >
-                      <td className="px-3 py-2 whitespace-nowrap">
-                        <div className="text-xs font-semibold text-gray-900">
-                          {test.orderNumber ? (
-                            <span className="text-blue-600 font-semibold mr-1">
-                              {test.orderNumber}.
-                            </span>
-                          ) : null}
-                          {test.name}
-                        </div>
-                      </td>
-                      <td className="px-2 py-2 whitespace-nowrap text-center">
-                        <span className="text-xs font-semibold text-gray-600">
-                          {test.numberOfQuestions || 0}
-                        </span>
-                      </td>
-                      <td className="px-2 py-2 whitespace-nowrap text-center">
-                        <span className="text-xs font-semibold text-gray-600">
-                          {test.maximumMarks || 0}
-                        </span>
-                      </td>
-                      <td className="px-2 py-2 whitespace-nowrap text-center">
-                        <span className="text-xs font-semibold text-gray-600">
-                          {test.duration || "N/A"}
-                        </span>
-                      </td>
-                      <td className="px-2 py-2 whitespace-nowrap text-center">
-                        <span className="text-xs font-semibold text-gray-600">
-                          {/* TODO: Add attempted count from API */}-
-                        </span>
-                      </td>
-                      <td className="px-2 py-2 whitespace-nowrap text-right">
-                        <button
-                          onClick={() => setSelectedTest(test._id)}
-                          className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold transition-colors"
-                        >
-                          Start Test
-                        </button>
-                      </td>
-                      <td className="px-3 py-2 whitespace-nowrap text-right">
-                        <span className="text-xs font-semibold text-gray-600">
-                          {/* TODO: Add user score from API - Color code: blue for good scores (>=70%), red for low scores (<50%), black for NA */}
-                          NA
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
+                      Start
+                    </button>
+                  </td>
+  
+                  {/* Col 7 */}
+                  <td className="px-4 py-2 text-right text-sm font-bold w-[13%]">
+                    <span className="text-gray-500">NA</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+  
+          </table>
         </div>
-      ))}
+  
+     {/* 🎯 MOBILE CARD VIEW */}
+<div className="md:hidden divide-y divide-gray-200">
+  {group.tests.map((test, i) => (
+    <div key={i} className="px-4 py-3">
+
+      {/* Show category name ONLY for the first test */}
+      {i === 0 && (
+        <div className="text-sm font-bold text-blue-600 mb-2">
+          {group.category.name}
+        </div>
+      )}
+
+      {/* Paper Name */}
+      <div className="text-sm font-semibold text-gray-900">
+        <span className=" mr-1">{test.orderNumber}.</span>
+        {test.name}
+      </div>
+
+      {/* Details */}
+      <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-gray-700">
+        <div>Questions: {test.numberOfQuestions || 0}</div>
+        <div>Marks: {test.maximumMarks || 0}</div>
+        <div>Duration: {test.duration || "N/A"}</div>
+        <div>Attempted: –</div>
+      </div>
+
+      {/* Button + Score */}
+      <div className="mt-3 flex items-center justify-between">
+        <button
+          onClick={() => setSelectedTest(test._id)}
+          className="
+            px-4 py-1.5 
+            bg-blue-600 
+            text-white 
+            text-[11px]
+            font-semibold 
+            rounded-md 
+            hover:bg-blue-700 
+            shadow-sm 
+            transition-all
+          "
+        >
+          Start
+        </button>
+
+        <div className="text-xs font-bold text-gray-500">
+          NA
+        </div>
+      </div>
+
     </div>
+  ))}
+</div>
+
+      </div>
+    ))}
+  </div>
+  
   );
 };
 
