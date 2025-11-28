@@ -502,6 +502,21 @@ What is the capital of India?,Mumbai,Delhi,Kolkata,Chennai,B,https://example.com
             errorCount++;
           }
         } catch (err) {
+          // Handle permission errors (403) - stop import immediately
+          if (err?.response?.status === 403) {
+            const permissionError = err?.response?.data?.message || 
+              "You don't have permission to create practice questions";
+            setImportError(permissionError);
+            showErrorRef.current(permissionError);
+            setIsImporting(false);
+            setShowImportModal(false);
+            // Reset file input
+            if (fileInputRef.current) {
+              fileInputRef.current.value = "";
+            }
+            return; // Stop processing remaining rows
+          }
+          
           errors.push(
             `Row ${rowNum}: ${
               err?.response?.data?.message || err?.message || "Unknown error"
@@ -529,10 +544,18 @@ What is the capital of India?,Mumbai,Delhi,Kolkata,Chennai,B,https://example.com
       }
       setShowImportModal(false);
     } catch (err) {
-      console.error("❌ Error importing CSV:", err);
-      const errorMessage = err?.message || "Failed to import CSV file";
-      setImportError(errorMessage);
-      showErrorRef.current(errorMessage);
+      // Handle permission errors (403) with user-friendly message
+      if (err?.response?.status === 403) {
+        const permissionError = err?.response?.data?.message || 
+          "You don't have permission to create practice questions. Only administrators and super moderators can import questions.";
+        setImportError(permissionError);
+        showErrorRef.current(permissionError);
+      } else {
+        console.error("❌ Error importing CSV:", err);
+        const errorMessage = err?.response?.data?.message || err?.message || "Failed to import CSV file";
+        setImportError(errorMessage);
+        showErrorRef.current(errorMessage);
+      }
     } finally {
       setIsImporting(false);
     }
@@ -696,8 +719,18 @@ What is the capital of India?,Mumbai,Delhi,Kolkata,Chennai,B,https://example.com
         throw new Error(response.data?.message || "Failed to save question");
       }
     } catch (err) {
-      console.error("❌ Error creating question:", err);
-      showError(err.response?.data?.message || "Failed to create question");
+      // Handle permission errors (403) with user-friendly message
+      if (err?.response?.status === 403) {
+        const permissionError = err?.response?.data?.message || 
+          "You don't have permission to create practice questions. Only administrators and super moderators can create questions.";
+        setFormError(permissionError);
+        showError(permissionError);
+      } else {
+        console.error("❌ Error creating question:", err);
+        const errorMessage = err?.response?.data?.message || err?.message || "Failed to create question";
+        setFormError(errorMessage);
+        showError(errorMessage);
+      }
     } finally {
       setIsFormLoading(false);
     }
