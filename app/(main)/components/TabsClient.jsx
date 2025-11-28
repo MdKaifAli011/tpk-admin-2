@@ -1,12 +1,10 @@
 "use client";
 
-import React, { useState, lazy, Suspense } from "react";
+import React, { useState } from "react";
 import OverviewTab from "./OverviewTab";
 import DiscussionForumTab from "./DiscussionForumTab";
+import PracticeTestTab from "./PracticeTestTab";
 import PerformanceTab from "./PerformanceTab";
-
-// Lazy load PracticeTestList to reduce initial bundle size
-const PracticeTestList = lazy(() => import("./PracticeTestList"));
 
 const TABS = ["Overview", "Discussion Forum", "Practice Test", "Performance"];
 
@@ -73,27 +71,14 @@ const TabsClient = ({
 
       case "Practice Test":
         return (
-          <div>
-            <Suspense
-              fallback={
-                <div className="flex items-center justify-center py-8">
-                  <div className="text-center">
-                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent mb-4"></div>
-                    <p className="text-gray-600">Loading practice tests...</p>
-                  </div>
-                </div>
-              }
-            >
-              <PracticeTestList
-                examId={examId}
-                subjectId={subjectId}
-                unitId={unitId}
-                chapterId={chapterId}
-                topicId={topicId}
-                subTopicId={subTopicId}
-              />
-            </Suspense>
-          </div>
+          <PracticeTestTab
+            examId={examId}
+            subjectId={subjectId}
+            unitId={unitId}
+            chapterId={chapterId}
+            topicId={topicId}
+            subTopicId={subTopicId}
+          />
         );
 
       case "Performance":
