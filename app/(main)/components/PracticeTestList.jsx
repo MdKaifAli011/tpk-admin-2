@@ -897,109 +897,123 @@ const PracticeTestList = ({
     }
 
     // Show pre-test start screen if test is not started
- if (!isTestStarted) {
+    if (!isTestStarted) {
       return (
-<div className="">
+        <div className="">
+          {/* OUTER WRAPPER */}
+          <div className="">
+            {/* TITLE */}
+            <div className="py-4 text-center border-b border-gray-200">
+              <h1 className="text-lg md:text-xl font-bold text-gray-900">
+                {test.name}
+              </h1>
 
-{/* OUTER WRAPPER */}
-<div className="">
+              <p className="text-[11px] md:text-xs text-gray-500 mt-1">
+                Let's boost your preparation today 🚀
+              </p>
+            </div>
 
-  {/* TITLE */}
-  <div className="py-4 text-center border-b border-gray-200">
-    <h1 className="text-lg md:text-xl font-bold text-gray-900">
-      {test.name}
-    </h1>
-
-    <p className="text-[11px] md:text-xs text-gray-500 mt-1">
-      Let's boost your preparation today 🚀
-    </p>
-  </div>
-
-  {/* HIGHLIGHT STRIP */}
-  <div className="
+            {/* HIGHLIGHT STRIP */}
+            <div
+              className="
     bg-gradient-to-r from-blue-50 to-indigo-50 
     border-b border-gray-200 
     px-3 md:px-6 py-2 flex items-center justify-between
-  ">
-    <span className="text-[10px] md:text-sm font-medium text-gray-700">
-      ⭐ Recommended: Attempt calmly & review before submission
-    </span>
+  "
+            >
+              <span className="text-[10px] md:text-sm font-medium text-gray-700">
+                ⭐ Recommended: Attempt calmly & review before submission
+              </span>
 
-    <span className="
+              <span
+                className="
       px-2 py-[3px] md:px-3 md:py-1
       text-[10px] md:text-xs
       font-semibold text-white 
       bg-blue-600 
       rounded-full shadow-sm
-    ">
-      Practice Mode
-    </span>
-  </div>
+    "
+              >
+                Practice Mode
+              </span>
+            </div>
 
-  {/* STATS GRID — FULLY RESPONSIVE */}
-  <div className="
+            {/* STATS GRID — FULLY RESPONSIVE */}
+            <div
+              className="
     grid grid-cols-2 md:grid-cols-4 
     text-center text-xs md:text-sm 
     border-b border-gray-200
-  ">
-    <div className="p-3 md:p-4 border-b md:border-b-0 border-r border-gray-200">
-      <p className="text-gray-500 text-[10px] md:text-xs">Duration</p>
-      <p className="text-sm md:text-lg font-bold text-gray-900">{test.duration}</p>
-    </div>
+  "
+            >
+              <div className="p-3 md:p-4 border-b md:border-b-0 border-r border-gray-200">
+                <p className="text-gray-500 text-[10px] md:text-xs">Duration</p>
+                <p className="text-sm md:text-lg font-bold text-gray-900">
+                  {test.duration}
+                </p>
+              </div>
 
-    <div className="p-3 md:p-4 border-b md:border-b-0 border-r border-gray-200">
-      <p className="text-gray-500 text-[10px] md:text-xs">Questions</p>
-      <p className="text-sm md:text-lg font-bold text-gray-900">{questions.length}</p>
-    </div>
+              <div className="p-3 md:p-4 border-b md:border-b-0 border-r border-gray-200">
+                <p className="text-gray-500 text-[10px] md:text-xs">
+                  Questions
+                </p>
+                <p className="text-sm md:text-lg font-bold text-gray-900">
+                  {questions.length}
+                </p>
+              </div>
 
-    <div className="p-3 md:p-4 border-b md:border-b-0 border-r border-gray-200">
-      <p className="text-gray-500 text-[10px] md:text-xs">Max Marks</p>
-      <p className="text-sm md:text-lg font-bold text-gray-900">{test.maximumMarks}</p>
-    </div>
+              <div className="p-3 md:p-4 border-b md:border-b-0 border-r border-gray-200">
+                <p className="text-gray-500 text-[10px] md:text-xs">
+                  Max Marks
+                </p>
+                <p className="text-sm md:text-lg font-bold text-gray-900">
+                  {test.maximumMarks}
+                </p>
+              </div>
 
-    <div className="p-3 md:p-4">
-      <p className="text-gray-500 text-[10px] md:text-xs">Negative</p>
-      <p className="text-sm md:text-lg font-bold text-gray-900">{test.negativeMarks}</p>
-    </div>
-  </div>
+              <div className="p-3 md:p-4">
+                <p className="text-gray-500 text-[10px] md:text-xs">Negative</p>
+                <p className="text-sm md:text-lg font-bold text-gray-900">
+                  {test.negativeMarks}
+                </p>
+              </div>
+            </div>
 
-  {/* INSTRUCTIONS */}
-  <div className="p-4 md:p-6">
-    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 md:p-5">
+            {/* INSTRUCTIONS */}
+            <div className="p-4 md:p-6">
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 md:p-5">
+                <h3 className="text-sm md:text-base font-semibold text-gray-900 mb-2 md:mb-3">
+                  Important Instructions
+                </h3>
 
-      <h3 className="text-sm md:text-base font-semibold text-gray-900 mb-2 md:mb-3">
-        Important Instructions
-      </h3>
+                <ul className="text-[11px] md:text-sm text-gray-700 space-y-1.5 md:space-y-2 leading-relaxed">
+                  {(test.description?.trim()
+                    ? test.description.split("\n").map((line) => line.trim())
+                    : [
+                        "Read each question carefully.",
+                        "You may navigate between questions anytime.",
+                        "Use “Mark for Review” for doubtful questions.",
+                        test.duration
+                          ? `Complete the test within ${test.duration}.`
+                          : "No time limit.",
+                        test.negativeMarks > 0
+                          ? `Each incorrect answer deducts ${test.negativeMarks} marks.`
+                          : "No negative marking.",
+                        "Review answers before final submission.",
+                      ]
+                  ).map((line, index) => (
+                    <li key={index} className="flex gap-2">
+                      <span className="mt-[2px] text-gray-400">•</span>
+                      <span>{line}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
 
-      <ul className="text-[11px] md:text-sm text-gray-700 space-y-1.5 md:space-y-2 leading-relaxed">
-        {(test.description?.trim()
-          ? test.description.split("\n").map(line => line.trim())
-          : [
-              "Read each question carefully.",
-              "You may navigate between questions anytime.",
-              "Use “Mark for Review” for doubtful questions.",
-              test.duration
-                ? `Complete the test within ${test.duration}.`
-                : "No time limit.",
-              test.negativeMarks > 0
-                ? `Each incorrect answer deducts ${test.negativeMarks} marks.`
-                : "No negative marking.",
-              "Review answers before final submission."
-            ]
-        ).map((line, index) => (
-          <li key={index} className="flex gap-2">
-            <span className="mt-[2px] text-gray-400">•</span>
-            <span>{line}</span>
-          </li>
-        ))}
-      </ul>
-
-    </div>
-  </div>
-
-  {/* ACTION BUTTONS */}
-  <div
-    className="
+            {/* ACTION BUTTONS */}
+            <div
+              className="
       px-4 md:px-6 py-3 
       border-t border-gray-200 
       bg-gray-50 
@@ -1007,11 +1021,11 @@ const PracticeTestList = ({
       justify-center 
       gap-2 md:gap-4
     "
-  >
-    {/* CANCEL BUTTON */}
-    <button
-      onClick={handleBackToList}
-      className="
+            >
+              {/* CANCEL BUTTON */}
+              <button
+                onClick={handleBackToList}
+                className="
         px-4 py-2 
         bg-white 
         border border-gray-300 
@@ -1021,14 +1035,14 @@ const PracticeTestList = ({
         hover:bg-gray-100 
         transition
       "
-    >
-      Cancel
-    </button>
+              >
+                Cancel
+              </button>
 
-    {/* START BUTTON (OWO LEVEL) */}
-    <button
-      onClick={handleStartTest}
-      className="
+              {/* START BUTTON (OWO LEVEL) */}
+              <button
+                onClick={handleStartTest}
+                className="
         px-5 py-2 
         bg-gradient-to-r from-blue-600 to-indigo-600
         text-white 
@@ -1038,17 +1052,13 @@ const PracticeTestList = ({
         flex items-center justify-center 
         gap-1.5 md:gap-2 transition
       "
-    >
-      <FaCheck className="text-[10px] md:text-xs" />
-      Start Test
-    </button>
-  </div>
-
-</div>
-</div>
-
-      
-      
+              >
+                <FaCheck className="text-[10px] md:text-xs" />
+                Start Test
+              </button>
+            </div>
+          </div>
+        </div>
       );
     }
 
@@ -1123,7 +1133,7 @@ const PracticeTestList = ({
           </div>
         )}
         {/* Test Header */}
-        <div className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm sticky top-0 z-10">
+        <div className="p-3 shadow-sm sticky top-0 z-10">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
             <div className="flex-1">
               <h1 className="text-base font-semibold text-gray-900 mb-1">
@@ -1169,180 +1179,179 @@ const PracticeTestList = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          {/* Main Question Area */}
-          <div className="lg:col-span-3 space-y-4">
-            {/* Question Card */}
-            <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center justify-center w-8 h-8 rounded-full font-medium bg-gray-100 text-gray-900 border border-gray-200 text-xs">
-                    {currentQuestionIndex + 1}
-                  </span>
-                  <h2 className="text-base font-semibold text-gray-900">
-                    {currentQuestion.question}
-                  </h2>
-                </div>
-                <button
-                  onClick={() => handleToggleMarked(currentQuestion._id)}
-                  className={`p-1.5 rounded-lg transition-colors ${
-                    markedForReview.has(currentQuestion._id)
-                      ? "bg-gray-100 text-gray-900"
-                      : "bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
-                  }`}
-                  title="Mark for Review"
-                >
-                  <FaFlag className="text-xs" />
-                </button>
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* LEFT: QUESTION PANEL */}
+          <div className="lg:col-span-3   p-6 shadow-sm">
+            {/* QUESTION HEADER */}
+            <div className="flex items-center justify-between mb-5 pb-3 border-b border-gray-200">
+              <h2 className="text-sm font-semibold text-gray-700">
+                Question {currentQuestionIndex + 1} of {questions.length}
+              </h2>
 
-              {/* Options */}
-              <div className="space-y-2">
-                {["A", "B", "C", "D"].map((option) => {
-                  const optionKey = `option${option}`;
-                  const optionText = currentQuestion[optionKey];
-                  const isSelected = answers[currentQuestion._id] === option;
-
-                  return (
-                    <button
-                      key={option}
-                      onClick={() =>
-                        handleAnswerSelect(currentQuestion._id, option)
-                      }
-                      className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                        isSelected
-                          ? "bg-blue-50 border-blue-500"
-                          : "bg-white border-gray-200 hover:border-blue-300 hover:bg-blue-50"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div
-                          className={`w-7 h-7 rounded-full flex items-center justify-center font-semibold text-xs ${
-                            isSelected
-                              ? "bg-blue-600 text-white"
-                              : "bg-gray-200 text-gray-700"
-                          }`}
-                        >
-                          {option}
-                        </div>
-                        <span className="text-xs font-medium text-gray-800 flex-1">
-                          {optionText}
-                        </span>
-                        {isSelected && (
-                          <FaCheckCircle className="text-blue-600 text-xs" />
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+              <button
+                onClick={() => handleToggleMarked(currentQuestion._id)}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md border border-gray-300 bg-gray-50 hover:bg-gray-100"
+              >
+                <FaFlag className="text-[10px]" />
+                {markedForReview.has(currentQuestion._id) ? "Marked" : "Mark"}
+              </button>
             </div>
 
-            {/* Navigation Buttons */}
-            <div className="flex items-center justify-between bg-white rounded-lg border border-gray-200 p-3 shadow-sm">
+            {/* QUESTION TEXT */}
+            <div className="text-gray-900 text-[15px] leading-relaxed mb-6">
+              {currentQuestion.question}
+            </div>
+
+            {/* OPTIONS */}
+            <div className="space-y-3">
+              {["A", "B", "C", "D"].map((opt) => {
+                const key = `option${opt}`;
+                const selected = answers[currentQuestion._id] === opt;
+
+                return (
+                  <label
+                    key={opt}
+                    className={`
+            flex items-start gap-3 p-3 rounded-lg cursor-pointer border transition 
+            ${
+              selected
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-300 bg-white hover:bg-gray-50"
+            }
+          `}
+                  >
+                    {/* Radio Circle */}
+                    <div
+                      className={`
+              w-5 h-5 rounded-full flex items-center justify-center border 
+              ${selected ? "bg-blue-600 border-blue-700" : "border-gray-400"}
+            `}
+                    >
+                      {selected && (
+                        <FaCheck className="text-white text-[9px]" />
+                      )}
+                    </div>
+
+                    {/* Option Text */}
+                    <span className="text-[14px] text-gray-800 flex-1 leading-relaxed">
+                      {currentQuestion[key]}
+                    </span>
+
+                    {/* Option Letter */}
+                    <span className="text-[10px] text-gray-500">{opt}</span>
+
+                    <input
+                      type="radio"
+                      checked={selected}
+                      onChange={() =>
+                        handleAnswerSelect(currentQuestion._id, opt)
+                      }
+                      className="hidden"
+                    />
+                  </label>
+                );
+              })}
+            </div>
+
+            {/* BOTTOM BUTTONS */}
+            <div className="flex justify-between items-center mt-8 pt-5 border-t border-gray-200">
               <button
                 onClick={() => goToQuestion(currentQuestionIndex - 1)}
                 disabled={currentQuestionIndex === 0}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-5 py-2 text-sm border border-gray-300 rounded-md bg-gray-50 text-gray-800 hover:bg-gray-100 disabled:opacity-40"
               >
-                <FaArrowLeft className="text-xs" />
-                <span>Previous</span>
+                Previous
               </button>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleShowSubmitModal}
-                  className="flex items-center gap-1.5 px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition-colors"
-                >
-                  <FaSave className="text-xs" />
-                  <span>Submit Test</span>
-                </button>
-              </div>
 
               <button
                 onClick={() => goToQuestion(currentQuestionIndex + 1)}
                 disabled={currentQuestionIndex === questions.length - 1}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-5 py-2 text-sm border border-gray-300 rounded-md bg-gray-50 text-gray-800 hover:bg-gray-100 disabled:opacity-40"
               >
-                <span>Next</span>
-                <FaArrowRight className="text-xs" />
+                Next
               </button>
             </div>
           </div>
 
-          {/* Question Navigator Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg border border-gray-200 p-3 shadow-sm sticky top-24">
-              <h3 className="text-xs font-semibold text-gray-900 mb-2">
-                Question Navigator
+          {/* RIGHT: SIDEBAR */}
+          <div className="space-y-6 sticky top-20">
+            {/* QUESTION PALETTE */}
+            <div className="bg-white  p-5 shadow-sm">
+              <h3 className="text-xs font-medium text-gray-600 uppercase mb-3">
+                Question Palette
               </h3>
-              <div className="grid grid-cols-5 gap-1.5 max-h-80 overflow-y-auto">
-                {questions.map((question, index) => {
-                  const isAnswered = answers[question._id] !== null;
-                  const isMarked = markedForReview.has(question._id);
-                  const isCurrent = index === currentQuestionIndex;
+
+              <div className="grid grid-cols-[repeat(auto-fit,_minmax(2rem,_1fr))] gap-2">
+                {questions.map((q, idx) => {
+                  const ans = !!answers[q._id];
+                  const mark = markedForReview.has(q._id);
+                  const cur = idx === currentQuestionIndex;
+
+                  let cls =
+                    "aspect-square max-w-8 mx-auto rounded-full flex items-center justify-center text-[11px] font-medium border transition-colors duration-150 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2";
+
+                  if (cur)
+                    cls +=
+                      " bg-blue-600 text-white border-blue-700 focus:ring-blue-600";
+                  else if (ans && mark)
+                    cls +=
+                      " bg-purple-500 text-white border-purple-600 focus:ring-purple-500";
+                  else if (ans)
+                    cls +=
+                      " bg-green-500 text-white border-green-600 focus:ring-green-500";
+                  else if (mark)
+                    cls +=
+                      " bg-yellow-400 text-gray-900 border-yellow-500 focus:ring-yellow-400";
+                  else
+                    cls +=
+                      "w-8 h-8 bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200 focus:ring-gray-400";
 
                   return (
                     <button
-                      key={question._id}
-                      onClick={() => goToQuestion(index)}
-                      className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${
-                        isCurrent
-                          ? "bg-blue-600 text-white ring-2 ring-blue-500 shadow-md"
-                          : isAnswered && isMarked
-                          ? "bg-purple-500 text-white border-2 border-purple-600 hover:bg-purple-600"
-                          : isAnswered
-                          ? "bg-green-500 text-white hover:bg-green-600"
-                          : isMarked
-                          ? "bg-yellow-400 text-gray-900 border-2 border-yellow-500 hover:bg-yellow-500"
-                          : "bg-blue-100 text-blue-700 hover:bg-blue-200 border border-blue-200"
-                      }`}
-                      title={`Question ${index + 1}${
-                        isMarked ? " (Marked)" : ""
-                      }${isAnswered ? " (Answered)" : ""}`}
+                      key={q._id}
+                      type="button"
+                      onClick={() => goToQuestion(idx)}
+                      className={cls}
+                      aria-current={cur ? "page" : undefined}
+                      aria-label={`Question ${idx + 1}${
+                        mark ? " marked for review" : ""
+                      }${ans ? " answered" : ""}`}
                     >
-                      {index + 1}
+                      {idx + 1}
                     </button>
                   );
                 })}
               </div>
+            </div>
 
-              <div className="mt-3 pt-3 border-t border-gray-200 space-y-1.5 text-xs">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded bg-green-500"></div>
-                  <span className="text-gray-600">Answered</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded bg-yellow-400 border-2 border-yellow-500"></div>
-                  <span className="text-gray-600">Marked</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded bg-purple-500"></div>
-                  <span className="text-gray-600">Answered & Marked</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded bg-blue-100 border border-blue-200"></div>
-                  <span className="text-gray-600">Unanswered</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded bg-blue-600 ring-2 ring-blue-500"></div>
-                  <span className="text-gray-600">Current</span>
-                </div>
+            {/* LEGEND */}
+            <div className="bg-white  p-5 shadow-sm text-xs space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded bg-green-500"></span> Answered
               </div>
-
-              <div className="mt-3 pt-3 border-t border-gray-200">
-                <div className="text-xs text-gray-600 space-y-0.5">
-                  <div>
-                    Answered: {answeredCount} / {questions.length}
-                  </div>
-                  <div>
-                    Unanswered: {questions.length - answeredCount} /{" "}
-                    {questions.length}
-                  </div>
-                  {markedCount > 0 && <div>Marked: {markedCount}</div>}
-                </div>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded bg-blue-600"></span> Current
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded bg-yellow-400"></span> Marked
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded bg-purple-500"></span> Answered
+                + Marked
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded bg-gray-200 border border-gray-400"></span>{" "}
+                Not Answered
               </div>
             </div>
+
+            {/* SUBMIT BUTTON */}
+            <button
+              onClick={handleShowSubmitModal}
+              className="w-full py-2.5 bg-green-600 text-white rounded-lg font-semibold text-sm hover:bg-green-700"
+            >
+              Submit Test
+            </button>
           </div>
         </div>
       </div>
@@ -1365,14 +1374,13 @@ const PracticeTestList = ({
     );
   }
 
-
   // Show practice test list
   return (
-    <div className="space-y-2">
-    {groupedData.map((group, groupIndex) => (
-      <div
-        key={groupIndex}
-        className="
+    <div className="space-y-4">
+      {groupedData.map((group, groupIndex) => (
+        <div
+          key={groupIndex}
+          className="
           bg-white 
         
           
@@ -1382,80 +1390,75 @@ const PracticeTestList = ({
           duration-200
           overflow-hidden
         "
-      >
-        {/* TABLE FOR DESKTOP */}
-        <div className="overflow-x-auto hidden md:block">
-          <table className="min-w-full table-fixed">
-            
-            {/* FIXED HEADER */}
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr className="text-[11px] font-semibold text-gray-600 uppercase tracking-wide">
-                
-                {/* Column 1 */}
-                <th className="px-4 py-2 text-left w-[28%] text-sm text-blue-600">
-                  {group.category.name}
-                </th>
-  
-                {/* Column 2 */}
-                <th className="px-3 py-2 text-center w-[10%]">Questions</th>
-  
-                {/* Column 3 */}
-                <th className="px-3 py-2 text-center w-[12%]">Max. Marks</th>
-  
-                {/* Column 4 */}
-                <th className="px-3 py-2 text-center w-[12%]">Duration</th>
-  
-                {/* Column 5 */}
-                <th className="px-3 py-2 text-center w-[12%]">Attempted</th>
-  
-                {/* Column 6 */}
-                <th className="px-3 py-2 text-right w-[13%]">Practice</th>
-  
-                {/* Column 7 */}
-                <th className="px-4 py-2 text-right w-[13%]">My Score</th>
-              </tr>
-            </thead>
-  
-            {/* BODY */}
-            <tbody className="divide-y divide-gray-200 bg-white">
-              {group.tests.map((test, i) => (
-                <tr key={i} className="hover:bg-gray-50 transition-all">
-  
-                  {/* Col 1 */}
-                  <td className="px-4 py-2 w-[28%]">
-                    <div className="text-sm font-semibold text-gray-900">
-                      <span className="mr-1">
-                        {test.orderNumber}.
-                      </span>
-                      {test.name}
-                    </div>
-                  </td>
-  
-                  {/* Col 2 */}
-                  <td className="px-3 py-2 text-center text-sm text-gray-700 w-[10%]">
-                    {test.numberOfQuestions || 0}
-                  </td>
-  
-                  {/* Col 3 */}
-                  <td className="px-3 py-2 text-center text-sm text-gray-700 w-[12%]">
-                    {test.maximumMarks || 0}
-                  </td>
-  
-                  {/* Col 4 */}
-                  <td className="px-3 py-2 text-center text-sm text-gray-700 w-[12%]">
-                    {test.duration || "N/A"}
-                  </td>
-  
-                  {/* Col 5 */}
-                  <td className="px-3 py-2 text-center text-sm text-gray-500 w-[12%]">
-                    –
-                  </td>
-  
-                  {/* Col 6 */}
-                  <td className="px-3 py-2 text-right w-[13%]">
-                    <button
-                      onClick={() => setSelectedTest(test._id)}
-                      className="
+        >
+          {/* TABLE FOR DESKTOP */}
+          <div className="overflow-x-auto hidden md:block">
+            <table className="min-w-full table-fixed">
+              {/* FIXED HEADER */}
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr className="text-[11px] font-semibold text-gray-600 uppercase tracking-wide">
+                  {/* Column 1 */}
+                  <th className="px-4 py-2 text-left w-[28%] text-sm text-blue-600">
+                    {group.category.name}
+                  </th>
+
+                  {/* Column 2 */}
+                  <th className="px-3 py-2 text-center w-[10%]">Questions</th>
+
+                  {/* Column 3 */}
+                  <th className="px-3 py-2 text-center w-[12%]">Max. Marks</th>
+
+                  {/* Column 4 */}
+                  <th className="px-3 py-2 text-center w-[12%]">Duration</th>
+
+                  {/* Column 5 */}
+                  <th className="px-3 py-2 text-center w-[12%]">Attempted</th>
+
+                  {/* Column 6 */}
+                  <th className="px-3 py-2 text-right w-[13%]">Practice</th>
+
+                  {/* Column 7 */}
+                  <th className="px-4 py-2 text-right w-[13%]">My Score</th>
+                </tr>
+              </thead>
+
+              {/* BODY */}
+              <tbody className="divide-y divide-gray-200 bg-white">
+                {group.tests.map((test, i) => (
+                  <tr key={i} className="hover:bg-gray-50 transition-all">
+                    {/* Col 1 */}
+                    <td className="px-4 py-2 w-[28%]">
+                      <div className="text-sm font-semibold text-gray-900">
+                        <span className="mr-1">{test.orderNumber}.</span>
+                        {test.name}
+                      </div>
+                    </td>
+
+                    {/* Col 2 */}
+                    <td className="px-3 py-2 text-center text-sm text-gray-700 w-[10%]">
+                      {test.numberOfQuestions || 0}
+                    </td>
+
+                    {/* Col 3 */}
+                    <td className="px-3 py-2 text-center text-sm text-gray-700 w-[12%]">
+                      {test.maximumMarks || 0}
+                    </td>
+
+                    {/* Col 4 */}
+                    <td className="px-3 py-2 text-center text-sm text-gray-700 w-[12%]">
+                      {test.duration || "N/A"}
+                    </td>
+
+                    {/* Col 5 */}
+                    <td className="px-3 py-2 text-center text-sm text-gray-500 w-[12%]">
+                      –
+                    </td>
+
+                    {/* Col 6 */}
+                    <td className="px-3 py-2 text-right w-[13%]">
+                      <button
+                        onClick={() => setSelectedTest(test._id)}
+                        className="
                         px-4 py-1.5
                         bg-blue-600 
                         hover:bg-blue-700 
@@ -1466,53 +1469,51 @@ const PracticeTestList = ({
                         hover:shadow
                         transition-all
                       "
-                    >
-                      Start
-                    </button>
-                  </td>
-  
-                  {/* Col 7 */}
-                  <td className="px-4 py-2 text-right text-sm font-bold w-[13%]">
-                    <span className="text-gray-500">NA</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-  
-          </table>
-        </div>
-  
-     {/* 🎯 MOBILE CARD VIEW */}
-<div className="md:hidden divide-y divide-gray-200">
-  {group.tests.map((test, i) => (
-    <div key={i} className="px-4 py-3">
+                      >
+                        Start
+                      </button>
+                    </td>
 
-      {/* Show category name ONLY for the first test */}
-      {i === 0 && (
-        <div className="text-sm font-bold text-blue-600 mb-2">
-          {group.category.name}
-        </div>
-      )}
+                    {/* Col 7 */}
+                    <td className="px-4 py-2 text-right text-sm font-bold w-[13%]">
+                      <span className="text-gray-500">NA</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-      {/* Paper Name */}
-      <div className="text-sm font-semibold text-gray-900">
-        <span className=" mr-1">{test.orderNumber}.</span>
-        {test.name}
-      </div>
+          {/* 🎯 MOBILE CARD VIEW */}
+          <div className="md:hidden divide-y divide-gray-200">
+            {group.tests.map((test, i) => (
+              <div key={i} className="px-4 py-3">
+                {/* Show category name ONLY for the first test */}
+                {i === 0 && (
+                  <div className="text-sm font-bold text-blue-600 mb-2">
+                    {group.category.name}
+                  </div>
+                )}
 
-      {/* Details */}
-      <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-gray-700">
-        <div>Questions: {test.numberOfQuestions || 0}</div>
-        <div>Marks: {test.maximumMarks || 0}</div>
-        <div>Duration: {test.duration || "N/A"}</div>
-        <div>Attempted: –</div>
-      </div>
+                {/* Paper Name */}
+                <div className="text-sm font-semibold text-gray-900">
+                  <span className=" mr-1">{test.orderNumber}.</span>
+                  {test.name}
+                </div>
 
-      {/* Button + Score */}
-      <div className="mt-3 flex items-center justify-between">
-        <button
-          onClick={() => setSelectedTest(test._id)}
-          className="
+                {/* Details */}
+                <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-gray-700">
+                  <div>Questions: {test.numberOfQuestions || 0}</div>
+                  <div>Marks: {test.maximumMarks || 0}</div>
+                  <div>Duration: {test.duration || "N/A"}</div>
+                  <div>Attempted: –</div>
+                </div>
+
+                {/* Button + Score */}
+                <div className="mt-3 flex items-center justify-between">
+                  <button
+                    onClick={() => setSelectedTest(test._id)}
+                    className="
             px-4 py-1.5 
             bg-blue-600 
             text-white 
@@ -1523,23 +1524,18 @@ const PracticeTestList = ({
             shadow-sm 
             transition-all
           "
-        >
-          Start
-        </button>
+                  >
+                    Start
+                  </button>
 
-        <div className="text-xs font-bold text-gray-500">
-          NA
+                  <div className="text-xs font-bold text-gray-500">NA</div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
-
+      ))}
     </div>
-  ))}
-</div>
-
-      </div>
-    ))}
-  </div>
-  
   );
 };
 
