@@ -645,7 +645,7 @@ const PracticeTestList = ({
     // Show error loading test if test is not found
     if (error || !test) {
       return (
-        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 ">
           <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-3">
             <div className="flex items-center gap-2 text-red-700">
               <FaTimesCircle className="text-sm" />
@@ -667,7 +667,7 @@ const PracticeTestList = ({
     // Show no questions available if test has no questions
     if (questions.length === 0) {
       return (
-        <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 ">
           <div className="text-center py-8">
             <div className="text-gray-400 text-4xl mb-3">📝</div>
             <h3 className="text-base font-semibold text-gray-900 mb-1.5">
@@ -692,7 +692,7 @@ const PracticeTestList = ({
       return (
         <div className="space-y-6">
           {/* Results Header */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+          <div className="bg-white p-4  border-b border-gray-300">
             <div className="text-center">
               <h1 className="text-2xl font-semibold text-gray-900 mb-1.5">
                 Test Results
@@ -702,7 +702,7 @@ const PracticeTestList = ({
           </div>
 
           {/* Score Card */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+          <div className="bg-white  p-4 ">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
               <div className="text-center p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <div className="text-2xl font-semibold text-gray-900 mb-0.5">
@@ -749,7 +749,7 @@ const PracticeTestList = ({
           </div>
 
           {/* Question-wise Results */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+          <div className="bg-white  p-4 ">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
               Question-wise Results
             </h2>
@@ -761,7 +761,7 @@ const PracticeTestList = ({
                 return (
                   <div
                     key={result.questionId}
-                    className="border border-gray-200 rounded-lg p-4 bg-white"
+                    className=" p-4 bg-white"
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-2">
@@ -803,7 +803,7 @@ const PracticeTestList = ({
                         return (
                           <div
                             key={option}
-                            className={`p-4 rounded-lg border ${
+                            className={`p-2 rounded-lg border ${
                               isCorrectAnswer
                                 ? "bg-green-50 border-green-200"
                                 : isUserAnswer && !isCorrectAnswer
@@ -931,7 +931,7 @@ const PracticeTestList = ({
       text-[10px] md:text-xs
       font-semibold text-white 
       bg-blue-600 
-      rounded-full shadow-sm
+      rounded-full 
     "
               >
                 Practice Mode
@@ -1071,7 +1071,7 @@ const PracticeTestList = ({
     const unansweredCount = questions.length - answeredCount;
 
     return (
-      <div className="space-y-4">
+      <div className="space-y-2">
         {/* Submit Confirmation Modal */}
         {showSubmitModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-60 h-screen">
@@ -1133,7 +1133,7 @@ const PracticeTestList = ({
           </div>
         )}
         {/* Test Header */}
-        <div className="p-3 shadow-sm sticky top-0 z-10">
+        <div className="p-3  sticky top-0 z-10 border-b border-gray-300">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
             <div className="flex-1">
               <h1 className="text-base font-semibold text-gray-900 mb-1">
@@ -1181,20 +1181,12 @@ const PracticeTestList = ({
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* LEFT: QUESTION PANEL */}
-          <div className="lg:col-span-3   p-6 shadow-sm">
+          <div className="lg:col-span-3   p-6 ">
             {/* QUESTION HEADER */}
             <div className="flex items-center justify-between mb-5 pb-3 border-b border-gray-200">
               <h2 className="text-sm font-semibold text-gray-700">
                 Question {currentQuestionIndex + 1} of {questions.length}
               </h2>
-
-              <button
-                onClick={() => handleToggleMarked(currentQuestion._id)}
-                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md border border-gray-300 bg-gray-50 hover:bg-gray-100"
-              >
-                <FaFlag className="text-[10px]" />
-                {markedForReview.has(currentQuestion._id) ? "Marked" : "Mark"}
-              </button>
             </div>
 
             {/* QUESTION TEXT */}
@@ -1254,21 +1246,50 @@ const PracticeTestList = ({
             </div>
 
             {/* BOTTOM BUTTONS */}
-            <div className="flex justify-between items-center mt-8 pt-5 border-t border-gray-200">
+            <div className="mt-8 flex items-center justify-between border-t border-gray-200 pt-5">
+              {/* Left: Previous */}
               <button
+                type="button"
                 onClick={() => goToQuestion(currentQuestionIndex - 1)}
                 disabled={currentQuestionIndex === 0}
-                className="px-5 py-2 text-sm border border-gray-300 rounded-md bg-gray-50 text-gray-800 hover:bg-gray-100 disabled:opacity-40"
+                className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 bg-gray-50 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
               >
+                {/* You can add an icon here if you want */}
                 Previous
               </button>
 
+              {/* Middle: Mark / Marked */}
               <button
+                type="button"
+                onClick={() => handleToggleMarked(currentQuestion._id)}
+                className={`inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-xs font-medium transition-colors
+      ${
+        markedForReview.has(currentQuestion._id)
+          ? "border-yellow-400 bg-yellow-50 text-yellow-800 hover:bg-yellow-100"
+          : "border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100"
+      }`}
+              >
+                <FaFlag
+                  className={`text-[11px] ${
+                    markedForReview.has(currentQuestion._id)
+                      ? "text-yellow-500"
+                      : "text-gray-500"
+                  }`}
+                />
+                {markedForReview.has(currentQuestion._id)
+                  ? "Marked for Review"
+                  : "Mark for Review"}
+              </button>
+
+              {/* Right: Next */}
+              <button
+                type="button"
                 onClick={() => goToQuestion(currentQuestionIndex + 1)}
                 disabled={currentQuestionIndex === questions.length - 1}
-                className="px-5 py-2 text-sm border border-gray-300 rounded-md bg-gray-50 text-gray-800 hover:bg-gray-100 disabled:opacity-40"
+                className="inline-flex items-center gap-2 rounded-md border border-gray-300 px-4 py-2 text-sm text-gray-700 bg-gray-50 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Next
+                {/* You can add an icon here if you want */}
               </button>
             </div>
           </div>
@@ -1276,7 +1297,7 @@ const PracticeTestList = ({
           {/* RIGHT: SIDEBAR */}
           <div className="space-y-6 sticky top-20">
             {/* QUESTION PALETTE */}
-            <div className="bg-white  p-5 shadow-sm">
+            <div className="bg-white  p-5 ">
               <h3 className="text-xs font-medium text-gray-600 uppercase mb-3">
                 Question Palette
               </h3>
@@ -1325,7 +1346,7 @@ const PracticeTestList = ({
             </div>
 
             {/* LEGEND */}
-            <div className="bg-white  p-5 shadow-sm text-xs space-y-2">
+            <div className="bg-white  p-5  text-xs space-y-2">
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded bg-green-500"></span> Answered
               </div>
@@ -1361,7 +1382,7 @@ const PracticeTestList = ({
   // Show test list
   if (groupedData.length === 0 && !isLoading) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm text-center">
+      <div className="bg-white rounded-lg border border-gray-200 p-4  text-center">
         <FaFileAlt className="text-3xl text-gray-400 mx-auto mb-3" />
         <h3 className="text-base font-semibold text-gray-900 mb-1.5">
           No Practice Categories Available
@@ -1384,7 +1405,7 @@ const PracticeTestList = ({
           bg-white 
         
           
-          shadow-sm 
+           
           hover:shadow-md 
           transition-all 
           duration-200
@@ -1465,7 +1486,7 @@ const PracticeTestList = ({
                         text-white 
                         text-xs font-semibold 
                         rounded-md 
-                        shadow-sm 
+                         
                         hover:shadow
                         transition-all
                       "
@@ -1521,7 +1542,7 @@ const PracticeTestList = ({
             font-semibold 
             rounded-md 
             hover:bg-blue-700 
-            shadow-sm 
+             
             transition-all
           "
                   >
