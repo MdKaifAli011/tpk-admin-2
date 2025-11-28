@@ -78,12 +78,17 @@ const PracticeSubCategoryManagement = ({ categoryId: propCategoryId }) => {
     try {
       const response = await api.get(`/practice/category/${categoryId}`);
       if (response.data?.success) {
-        setCurrentCategory(response.data.data);
+        const categoryData = response.data.data;
+        setCurrentCategory(categoryData);
         // Auto-set categoryId in form
         setFormData((prev) => ({
           ...prev,
-          categoryId: response.data.data._id,
+          categoryId: categoryData._id,
         }));
+        // Immediately fetch units if examId and subjectId are available
+        if (categoryData?.examId?._id && categoryData?.subjectId?._id) {
+          await fetchUnits(categoryData.examId._id, categoryData.subjectId._id);
+        }
       }
     } catch (err) {
       console.error("❌ Error fetching current category:", err);
@@ -215,22 +220,51 @@ const PracticeSubCategoryManagement = ({ categoryId: propCategoryId }) => {
     }
   }, [formData.categoryId, showAddForm, editingSubCategory, subCategories]);
 
+  // Fetch category data when form opens for creation
+  useEffect(() => {
+    if (!showAddForm || editingSubCategory) return; // Only for new creation
+    
+    // If categoryId is from URL but currentCategory is not loaded, fetch it
+    if (categoryId && !currentCategory) {
+      fetchCurrentCategory();
+    }
+    // Note: Once currentCategory is loaded, the second useEffect will fetch units
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showAddForm, categoryId, editingSubCategory, currentCategory]);
+
   // Fetch units when category is loaded or form category changes
   useEffect(() => {
-    const selectedCategory = categoryId
-      ? currentCategory
-      : categories.find((c) => c._id === formData.categoryId);
+    // Skip if form is not open (to avoid unnecessary fetches)
+    if (!showAddForm && !editingSubCategory) return;
+    
+    // If categoryId is from URL, use currentCategory
+    // Otherwise, find it in categories array
+    let selectedCategory = null;
+    
+    if (categoryId) {
+      // Category from URL - use currentCategory
+      selectedCategory = currentCategory;
+    } else if (formData.categoryId) {
+      // Category from form selection - find in categories array
+      selectedCategory = categories.find((c) => c._id === formData.categoryId);
+    }
 
     if (selectedCategory?.examId?._id && selectedCategory?.subjectId?._id) {
       fetchUnits(selectedCategory.examId._id, selectedCategory.subjectId._id);
-    } else {
+    } else if (formData.categoryId || categoryId) {
+      // Only clear if we actually have a category selected
+      // This prevents clearing when form first opens
+      if (!selectedCategory) {
+        // Category is selected but not loaded yet - don't clear, wait for it
+        return;
+      }
       setUnits([]);
       setChapters([]);
       setTopics([]);
       setSubTopics([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentCategory, formData.categoryId, categories, categoryId]);
+  }, [currentCategory, formData.categoryId, categories, categoryId, showAddForm, editingSubCategory]);
 
   // Handle form field changes
   const handleFormChange = (e) => {
@@ -250,7 +284,11 @@ const PracticeSubCategoryManagement = ({ categoryId: propCategoryId }) => {
         setTopics([]);
         setSubTopics([]);
         // Fetch units for the new category
-        const selectedCategory = categories.find((c) => c._id === value);
+        // Check both categories array and currentCategory
+        let selectedCategory = categories.find((c) => c._id === value);
+        if (!selectedCategory && value === categoryId && currentCategory) {
+          selectedCategory = currentCategory;
+        }
         if (selectedCategory?.examId?._id && selectedCategory?.subjectId?._id) {
           fetchUnits(
             selectedCategory.examId._id,
@@ -549,7 +587,10 @@ const PracticeSubCategoryManagement = ({ categoryId: propCategoryId }) => {
             <div className="flex items-center gap-2">
               {canCreate ? (
                 <button
-                  onClick={() => setShowAddForm(true)}
+                  onClick={() => {
+                    setShowAddForm(true);
+                    // The useEffect will handle data fetching when form opens
+                  }}
                   className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition-colors"
                 >
                   Create Paper
