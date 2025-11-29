@@ -573,17 +573,19 @@ const RichTextEditor = ({
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-semibold text-gray-900 truncate text-center text-white bg-blue-500 p-2 rounded-lg">
-                         
-                             {insertOptions.description ||
-                                selectedForm.description}
-                          </h4>
+                          {/* Description Badge - shown first */}
                           {(insertOptions.description ||
                             selectedForm.description) && (
-                            <p className="text-xs text-gray-600 mt-1">
-                                {insertOptions.title || selectedForm.formName}
-                            </p>
+                            <div className="bg-blue-600 text-white text-xs font-medium px-3 py-1 rounded-full inline-block mb-2">
+                              {insertOptions.description ||
+                                selectedForm.description}
+                            </div>
                           )}
+                          {/* Title - shown second */}
+                          <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                            {insertOptions.title || selectedForm.formName}
+                          </h4>
+                          {/* Button Preview */}
                           <div className="mt-3">
                             <span className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md">
                               {insertOptions.buttonText || "Submit"}
@@ -601,24 +603,6 @@ const RichTextEditor = ({
 
                       {/* Form Title */}
                       <div>
-                         {/* Form Description */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                          Form Description
-                        </label>
-                        <textarea
-                          value={insertOptions.description}
-                          onChange={(e) =>
-                            setInsertOptions({
-                              ...insertOptions,
-                              description: e.target.value,
-                            })
-                          }
-                          placeholder="Enter form description (optional)"
-                          rows={2}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm resize-none"
-                        />
-                      </div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">
                           Form Title <span className="text-red-500">*</span>
                         </label>
@@ -636,7 +620,24 @@ const RichTextEditor = ({
                         />
                       </div>
 
-                     
+                      {/* Form Description */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          Form Description
+                        </label>
+                        <textarea
+                          value={insertOptions.description}
+                          onChange={(e) =>
+                            setInsertOptions({
+                              ...insertOptions,
+                              description: e.target.value,
+                            })
+                          }
+                          placeholder="Enter form description (optional)"
+                          rows={2}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm resize-none"
+                        />
+                      </div>
 
                       {/* Image URL */}
                       <div>

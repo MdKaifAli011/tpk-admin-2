@@ -38,14 +38,54 @@
   color: #4b5563;
 }
 
+/* Lists - ensure proper styling for both direct and nested lists */
 .rich-text-content ul,
 .rich-text-content ol {
-  margin: 1rem 0;
-  padding-left: 2rem;
+  margin: 1rem 0 !important;
+  padding-left: 2rem !important;
+  list-style-position: outside !important;
+  display: block !important;
+}
+
+.rich-text-content ul {
+  list-style-type: disc !important;
+}
+
+.rich-text-content ol {
+  list-style-type: decimal !important;
 }
 
 .rich-text-content li {
+  margin: 0.5rem 0 !important;
+  display: list-item !important;
+  line-height: 1.75 !important;
+  color: #4b5563 !important;
+  list-style-position: outside !important;
+}
+
+/* Nested lists */
+.rich-text-content ul ul,
+.rich-text-content ol ol,
+.rich-text-content ul ol,
+.rich-text-content ol ul {
   margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.rich-text-content ul ul {
+  list-style-type: circle;
+}
+
+.rich-text-content ul ul ul {
+  list-style-type: square;
+}
+
+.rich-text-content ol ol {
+  list-style-type: lower-alpha;
+}
+
+.rich-text-content ol ol ol {
+  list-style-type: lower-roman;
 }
 
 .rich-text-content blockquote {

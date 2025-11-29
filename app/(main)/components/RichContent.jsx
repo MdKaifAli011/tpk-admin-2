@@ -523,17 +523,24 @@ const RichContent = ({ html }) => {
             );
           }
 
-          // Regular HTML content - render based on content type
+          // Regular HTML content - preserve exact structure from editor
           if (part.trim()) {
-            // Check if the HTML part starts with a block-level element
             const trimmedPart = part.trim();
+
+            // Check if content starts with block-level elements (lists, paragraphs, etc.)
             const startsWithBlockTag =
-              /^<[^>]+(?:p|div|h[1-6]|ul|ol|li|blockquote|pre|table|section|article|header|footer|nav|aside|main|figure)[\s>\/]/.test(
+              /^<[^>]+(?:p|div|h[1-6]|ul|ol|li|blockquote|pre|table|section|article|header|footer|nav|aside|main|figure|hr)[\s>\/]/.test(
                 trimmedPart
               );
 
-            if (startsWithBlockTag || !hasInlineForms) {
-              // For block-level content or when no inline forms, render in a div
+            // Check if content contains complete list structures
+            const hasListStructure = /<(ul|ol)[^>]*>[\s\S]*<\/(ul|ol)>/i.test(
+              trimmedPart
+            );
+
+            // For block-level content (lists, paragraphs, etc.), render directly to preserve structure
+            // Lists need to be rendered exactly as they are in the editor
+            if (startsWithBlockTag || hasListStructure || !hasInlineForms) {
               return (
                 <div
                   key={`content-${index}`}
