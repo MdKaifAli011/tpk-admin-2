@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import loadMathJax from "../lib/utils/mathJaxLoader";
 import { logger } from "@/utils/logger";
 import FormRenderer from "./forms/FormRenderer";
@@ -236,37 +236,77 @@ const RichContent = ({ html }) => {
     fetchFormConfigs();
   }, [forms]);
 
-  // Reprocess MathJax when forms are loaded or DOM updates
-  useEffect(() => {
+  // Helper function to reprocess MathJax
+  const reprocessMathJax = useCallback(() => {
     if (
       !html ||
       !window.MathJax ||
-      !window.MathJax.isReady ||
       !containerRef.current
     )
       return;
 
-    // Wait for DOM to update after form configs load
-    const timer = setTimeout(() => {
+    // Wait for MathJax to be ready
+    const processMathJaxContent = () => {
+      if (!window.MathJax.isReady && !window.MathJax.Hub) {
+        // MathJax not ready yet, try again
+        setTimeout(processMathJaxContent, 100);
+        return;
+      }
+
       try {
-        const contentDivs = containerRef.current.querySelectorAll(
-          "[data-content-part]"
-        );
+        // Process the entire container to ensure all MathJax content is reprocessed
+        const container = containerRef.current;
+        if (!container) return;
+
+        // Find all elements that might contain MathJax (content parts and the container itself)
+        const contentDivs = container.querySelectorAll("[data-content-part]");
         const elementsToProcess =
           contentDivs.length > 0
             ? Array.from(contentDivs)
-            : [containerRef.current];
+            : [container];
 
-        if (window.MathJax && window.MathJax.Hub) {
+        if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Queue) {
+          // Use Queue for better handling of multiple reprocesses
+          window.MathJax.Hub.Queue(["Typeset", window.MathJax.Hub, elementsToProcess]);
+        } else if (window.MathJax && window.MathJax.Hub && typeof window.MathJax.Hub.Typeset === "function") {
           window.MathJax.Hub.Typeset(elementsToProcess);
+        } else if (window.MathJax && typeof window.MathJax.typeset === "function") {
+          // Fallback for MathJax 3.x
+          window.MathJax.typeset(elementsToProcess);
         }
       } catch (error) {
         // Silently fail - MathJax will process on next load
+        logger.error("MathJax reprocessing error:", error);
       }
+    };
+
+    // Start processing
+    processMathJaxContent();
+  }, [html]);
+
+  // Reprocess MathJax when forms are loaded or DOM updates
+  useEffect(() => {
+    if (!html || !containerRef.current) return;
+
+    // Wait for DOM to update after form configs load
+    const timer = setTimeout(() => {
+      reprocessMathJax();
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [html, formConfigs]);
+  }, [html, formConfigs, reprocessMathJax]);
+
+  // Reprocess MathJax when form states change (buttons clicked, modals opened/closed)
+  useEffect(() => {
+    if (!html || !containerRef.current) return;
+
+    // Wait for DOM to update after form state changes (slightly longer delay for modals)
+    const timer = setTimeout(() => {
+      reprocessMathJax();
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [html, formStates, reprocessMathJax]);
 
   // Helper function to check if HTML content is inline
   const isInlineContent = (html) => {

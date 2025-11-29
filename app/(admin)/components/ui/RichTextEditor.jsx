@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { FaTimes } from "react-icons/fa";
+import { FaTimes, FaSearch } from "react-icons/fa";
 import api from "@/lib/api";
 
 const CKEDITOR_SCRIPT = "/vendor/ckeditor/ckeditor.js";
@@ -360,14 +360,14 @@ const RichTextEditor = ({
       >
         {/* Insert Form Button */}
         {isReady && !disabled && (
-          <div className="px-3 py-2 border-b border-gray-200 bg-gray-50 flex items-center justify-end">
+          <div className="px-4 py-2.5 border-b border-gray-200 bg-gray-50 flex items-center justify-end">
             <button
               onClick={() => setShowFormModal(true)}
-              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium transition-colors flex items-center gap-2"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
               type="button"
             >
               <svg
-                className="w-3.5 h-3.5"
+                className="w-4 h-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -400,12 +400,19 @@ const RichTextEditor = ({
 
       {/* Form Selection Modal */}
       {showFormModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden border border-gray-200">
-            <div className="flex items-center justify-between px-6 py-4 border-b bg-white">
-              <h2 className="text-xl font-semibold text-gray-900">
-                Insert Form
-              </h2>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          {/* Modal Container */}
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden border border-gray-200">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b bg-white sticky top-0 z-10">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  Insert Form
+                </h2>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Embed an existing form into your content
+                </p>
+              </div>
               <button
                 onClick={() => setShowFormModal(false)}
                 className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition"
@@ -414,236 +421,320 @@ const RichTextEditor = ({
               </button>
             </div>
 
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-              {!selectedForm ? (
-                <>
+            {/* Body */}
+            <div
+              className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 overflow-y-auto"
+              style={{ maxHeight: "calc(90vh - 120px)" }}
+            >
+              {/* Left Column - Form List */}
+              <div className="space-y-4">
+                {/* Search */}
+                <div className="relative">
+                  <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Search forms..."
+                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                {/* Form List */}
+                <div className="rounded-lg border border-gray-200 overflow-hidden bg-white">
                   {loadingForms ? (
                     <div className="flex items-center justify-center py-12">
                       <div className="text-center">
-                        <div className="inline-block animate-spin rounded-full h-6 w-6 border-3 border-blue-600 border-t-transparent mb-3"></div>
+                        <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-blue-600 border-t-transparent mb-3"></div>
                         <p className="text-sm text-gray-600">
                           Loading forms...
                         </p>
                       </div>
                     </div>
                   ) : forms.length === 0 ? (
-                    <div className="text-center py-12">
-                      <p className="text-sm text-gray-600">
-                        No active forms available.
+                    <div className="text-center py-12 px-4">
+                      <p className="text-sm font-medium text-gray-800 mb-1">
+                        No active forms
                       </p>
-                      <p className="text-xs text-gray-500 mt-2">
+                      <p className="text-xs text-gray-500">
                         Create a form in Form Management first.
                       </p>
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      <p className="text-sm text-gray-700 mb-4">
-                        Select a form to insert:
-                      </p>
+                    <ul className="divide-y divide-gray-200 max-h-[calc(90vh-280px)] overflow-y-auto">
                       {forms.map((form) => (
-                        <button
-                          key={form._id}
-                          onClick={() => handleFormSelect(form)}
-                          className="w-full text-left p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-blue-300 transition-colors"
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <h3 className="text-sm font-semibold text-gray-900 mb-1">
+                        <li key={form._id}>
+                          <button
+                            onClick={() => handleFormSelect(form)}
+                            className={`w-full text-left p-4 transition-colors ${
+                              selectedForm?._id === form._id
+                                ? "bg-blue-50 border-l-4 border-blue-600"
+                                : "hover:bg-gray-50"
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <h3 className="text-sm font-semibold text-gray-900">
                                 {form.formName}
                               </h3>
-                              {form.description && (
-                                <p className="text-xs text-gray-600 mb-2">
-                                  {form.description}
-                                </p>
+                              {form.submissionCount > 0 && (
+                                <span className="text-xs text-gray-500 whitespace-nowrap">
+                                  {form.submissionCount} submission
+                                  {form.submissionCount !== 1 ? "s" : ""}
+                                </span>
                               )}
-                              <div className="flex items-center gap-4 text-xs text-gray-500">
-                                <span>
-                                  <code className="bg-gray-100 px-2 py-0.5 rounded">
-                                    {form.formId}
-                                  </code>
-                                </span>
-                                <span>{form.fields?.length || 0} fields</span>
-                                <span>
-                                  {form.submissionCount || 0} submissions
-                                </span>
-                              </div>
                             </div>
-                          </div>
-                        </button>
+
+                            {form.description && (
+                              <p className="text-xs text-gray-600 mb-2 line-clamp-2">
+                                {form.description}
+                              </p>
+                            )}
+
+                            <div className="flex items-center gap-3 flex-wrap">
+                              <code className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded font-mono">
+                                {form.formId}
+                              </code>
+                              <span className="text-xs text-gray-500">
+                                {form.fields?.length || 0} field
+                                {form.fields?.length !== 1 ? "s" : ""}
+                              </span>
+                            </div>
+                          </button>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
                   )}
-                </>
-              ) : (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        {selectedForm.formName}
-                      </h3>
-                      <button
-                        onClick={() => setSelectedForm(null)}
-                        className="text-xs text-blue-600 hover:text-blue-700 mt-1"
+                </div>
+              </div>
+
+              {/* Right Column - Form Configuration */}
+              <div className="space-y-4">
+                {!selectedForm ? (
+                  <div className="h-full min-h-[400px] border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-center p-6 bg-gray-50">
+                    <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center mb-4">
+                      <svg
+                        className="w-8 h-8 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                       >
-                        ← Change form
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                    </div>
+                    <p className="text-sm font-medium text-gray-700 mb-1">
+                      Select a form
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Choose a form from the list to configure and insert it
+                      into your content.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {/* Form Header */}
+                    <div className="flex items-start justify-between pb-3 border-b border-gray-200">
+                      <div className="flex-1">
+                        <h3 className="text-base font-semibold text-gray-900 mb-1">
+                          {selectedForm.formName}
+                        </h3>
+                        <button
+                          onClick={() => setSelectedForm(null)}
+                          className="text-xs text-blue-600 hover:text-blue-700 hover:underline"
+                        >
+                          ← Change form
+                        </button>
+                      </div>
+                      {selectedForm.submissionCount > 0 && (
+                        <span className="text-xs text-gray-500">
+                          {selectedForm.submissionCount} submission
+                          {selectedForm.submissionCount !== 1 ? "s" : ""}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Preview Card */}
+                    <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+                      <div className="p-4 flex gap-4 items-center">
+                        <div className="w-24 h-20 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white overflow-hidden shrink-0">
+                          {insertOptions.imageUrl ? (
+                            <img
+                              src={insertOptions.imageUrl}
+                              alt="Form preview"
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.target.style.display = "none";
+                              }}
+                            />
+                          ) : (
+                            <span className="text-xs font-semibold">FORM</span>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-semibold text-gray-900 truncate text-center text-white bg-blue-500 p-2 rounded-lg">
+                         
+                             {insertOptions.description ||
+                                selectedForm.description}
+                          </h4>
+                          {(insertOptions.description ||
+                            selectedForm.description) && (
+                            <p className="text-xs text-gray-600 mt-1">
+                                {insertOptions.title || selectedForm.formName}
+                            </p>
+                          )}
+                          <div className="mt-3">
+                            <span className="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md">
+                              {insertOptions.buttonText || "Submit"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Configuration Fields */}
+                    <div className="space-y-4">
+                      <h4 className="text-sm font-semibold text-gray-900">
+                        Form Settings
+                      </h4>
+
+                      {/* Form Title */}
+                      <div>
+                         {/* Form Description */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          Form Description
+                        </label>
+                        <textarea
+                          value={insertOptions.description}
+                          onChange={(e) =>
+                            setInsertOptions({
+                              ...insertOptions,
+                              description: e.target.value,
+                            })
+                          }
+                          placeholder="Enter form description (optional)"
+                          rows={2}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm resize-none"
+                        />
+                      </div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          Form Title <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={insertOptions.title}
+                          onChange={(e) =>
+                            setInsertOptions({
+                              ...insertOptions,
+                              title: e.target.value,
+                            })
+                          }
+                          placeholder="Enter form title"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        />
+                      </div>
+
+                     
+
+                      {/* Image URL */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                          Image URL
+                        </label>
+                        <input
+                          type="url"
+                          value={insertOptions.imageUrl}
+                          onChange={(e) =>
+                            setInsertOptions({
+                              ...insertOptions,
+                              imageUrl: e.target.value,
+                            })
+                          }
+                          placeholder="https://example.com/image.jpg"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        />
+                        <p className="mt-1 text-xs text-gray-500">
+                          Image displayed in the form modal (optional)
+                        </p>
+                      </div>
+
+                      {/* Button Configuration */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                            Button Text <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={insertOptions.buttonText}
+                            onChange={(e) =>
+                              setInsertOptions({
+                                ...insertOptions,
+                                buttonText: e.target.value,
+                              })
+                            }
+                            placeholder="e.g., Download, Submit"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                            Button Link{" "}
+                            <span className="text-gray-500 text-xs">
+                              (optional)
+                            </span>
+                          </label>
+                          <input
+                            type="url"
+                            value={insertOptions.buttonLink}
+                            onChange={(e) =>
+                              setInsertOptions({
+                                ...insertOptions,
+                                buttonLink: e.target.value,
+                              })
+                            }
+                            placeholder="https://example.com"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Footer Actions */}
+                    <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
+                      <button
+                        onClick={() => {
+                          setShowFormModal(false);
+                          setSelectedForm(null);
+                          setInsertOptions({
+                            title: "",
+                            description: "",
+                            buttonText: "",
+                            buttonLink: "",
+                            imageUrl: "",
+                          });
+                        }}
+                        className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg text-sm font-medium transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={insertFormCode}
+                        disabled={
+                          !insertOptions.title.trim() ||
+                          !insertOptions.buttonText.trim()
+                        }
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Insert Form
                       </button>
                     </div>
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Form Title <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={insertOptions.title}
-                      onChange={(e) =>
-                        setInsertOptions({
-                          ...insertOptions,
-                          title: e.target.value,
-                        })
-                      }
-                      placeholder="e.g., Connect With TestprepKart"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    />
-                    <p className="mt-1 text-xs text-gray-500">
-                      Main title displayed at the top of the form
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Form Description{" "}
-                      <span className="text-gray-500 text-xs">(optional)</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={insertOptions.description}
-                      onChange={(e) =>
-                        setInsertOptions({
-                          ...insertOptions,
-                          description: e.target.value,
-                        })
-                      }
-                      placeholder="e.g., WE WILL CALL YOU SOON"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    />
-                    <p className="mt-1 text-xs text-gray-500">
-                      Description shown as blue badge below the title
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Form Image URL{" "}
-                      <span className="text-gray-500 text-xs">(optional)</span>
-                    </label>
-                    <input
-                      type="url"
-                      value={insertOptions.imageUrl}
-                      onChange={(e) =>
-                        setInsertOptions({
-                          ...insertOptions,
-                          imageUrl: e.target.value,
-                        })
-                      }
-                      placeholder="https://example.com/image.jpg"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    />
-                    <p className="mt-1 text-xs text-gray-500">
-                      Image displayed in the left blue area of the form modal
-                      (auto-fits)
-                    </p>
-                    {insertOptions.imageUrl && (
-                      <div className="mt-3 p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg border border-gray-200">
-                        <img
-                          src={insertOptions.imageUrl}
-                          alt="Preview"
-                          className="w-full h-32 object-cover rounded border border-gray-200"
-                          onError={(e) => {
-                            e.target.style.display = "none";
-                          }}
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Button Text <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={insertOptions.buttonText}
-                      onChange={(e) =>
-                        setInsertOptions({
-                          ...insertOptions,
-                          buttonText: e.target.value,
-                        })
-                      }
-                      placeholder="e.g., Download Now, Get Started"
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    />
-                    <p className="mt-1 text-xs text-gray-500">
-                      Text displayed on the inline form button
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Button Link{" "}
-                      <span className="text-gray-500 text-xs">(optional)</span>
-                    </label>
-                    <input
-                      type="url"
-                      value={insertOptions.buttonLink}
-                      onChange={(e) =>
-                        setInsertOptions({
-                          ...insertOptions,
-                          buttonLink: e.target.value,
-                        })
-                      }
-                      placeholder="https://example.com/download"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    />
-                    <p className="mt-1 text-xs text-gray-500">
-                      URL to redirect after successful form submission
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="px-6 py-4 bg-gray-50 border-t flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setShowFormModal(false);
-                  setSelectedForm(null);
-                  setInsertOptions({
-                    title: "",
-                    description: "",
-                    buttonText: "",
-                    buttonLink: "",
-                    imageUrl: "",
-                  });
-                }}
-                className="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition"
-              >
-                Cancel
-              </button>
-              {selectedForm && (
-                <button
-                  onClick={insertFormCode}
-                  disabled={
-                    !insertOptions.buttonText.trim() ||
-                    !insertOptions.title.trim()
-                  }
-                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Insert Form
-                </button>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>
