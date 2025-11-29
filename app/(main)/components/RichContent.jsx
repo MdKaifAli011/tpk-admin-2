@@ -266,8 +266,6 @@ const RichContent = ({ html }) => {
     }, 500);
 
     return () => clearTimeout(timer);
-    // Depend on html and formConfigs only - forms and processedHtml are derived from html
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [html, formConfigs]);
 
   // Helper function to check if HTML content is inline
@@ -324,149 +322,160 @@ const RichContent = ({ html }) => {
     // Determine if we have inline forms in the content
     const hasInlineForms = forms.some((f) => f.isInline);
 
-    return parts.map((part, index) => {
-      if (formMap[part]) {
-        const formId = formMap[part];
-        const formData = formDataMap[part];
-        const formKey = `form-${formId}-${index}`;
-        const isOpen = formStates[formKey] || false;
-        const formConfig = formConfigs[formId];
+    return (
+      <>
+        {parts.map((part, index) => {
+          if (formMap[part]) {
+            const formId = formMap[part];
+            const formData = formDataMap[part];
+            const formKey = `form-${formId}-${index}`;
+            const isOpen = formStates[formKey] || false;
+            const formConfig = formConfigs[formId];
 
-        // For inline forms
-        if (formData?.isInline) {
-          // Priority: formData (from HTML attributes) > formConfig > default
-          const buttonText =
-            (formData.buttonText && formData.buttonText.trim()) ||
-            formConfig?.settings?.buttonText ||
-            "Open Form";
-          const imageUrl =
-            (formData.imageUrl && formData.imageUrl.trim()) || "";
-          const buttonLink =
-            (formData.buttonLink && formData.buttonLink.trim()) || "";
+            // For inline forms
+            if (formData?.isInline) {
+              // Priority: formData (from HTML attributes) > formConfig > default
+              const buttonText =
+                (formData.buttonText && formData.buttonText.trim()) ||
+                formConfig?.settings?.buttonText ||
+                "Open Form";
+              const imageUrl =
+                (formData.imageUrl && formData.imageUrl.trim()) || "";
+              const buttonLink =
+                (formData.buttonLink && formData.buttonLink.trim()) || "";
 
-          return (
-            <React.Fragment key={formKey}>
-              <button
-                onClick={() =>
-                  setFormStates((prev) => ({
-                    ...prev,
-                    [formKey]: !prev[formKey],
-                  }))
-                }
-                className="inline-block px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-md sm:rounded-lg text-xs sm:text-sm md:text-base font-medium transition-all duration-200 transform active:scale-95"
-                style={{
-                  display: "inline-block",
-                  verticalAlign: "baseline",
-                  cursor: "pointer",
-                  lineHeight: "1.5",
-                  margin: "0 2px",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {capitalizeButtonText(buttonText || "Open Form")}
-              </button>
-              {isOpen && (
-                <FormRenderer
-                  formId={formId}
-                  isOpen={isOpen}
-                  onClose={() =>
-                    setFormStates((prev) => ({
-                      ...prev,
-                      [formKey]: false,
-                    }))
-                  }
-                  prepared=""
-                  buttonLink={buttonLink}
-                  imageUrl={imageUrl}
-                  title={formData.title || ""}
-                  description={formData.description || ""}
-                />
-              )}
-            </React.Fragment>
-          );
-        }
-
-        // For block forms (legacy)
-        const buttonText =
-          formConfig?.settings?.buttonText ||
-          formData?.buttonText ||
-          "Open Form";
-        const formName = formConfig?.formName || formId;
-        const formDescription = formConfig?.description || "";
-
-        return (
-          <div key={formKey} className="my-3 sm:my-4">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 md:p-5">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-3">
-                <div className="flex-1">
-                  <h4 className="text-xs sm:text-sm md:text-base font-semibold text-gray-900 mb-1">
-                    {formName}
-                  </h4>
-                  {formDescription && (
-                    <p className="text-[11px] sm:text-xs text-gray-600 mb-1">
-                      {formDescription}
-                    </p>
+              return (
+                <React.Fragment key={formKey}>
+                  <button
+                    onClick={() =>
+                      setFormStates((prev) => ({
+                        ...prev,
+                        [formKey]: !prev[formKey],
+                      }))
+                    }
+                    className="inline-block px-2 py-1.5 sm:px-3 sm:py-2 md:px-4 md:py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-md sm:rounded-lg text-xs sm:text-sm md:text-base font-medium transition-all duration-200 transform active:scale-95"
+                    style={{
+                      display: "inline-block",
+                      verticalAlign: "baseline",
+                      cursor: "pointer",
+                      lineHeight: "1.5",
+                      margin: "0 4px",
+                      whiteSpace: "nowrap",
+                      textDecoration: "none",
+                    }}
+                  >
+                    {capitalizeButtonText(buttonText || "Open Form")}
+                  </button>
+                  {isOpen && (
+                    <FormRenderer
+                      formId={formId}
+                      isOpen={isOpen}
+                      onClose={() =>
+                        setFormStates((prev) => ({
+                          ...prev,
+                          [formKey]: false,
+                        }))
+                      }
+                      prepared=""
+                      buttonLink={buttonLink}
+                      imageUrl={imageUrl}
+                      title={formData.title || ""}
+                      description={formData.description || ""}
+                    />
                   )}
-                  <p className="text-[10px] sm:text-xs text-gray-500">
-                    Click the button below to open the form
-                  </p>
+                </React.Fragment>
+              );
+            }
+
+            // For block forms (legacy)
+            const buttonText =
+              formConfig?.settings?.buttonText ||
+              formData?.buttonText ||
+              "Open Form";
+            const formName = formConfig?.formName || formId;
+            const formDescription = formConfig?.description || "";
+
+            return (
+              <div key={formKey} className="my-3 sm:my-4">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 md:p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-3">
+                    <div className="flex-1">
+                      <h4 className="text-xs sm:text-sm md:text-base font-semibold text-gray-900 mb-1">
+                        {formName}
+                      </h4>
+                      {formDescription && (
+                        <p className="text-[11px] sm:text-xs text-gray-600 mb-1">
+                          {formDescription}
+                        </p>
+                      )}
+                      <p className="text-[10px] sm:text-xs text-gray-500">
+                        Click the button below to open the form
+                      </p>
+                    </div>
+                    <button
+                      onClick={() =>
+                        setFormStates((prev) => ({
+                          ...prev,
+                          [formKey]: !prev[formKey],
+                        }))
+                      }
+                      className="w-full sm:w-auto px-3 py-1.5 sm:px-4 sm:py-2 md:px-5 md:py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-md sm:rounded-lg text-xs sm:text-sm md:text-base font-medium transition-all duration-200 transform active:scale-95 whitespace-nowrap"
+                    >
+                      {isOpen ? "Close" : capitalizeButtonText(buttonText)}
+                    </button>
+                  </div>
+                  {isOpen && (
+                    <FormRenderer
+                      formId={formId}
+                      isOpen={isOpen}
+                      onClose={() =>
+                        setFormStates((prev) => ({
+                          ...prev,
+                          [formKey]: false,
+                        }))
+                      }
+                      prepared=""
+                    />
+                  )}
                 </div>
-                <button
-                  onClick={() =>
-                    setFormStates((prev) => ({
-                      ...prev,
-                      [formKey]: !prev[formKey],
-                    }))
-                  }
-                  className="w-full sm:w-auto px-3 py-1.5 sm:px-4 sm:py-2 md:px-5 md:py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-md sm:rounded-lg text-xs sm:text-sm md:text-base font-medium transition-all duration-200 transform active:scale-95 whitespace-nowrap"
-                >
-                  {isOpen ? "Close" : capitalizeButtonText(buttonText)}
-                </button>
               </div>
-              {isOpen && (
-                <FormRenderer
-                  formId={formId}
-                  isOpen={isOpen}
-                  onClose={() =>
-                    setFormStates((prev) => ({
-                      ...prev,
-                      [formKey]: false,
-                    }))
-                  }
-                  prepared=""
+            );
+          }
+
+          // Regular HTML content - render based on content type
+          if (part.trim()) {
+            // Check if the HTML part starts with a block-level element
+            const trimmedPart = part.trim();
+            const startsWithBlockTag =
+              /^<[^>]+(?:p|div|h[1-6]|ul|ol|li|blockquote|pre|table|section|article|header|footer|nav|aside|main|figure)[\s>\/]/.test(
+                trimmedPart
+              );
+
+            if (startsWithBlockTag || !hasInlineForms) {
+              // For block-level content or when no inline forms, render in a div
+              return (
+                <div
+                  key={`content-${index}`}
+                  data-content-part="true"
+                  dangerouslySetInnerHTML={{ __html: part }}
                 />
-              )}
-            </div>
-          </div>
-        );
-      }
-
-      // Regular HTML content - render inline if content is inline and we have inline forms
-      if (part.trim()) {
-        const inline = hasInlineForms && isInlineContent(part);
-
-        if (inline) {
-          return (
-            <span
-              key={`content-${index}`}
-              data-content-part="true"
-              className="inline"
-              style={{ display: "inline" }}
-              dangerouslySetInnerHTML={{ __html: part }}
-            />
-          );
-        } else {
-          return (
-            <div
-              key={`content-${index}`}
-              data-content-part="true"
-              dangerouslySetInnerHTML={{ __html: part }}
-            />
-          );
-        }
-      }
-      return null;
-    });
+              );
+            } else {
+              // For inline content with inline forms, render inline to maintain flow
+              return (
+                <span
+                  key={`content-${index}`}
+                  data-content-part="true"
+                  style={{ display: "inline" }}
+                  dangerouslySetInnerHTML={{ __html: part }}
+                />
+              );
+            }
+          }
+          return null;
+        })}
+      </>
+    );
   };
 
   return (
