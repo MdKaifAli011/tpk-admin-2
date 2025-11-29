@@ -73,39 +73,65 @@ const LeadTable = ({ leads, onView, onDelete }) => {
           })
         : "N/A";
 
+      // Ensure phone number is consistently formatted (same as table display)
+      const phoneNumber = lead.phoneNumber ? String(lead.phoneNumber).trim() : "";
+
+      // Helper function to format CSV field
+      const formatCSVField = (field, isPhoneNumber = false) => {
+        const stringField = String(field || "");
+        // Escape commas, quotes, and newlines
+        if (stringField.includes(",") || stringField.includes('"') || stringField.includes("\n")) {
+          return `"${stringField.replace(/"/g, '""')}"`;
+        }
+        return stringField;
+      };
+
+      // Format phone number specifically for Excel (force as text to prevent scientific notation)
+      const formatPhoneNumberForCSV = (phone) => {
+        if (!phone) return "";
+        let phoneStr = String(phone).trim();
+        
+        // Excel converts large numbers to scientific notation even when quoted
+        // Solution: Ensure phone number always starts with a character Excel recognizes as text
+        // If it starts with +, that's good. But add a space prefix to be 100% sure Excel treats it as text
+        // Format: " +201234567891" - the leading space forces Excel to treat as text
+        // This ensures phone numbers display exactly as shown in the table (space will be minimal/ignored)
+        
+        // Ensure it starts with +, and if not, add space prefix to force text mode
+        if (phoneStr.startsWith("+")) {
+          // Already has +, but add invisible tab to absolutely prevent conversion
+          // Tab is invisible in Excel but forces text interpretation
+          return `"\t${phoneStr.replace(/"/g, '""')}"`;
+        } else {
+          // No + prefix, add space to force text mode
+          return `" ${phoneStr.replace(/"/g, '""')}"`;
+        }
+      };
+
       return [
-        date,
-        lead.country || "",
-        lead.name || "",
-        lead.email || "",
-        lead.className || "",
-        lead.prepared || "",
-        lead.form_id || lead.form_name || "",
-        lead.phoneNumber || "",
-        lead.source || "",
-        lead.status || "new",
-        lead.updateCount || 0,
-      ]
-        .map((field) => {
-          // Escape commas and quotes in CSV
-          const stringField = String(field || "");
-          if (
-            stringField.includes(",") ||
-            stringField.includes('"') ||
-            stringField.includes("\n")
-          ) {
-            return `"${stringField.replace(/"/g, '""')}"`;
-          }
-          return stringField;
-        })
-        .join(",");
+        formatCSVField(date),
+        formatCSVField(lead.country || ""),
+        formatCSVField(lead.name || ""),
+        formatCSVField(lead.email || ""),
+        formatCSVField(lead.className || ""),
+        formatCSVField(lead.prepared || ""),
+        formatCSVField(lead.form_id || lead.form_name || ""),
+        formatPhoneNumberForCSV(phoneNumber), // Force phone number as text using Excel formula
+        formatCSVField(lead.source || ""),
+        formatCSVField(lead.status || "new"),
+        formatCSVField(lead.updateCount || 0),
+      ].join(",");
     });
 
     // Combine headers and rows
     const csvContent = [headers.join(","), ...csvRows].join("\n");
 
+    // Add UTF-8 BOM for Excel compatibility (ensures phone numbers and special characters display correctly)
+    const BOM = "\uFEFF";
+    const csvWithBOM = BOM + csvContent;
+
     // Create blob and download
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob([csvWithBOM], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
 
@@ -351,10 +377,10 @@ const LeadTable = ({ leads, onView, onDelete }) => {
                   <td className="px-2 py-2 whitespace-nowrap">
                     {lead.phoneNumber ? (
                       <a
-                        href={`tel:${lead.phoneNumber}`}
+                        href={`tel:${String(lead.phoneNumber).trim()}`}
                         className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
                       >
-                        {lead.phoneNumber}
+                        {String(lead.phoneNumber).trim()}
                       </a>
                     ) : (
                       <span className="text-sm text-gray-400 italic">N/A</span>
@@ -514,10 +540,10 @@ const LeadTable = ({ leads, onView, onDelete }) => {
                   <div>
                     <div className="text-xs text-gray-500">Phone</div>
                     <a
-                      href={`tel:${lead.phoneNumber}`}
+                      href={`tel:${String(lead.phoneNumber).trim()}`}
                       className="text-sm font-medium text-gray-900 hover:text-blue-600 transition-colors"
                     >
-                      {lead.phoneNumber}
+                      {String(lead.phoneNumber).trim()}
                     </a>
                   </div>
                 )}
