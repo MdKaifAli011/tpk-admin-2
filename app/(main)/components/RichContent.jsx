@@ -1,11 +1,20 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+  useCallback,
+} from "react";
+import { lazy, Suspense } from "react";
 import loadMathJax from "../lib/utils/mathJaxLoader";
 import { logger } from "@/utils/logger";
-import FormRenderer from "./forms/FormRenderer";
 
-// Helper function to capitalize button text
+// Lazy load FormRenderer to reduce initial bundle size
+const FormRenderer = lazy(() => import("./forms/FormRenderer"));
+
+// Helper function to capitalize button text - moved outside component to avoid recreation
 const capitalizeButtonText = (text) => {
   if (!text) return "";
   return text
@@ -14,11 +23,75 @@ const capitalizeButtonText = (text) => {
     .join(" ");
 };
 
+// Cache for decoded attributes to avoid repeated processing
+const decodeCache = new Map();
+const decodeAttr = (str) => {
+  if (!str) return "";
+  if (decodeCache.has(str)) return decodeCache.get(str);
+  const decoded = str
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&#39;/g, "'")
+    .replace(/&#x27;/g, "'")
+    .trim();
+  // Limit cache size to prevent memory issues
+  if (decodeCache.size < 100) {
+    decodeCache.set(str, decoded);
+  }
+  return decoded;
+};
+
+// Helper function to check if HTML content is inline - moved outside to avoid recreation
+const blockLevelTags = [
+  "<p",
+  "<div",
+  "<h1",
+  "<h2",
+  "<h3",
+  "<h4",
+  "<h5",
+  "<h6",
+  "<ul",
+  "<ol",
+  "<li",
+  "<blockquote",
+  "<pre",
+  "<table",
+  "<section",
+  "<article",
+  "<header",
+  "<footer",
+  "<nav",
+  "<aside",
+  "<main",
+  "<figure",
+  "<hr",
+];
+const isInlineContent = (html) => {
+  if (!html || !html.trim()) return false;
+  const trimmed = html.trim().toLowerCase();
+  return !blockLevelTags.some((tag) => trimmed.startsWith(tag));
+};
+
 const RichContent = ({ html }) => {
   const containerRef = useRef(null);
+  const mathJaxTimerRef = useRef(null);
+  const mathJaxInitTimerRef = useRef(null);
   const [mathJaxError, setMathJaxError] = useState(false);
   const [formStates, setFormStates] = useState({});
   const [formConfigs, setFormConfigs] = useState({});
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      // Clear any pending MathJax timers
+      if (mathJaxTimerRef.current) {
+        clearTimeout(mathJaxTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -80,12 +153,12 @@ const RichContent = ({ html }) => {
                   }
                 });
               } else {
-                // Fallback: retry after delay
-                setTimeout(() => {
+                // Fallback: retry after shorter delay
+                mathJaxInitTimerRef.current = setTimeout(() => {
                   if (isMounted && containerRef.current && window.MathJax) {
                     processMathJax(window.MathJax);
                   }
-                }, 1000);
+                }, 300);
               }
             }
           } else {
@@ -110,10 +183,13 @@ const RichContent = ({ html }) => {
 
     return () => {
       isMounted = false;
+      if (mathJaxInitTimerRef.current) {
+        clearTimeout(mathJaxInitTimerRef.current);
+      }
     };
   }, [html]);
 
-  // Parse HTML and extract form embeds (both div and inline span)
+  // Parse HTML and extract form embeds - optimized regex compilation
   const { processedHtml, forms } = useMemo(() => {
     if (!html) return { processedHtml: "", forms: [] };
 
@@ -121,53 +197,27 @@ const RichContent = ({ html }) => {
     let processedHtml = html;
     let formIndex = 0;
 
-    // Match inline form embeds (span.form-embed-inline) - extract data attributes in any order
+    // Pre-compile regex patterns for better performance
     const inlineFormRegex =
       /<span[^>]*class="form-embed-inline"[^>]*>[\s\S]*?<\/span>/gi;
+    const attrRegexes = {
+      formId: /data-form-id=["']?([^"'\s>]+)["']?/i,
+      title: /data-title=["']([^"']*)["']/i,
+      description: /data-description=["']([^"']*)["']/i,
+      buttonText: /data-button-text=["']([^"']*)["']/i,
+      buttonLink: /data-button-link=["']([^"']*)["']/i,
+      imageUrl: /data-image-url=["']([^"']*)["']/i,
+    };
+
+    // Match inline form embeds - optimized single pass extraction
     let match;
+    const matches = [];
     while ((match = inlineFormRegex.exec(html)) !== null) {
-      const fullMatch = match[0];
+      matches.push(match[0]);
+    }
 
-      // Extract data attributes using a more flexible approach
-      // Handle both quoted and unquoted attributes
-      const formIdMatch = fullMatch.match(
-        /data-form-id=["']?([^"'\s>]+)["']?/i
-      );
-      const titleMatch = fullMatch.match(/data-title=["']([^"']*)["']/i);
-      const descriptionMatch = fullMatch.match(
-        /data-description=["']([^"']*)["']/i
-      );
-      const buttonTextMatch = fullMatch.match(
-        /data-button-text=["']([^"']*)["']/i
-      );
-      const buttonLinkMatch = fullMatch.match(
-        /data-button-link=["']([^"']*)["']/i
-      );
-      const imageUrlMatch = fullMatch.match(/data-image-url=["']([^"']*)["']/i);
-
-      const formId = formIdMatch ? formIdMatch[1] : "";
-
-      // Decode HTML entities properly
-      const decodeAttr = (str) => {
-        if (!str) return "";
-        return str
-          .replace(/&quot;/g, '"')
-          .replace(/&amp;/g, "&")
-          .replace(/&lt;/g, "<")
-          .replace(/&gt;/g, ">")
-          .replace(/&#39;/g, "'")
-          .replace(/&#x27;/g, "'")
-          .trim();
-      };
-
-      const title = titleMatch ? decodeAttr(titleMatch[1]) : "";
-      const description = descriptionMatch
-        ? decodeAttr(descriptionMatch[1])
-        : "";
-      const buttonText = buttonTextMatch ? decodeAttr(buttonTextMatch[1]) : "";
-      const buttonLink = buttonLinkMatch ? decodeAttr(buttonLinkMatch[1]) : "";
-      const imageUrl = imageUrlMatch ? decodeAttr(imageUrlMatch[1]) : "";
-
+    matches.forEach((fullMatch) => {
+      const formId = attrRegexes.formId.exec(fullMatch)?.[1] || "";
       if (formId) {
         const placeholder = `<!--FORM_PLACEHOLDER_${formIndex}-->`;
         processedHtml = processedHtml.replace(fullMatch, placeholder);
@@ -175,192 +225,179 @@ const RichContent = ({ html }) => {
           formId,
           placeholder,
           index: formIndex,
-          buttonText,
-          title,
-          description,
-          buttonLink,
-          imageUrl,
+          buttonText: decodeAttr(
+            attrRegexes.buttonText.exec(fullMatch)?.[1] || ""
+          ),
+          title: decodeAttr(attrRegexes.title.exec(fullMatch)?.[1] || ""),
+          description: decodeAttr(
+            attrRegexes.description.exec(fullMatch)?.[1] || ""
+          ),
+          buttonLink: decodeAttr(
+            attrRegexes.buttonLink.exec(fullMatch)?.[1] || ""
+          ),
+          imageUrl: decodeAttr(attrRegexes.imageUrl.exec(fullMatch)?.[1] || ""),
           isInline: true,
+        });
+        formIndex++;
+      }
+    });
+
+    // Match block form embeds - legacy support
+    const blockFormRegex =
+      /<div[^>]*class="form-embed"[^>]*data-form-id="([^"]+)"[^>]*(?:data-button-text="([^"]*)")?[^>]*>[\s\S]*?<\/div>/gi;
+    while ((match = blockFormRegex.exec(html)) !== null) {
+      const formId = match[1];
+      if (formId) {
+        const placeholder = `<!--FORM_PLACEHOLDER_${formIndex}-->`;
+        processedHtml = processedHtml.replace(match[0], placeholder);
+        formsFound.push({
+          formId,
+          placeholder,
+          index: formIndex,
+          buttonText: decodeAttr(match[2] || ""),
+          isInline: false,
         });
         formIndex++;
       }
     }
 
-    // Match block form embeds (div.form-embed) - legacy support
-    const blockFormRegex =
-      /<div[^>]*class="form-embed"[^>]*data-form-id="([^"]+)"[^>]*(?:data-button-text="([^"]*)")?[^>]*>[\s\S]*?<\/div>/gi;
-    while ((match = blockFormRegex.exec(html)) !== null) {
-      const formId = match[1];
-      const buttonText = match[2] || "";
-      const fullMatch = match[0];
-      const placeholder = `<!--FORM_PLACEHOLDER_${formIndex}-->`;
-      processedHtml = processedHtml.replace(fullMatch, placeholder);
-      formsFound.push({
-        formId,
-        placeholder,
-        index: formIndex,
-        buttonText,
-        isInline: false,
-      });
-      formIndex++;
-    }
-
     return { processedHtml, forms: formsFound };
   }, [html]);
 
-  // Fetch form configs for all embedded forms
+  // Fetch form configs for all embedded forms - optimized with batch requests
   useEffect(() => {
     if (forms.length === 0) return;
 
+    let isCancelled = false;
+
     const fetchFormConfigs = async () => {
-      const configs = {};
-      for (const form of forms) {
+      // Get unique form IDs
+      const uniqueFormIds = [...new Set(forms.map((f) => f.formId))];
+
+      // Batch fetch all form configs in parallel
+      const fetchPromises = uniqueFormIds.map(async (formId) => {
         try {
-          const response = await fetch(`/api/form/${form.formId}`);
+          const response = await fetch(`/api/form/${formId}`);
           if (response.ok) {
             const data = await response.json();
             if (data.success) {
-              configs[form.formId] = data.data;
+              return { formId, config: data.data };
             }
           }
         } catch (error) {
-          console.error(
-            `Error fetching form config for ${form.formId}:`,
-            error
-          );
+          console.error(`Error fetching form config for ${formId}:`, error);
         }
-      }
-      setFormConfigs(configs);
+        return null;
+      });
+
+      const results = await Promise.all(fetchPromises);
+
+      if (isCancelled) return;
+
+      setFormConfigs((prevConfigs) => {
+        const newConfigs = { ...prevConfigs };
+        results.forEach((result) => {
+          if (result) {
+            newConfigs[result.formId] = result.config;
+          }
+        });
+        return newConfigs;
+      });
     };
 
     fetchFormConfigs();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [forms]);
 
-  // Helper function to reprocess MathJax
+  // Helper function to reprocess MathJax - optimized with debouncing
   const reprocessMathJax = useCallback(() => {
-    if (
-      !html ||
-      !window.MathJax ||
-      !containerRef.current
-    )
-      return;
+    // Clear any pending reprocessing
+    if (mathJaxTimerRef.current) {
+      clearTimeout(mathJaxTimerRef.current);
+    }
 
-    // Wait for MathJax to be ready
-    const processMathJaxContent = () => {
+    if (!html || !containerRef.current) return;
+
+    mathJaxTimerRef.current = setTimeout(() => {
+      if (!window.MathJax || !containerRef.current) return;
+
+      // Check if MathJax is ready
       if (!window.MathJax.isReady && !window.MathJax.Hub) {
-        // MathJax not ready yet, try again
-        setTimeout(processMathJaxContent, 100);
         return;
       }
 
       try {
-        // Process the entire container to ensure all MathJax content is reprocessed
         const container = containerRef.current;
-        if (!container) return;
-
-        // Find all elements that might contain MathJax (content parts and the container itself)
         const contentDivs = container.querySelectorAll("[data-content-part]");
         const elementsToProcess =
-          contentDivs.length > 0
-            ? Array.from(contentDivs)
-            : [container];
+          contentDivs.length > 0 ? Array.from(contentDivs) : [container];
 
-        if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Queue) {
-          // Use Queue for better handling of multiple reprocesses
-          window.MathJax.Hub.Queue(["Typeset", window.MathJax.Hub, elementsToProcess]);
-        } else if (window.MathJax && window.MathJax.Hub && typeof window.MathJax.Hub.Typeset === "function") {
+        if (window.MathJax?.Hub?.Queue) {
+          window.MathJax.Hub.Queue([
+            "Typeset",
+            window.MathJax.Hub,
+            elementsToProcess,
+          ]);
+        } else if (window.MathJax?.Hub?.Typeset) {
           window.MathJax.Hub.Typeset(elementsToProcess);
-        } else if (window.MathJax && typeof window.MathJax.typeset === "function") {
-          // Fallback for MathJax 3.x
+        } else if (window.MathJax?.typeset) {
           window.MathJax.typeset(elementsToProcess);
         }
       } catch (error) {
-        // Silently fail - MathJax will process on next load
         logger.error("MathJax reprocessing error:", error);
       }
-    };
-
-    // Start processing
-    processMathJaxContent();
+    }, 100); // Minimal delay for fast processing
   }, [html]);
 
-  // Reprocess MathJax when forms are loaded or DOM updates
+  // Reprocess MathJax when forms are loaded or DOM updates - optimized
   useEffect(() => {
     if (!html || !containerRef.current) return;
-
-    // Wait for DOM to update after form configs load
-    const timer = setTimeout(() => {
-      reprocessMathJax();
-    }, 500);
-
-    return () => clearTimeout(timer);
+    reprocessMathJax();
+    return () => {
+      if (mathJaxTimerRef.current) {
+        clearTimeout(mathJaxTimerRef.current);
+      }
+    };
   }, [html, formConfigs, reprocessMathJax]);
 
-  // Reprocess MathJax when form states change (buttons clicked, modals opened/closed)
+  // Reprocess MathJax when form states change - optimized
   useEffect(() => {
     if (!html || !containerRef.current) return;
-
-    // Wait for DOM to update after form state changes (slightly longer delay for modals)
-    const timer = setTimeout(() => {
-      reprocessMathJax();
-    }, 200);
-
-    return () => clearTimeout(timer);
+    reprocessMathJax();
+    return () => {
+      if (mathJaxTimerRef.current) {
+        clearTimeout(mathJaxTimerRef.current);
+      }
+    };
   }, [html, formStates, reprocessMathJax]);
 
-  // Helper function to check if HTML content is inline
-  const isInlineContent = (html) => {
-    if (!html || !html.trim()) return false;
-    const trimmed = html.trim();
+  // Memoize form maps and parts split together for efficiency
+  const { formMap, formDataMap, hasInlineForms, parts } = useMemo(() => {
+    if (!processedHtml) {
+      return { formMap: {}, formDataMap: {}, hasInlineForms: false, parts: [] };
+    }
 
-    // Check if it starts with block-level tags
-    const blockLevelTags = [
-      "<p",
-      "<div",
-      "<h1",
-      "<h2",
-      "<h3",
-      "<h4",
-      "<h5",
-      "<h6",
-      "<ul",
-      "<ol",
-      "<li",
-      "<blockquote",
-      "<pre",
-      "<table",
-      "<section",
-      "<article",
-      "<header",
-      "<footer",
-      "<nav",
-      "<aside",
-      "<main",
-      "<figure",
-      "<hr",
-    ];
-
-    const isBlockLevel = blockLevelTags.some((tag) =>
-      trimmed.toLowerCase().startsWith(tag)
-    );
-
-    return !isBlockLevel;
-  };
-
-  // Render content with forms
-  const renderContent = () => {
-    if (!processedHtml) return null;
-
-    const parts = processedHtml.split(/(<!--FORM_PLACEHOLDER_\d+-->)/);
-    const formMap = {};
-    const formDataMap = {};
+    const map = {};
+    const dataMap = {};
     forms.forEach((form) => {
-      formMap[form.placeholder] = form.formId;
-      formDataMap[form.placeholder] = form;
+      map[form.placeholder] = form.formId;
+      dataMap[form.placeholder] = form;
     });
 
-    // Determine if we have inline forms in the content
-    const hasInlineForms = forms.some((f) => f.isInline);
+    return {
+      formMap: map,
+      formDataMap: dataMap,
+      hasInlineForms: forms.some((f) => f.isInline),
+      parts: processedHtml.split(/(<!--FORM_PLACEHOLDER_\d+-->)/),
+    };
+  }, [processedHtml, forms]);
+
+  // Render content with forms - optimized inline render
+  const renderContent = useMemo(() => {
+    if (!processedHtml || parts.length === 0) return null;
 
     return (
       <>
@@ -407,21 +444,23 @@ const RichContent = ({ html }) => {
                     {capitalizeButtonText(buttonText || "Open Form")}
                   </button>
                   {isOpen && (
-                    <FormRenderer
-                      formId={formId}
-                      isOpen={isOpen}
-                      onClose={() =>
-                        setFormStates((prev) => ({
-                          ...prev,
-                          [formKey]: false,
-                        }))
-                      }
-                      prepared=""
-                      buttonLink={buttonLink}
-                      imageUrl={imageUrl}
-                      title={formData.title || ""}
-                      description={formData.description || ""}
-                    />
+                    <Suspense fallback={null}>
+                      <FormRenderer
+                        formId={formId}
+                        isOpen={isOpen}
+                        onClose={() =>
+                          setFormStates((prev) => ({
+                            ...prev,
+                            [formKey]: false,
+                          }))
+                        }
+                        prepared=""
+                        buttonLink={buttonLink}
+                        imageUrl={imageUrl}
+                        title={formData.title || ""}
+                        description={formData.description || ""}
+                      />
+                    </Suspense>
                   )}
                 </React.Fragment>
               );
@@ -465,17 +504,19 @@ const RichContent = ({ html }) => {
                     </button>
                   </div>
                   {isOpen && (
-                    <FormRenderer
-                      formId={formId}
-                      isOpen={isOpen}
-                      onClose={() =>
-                        setFormStates((prev) => ({
-                          ...prev,
-                          [formKey]: false,
-                        }))
-                      }
-                      prepared=""
-                    />
+                    <Suspense fallback={null}>
+                      <FormRenderer
+                        formId={formId}
+                        isOpen={isOpen}
+                        onClose={() =>
+                          setFormStates((prev) => ({
+                            ...prev,
+                            [formKey]: false,
+                          }))
+                        }
+                        prepared=""
+                      />
+                    </Suspense>
                   )}
                 </div>
               </div>
@@ -516,7 +557,15 @@ const RichContent = ({ html }) => {
         })}
       </>
     );
-  };
+  }, [
+    parts,
+    formMap,
+    formDataMap,
+    formStates,
+    formConfigs,
+    hasInlineForms,
+    processedHtml,
+  ]);
 
   return (
     <>
@@ -527,7 +576,7 @@ const RichContent = ({ html }) => {
         </div>
       )}
       <div ref={containerRef} className="rich-text-content">
-        {renderContent()}
+        {renderContent}
       </div>
     </>
   );
