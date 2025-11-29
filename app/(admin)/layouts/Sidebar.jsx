@@ -24,7 +24,7 @@ const ALL_MENU_ITEMS = [
     icon: FaRegFolderOpen,
   },
   {
-    name:"Definitions Management",
+    name: "Definitions Management",
     href: "/admin/definitions",
     icon: FaRegFolderOpen,
   },
@@ -33,7 +33,6 @@ const ALL_MENU_ITEMS = [
     name: "Practice Test Management",
     href: "/admin/practice",
     icon: FaRegFolderOpen,
-
   },
   {
     name: "Lead Management",
@@ -51,7 +50,6 @@ const ALL_MENU_ITEMS = [
     icon: FaUserTag,
     adminOnly: true,
   },
-
 ];
 
 const Sidebar = ({ isOpen, onClose }) => {

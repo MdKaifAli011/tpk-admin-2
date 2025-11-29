@@ -47,6 +47,10 @@ const leadSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    form_id: {
+      type: String,
+      trim: true,
+    },
     source: {
       type: String,
       trim: true,
@@ -64,6 +68,7 @@ leadSchema.index({ createdAt: -1 });
 leadSchema.index({ country: 1 });
 leadSchema.index({ className: 1 });
 leadSchema.index({ form_name: 1 });
+leadSchema.index({ form_id: 1 });
 leadSchema.index({ source: 1 });
 
 if (mongoose.models?.Lead) {

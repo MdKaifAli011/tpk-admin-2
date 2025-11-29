@@ -129,6 +129,7 @@ export async function POST(request) {
 
       // Add new fields if provided
       if (body.form_name) updateData.form_name = body.form_name.trim();
+      if (body.form_id) updateData.form_id = body.form_id.trim();
       if (body.source) updateData.source = body.source.trim();
       if (body.prepared) updateData.prepared = body.prepared.trim();
 
@@ -152,6 +153,7 @@ export async function POST(request) {
 
       // Add new fields if provided
       if (body.form_name) createData.form_name = body.form_name.trim();
+      if (body.form_id) createData.form_id = body.form_id.trim();
       if (body.source) createData.source = body.source.trim();
       if (body.prepared) createData.prepared = body.prepared.trim();
 

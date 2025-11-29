@@ -252,7 +252,7 @@ const DownloadModal = ({ isOpen, onClose }) => {
           <div className="flex-1 overflow-y-auto">
             <div className="p-4">
               <div className="bg-blue-600 text-white text-xs font-medium px-3 py-1 rounded-full inline-block mb-2">
-              We Will Connect With You Soon
+                We Will Connect With You Soon
               </div>
 
               <h2 className="text-xl font-bold text-gray-900 mb-3">

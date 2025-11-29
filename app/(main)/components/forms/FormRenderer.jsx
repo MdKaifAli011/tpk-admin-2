@@ -10,6 +10,15 @@ import FormFieldInput from "./FormFieldInput";
 import VerificationInput from "./VerificationInput";
 import SubmitStatusMessage from "./SubmitStatusMessage";
 
+// Helper function to capitalize button text
+const capitalizeButtonText = (text) => {
+  if (!text) return "";
+  return text
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+};
+
 const FormRenderer = ({
   formId,
   isOpen,
@@ -136,12 +145,49 @@ const FormRenderer = ({
     setSubmitMessage("");
 
     try {
+      // Extract exam name from URL
+      const extractExamName = (urlString) => {
+        if (!urlString) return "";
+        try {
+          const url = new URL(urlString);
+          const pathname = url.pathname;
+
+          // Remove leading/trailing slashes and split
+          const segments = pathname
+            .split("/")
+            .filter((seg) => seg && seg.trim() && seg !== "");
+
+          // Extract first segment as exam name (e.g., /neet, /ib, /jee)
+          if (segments.length > 0) {
+            const firstSegment = segments[0].toUpperCase();
+            // Return if it's a reasonable length (2-20 characters)
+            if (firstSegment.length >= 2 && firstSegment.length <= 20) {
+              return firstSegment;
+            }
+          }
+
+          return "";
+        } catch {
+          // If URL parsing fails, try to extract from string directly
+          const match = urlString.match(/\/([a-z]{2,20})(?:\/|$|\?)/i);
+          if (match && match[1]) {
+            return match[1].toUpperCase();
+          }
+          return "";
+        }
+      };
+
+      const sourceUrl =
+        typeof window !== "undefined" ? window.location.href : "";
+      const extractedExamName = extractExamName(sourceUrl);
+
       // Prepare submission data
       const submissionData = {
         ...formData,
-        form_name: formId,
-        source: typeof window !== "undefined" ? window.location.href : "",
-        prepared: prepared || "",
+        form_name: formConfig?.formName || formId,
+        form_id: formId,
+        source: sourceUrl,
+        prepared: extractedExamName || prepared || "",
       };
 
       // Combine country code and phone number if both exist
@@ -431,12 +477,12 @@ const FormRenderer = ({
                   />
                 )}
 
-                <div className="pt-1 flex gap-2">
+                <div className="pt-1 flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <button
                     type="button"
                     onClick={handleClose}
                     disabled={isSubmitting}
-                    className="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:flex-1 px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 md:py-3 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 font-medium rounded-md sm:rounded-lg text-xs sm:text-sm md:text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95"
                     aria-label="Cancel form"
                   >
                     Cancel
@@ -444,7 +490,7 @@ const FormRenderer = ({
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full sm:flex-1 px-3 py-2 sm:px-4 sm:py-2.5 md:px-5 md:py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-md sm:rounded-lg text-xs sm:text-sm md:text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transform active:scale-95"
                     aria-label={
                       isSubmitting ? "Submitting form" : "Submit form"
                     }
@@ -452,13 +498,17 @@ const FormRenderer = ({
                     {isSubmitting ? (
                       <>
                         <FaSpinner
-                          className="animate-spin text-sm"
+                          className="animate-spin text-xs sm:text-sm"
                           aria-hidden="true"
                         />
                         <span>Submitting...</span>
                       </>
                     ) : (
-                      <span>{formConfig.settings.buttonText || "Submit"}</span>
+                      <span>
+                        {capitalizeButtonText(
+                          formConfig.settings.buttonText || "Submit"
+                        )}
+                      </span>
                     )}
                   </button>
                 </div>

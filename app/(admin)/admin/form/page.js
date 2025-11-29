@@ -1,4 +1,5 @@
 import FormManagement from "../../components/features/FormManagement";
+import MainLayout from "../../layouts/MainLayout";
 
 export const metadata = {
   title: "Form Management | Admin Panel",
@@ -6,6 +7,10 @@ export const metadata = {
 };
 
 export default function FormManagementPage() {
-  return <FormManagement />;
-}
+  return (  
+  <MainLayout>
+  <FormManagement />
+  </MainLayout >
+)
+};
 

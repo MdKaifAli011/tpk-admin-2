@@ -1,15 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import {
-  FaPlus,
-  FaEdit,
-  FaTrash,
-  FaCopy,
-  FaEye,
-  FaClipboardList,
-  FaCode,
-  FaTimes,
-} from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaClipboardList } from "react-icons/fa";
 import { ToastContainer, useToast } from "../ui/Toast";
 import api from "@/lib/api";
 import { LoadingSpinner } from "../ui/SkeletonLoader";
@@ -21,8 +12,6 @@ const FormManagement = () => {
   const [error, setError] = useState(null);
   const [showBuilder, setShowBuilder] = useState(false);
   const [editingForm, setEditingForm] = useState(null);
-  const [showCodeModal, setShowCodeModal] = useState(false);
-  const [selectedForm, setSelectedForm] = useState(null);
   const { toasts, removeToast, success, error: showError } = useToast();
 
   useEffect(() => {
@@ -83,38 +72,6 @@ const FormManagement = () => {
     fetchForms();
   };
 
-  const handleShowCode = (form) => {
-    setSelectedForm(form);
-    setShowCodeModal(true);
-  };
-
-  const generateCode = (form) => {
-    const componentName = form.formId
-      .split("-")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join("");
-    return `import FormRenderer from '@/components/forms/FormRenderer';
-import { useState } from 'react';
-
-export const ${componentName}Form = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  
-  return (
-    <>
-      <button onClick={() => setIsOpen(true)} className="px-4 py-2 bg-blue-600 text-white rounded-lg">
-        Open Form
-      </button>
-      <FormRenderer 
-        formId="${form.formId}"
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        prepared=""
-      />
-    </>
-  );
-};`;
-  };
-
   if (showBuilder) {
     return <FormBuilder form={editingForm} onClose={handleBuilderClose} />;
   }
@@ -131,8 +88,7 @@ export const ${componentName}Form = () => {
               Form Management
             </h1>
             <p className="text-xs text-gray-600">
-              Create and manage dynamic forms. Generate code to embed forms
-              anywhere in your application.
+              Create and manage dynamic forms for your application.
             </p>
           </div>
           <button
@@ -262,13 +218,6 @@ export const ${componentName}Form = () => {
                       <td className="px-4 py-3 whitespace-nowrap text-right">
                         <div className="flex items-center justify-end gap-2">
                           <button
-                            onClick={() => handleShowCode(form)}
-                            className="p-1.5 bg-blue-50 text-blue-600 rounded-lg transition-colors hover:bg-blue-100"
-                            title="Get Code"
-                          >
-                            <FaCode className="w-3.5 h-3.5" />
-                          </button>
-                          <button
                             onClick={() => handleEdit(form)}
                             className="p-1.5 bg-green-50 text-green-600 rounded-lg transition-colors hover:bg-green-100"
                             title="Edit Form"
@@ -292,87 +241,6 @@ export const ${componentName}Form = () => {
           )}
         </div>
       </div>
-
-      {/* Code Modal */}
-      {showCodeModal && selectedForm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden border border-gray-200">
-            <div className="flex items-center justify-between px-6 py-4 border-b bg-white">
-              <h2 className="text-xl font-semibold text-gray-900">
-                Generated Code for {selectedForm.formName}
-              </h2>
-              <button
-                onClick={() => {
-                  setShowCodeModal(false);
-                  setSelectedForm(null);
-                }}
-                className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition"
-              >
-                <FaTimes className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Copy this code and paste it in your component:
-                </label>
-                <div className="relative">
-                  <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
-                    <code>{generateCode(selectedForm)}</code>
-                  </pre>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(generateCode(selectedForm));
-                      success("Code copied to clipboard!");
-                    }}
-                    className="absolute top-2 right-2 p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-                    title="Copy Code"
-                  >
-                    <FaCopy className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 className="text-sm font-semibold text-blue-900 mb-2">
-                  Usage Instructions:
-                </h3>
-                <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-                  <li>Copy the code above</li>
-                  <li>
-                    Create a new component file or paste in your existing
-                    component
-                  </li>
-                  <li>
-                    Import FormRenderer:{" "}
-                    <code className="bg-blue-100 px-1 rounded">
-                      import FormRenderer from '@/components/forms/FormRenderer'
-                    </code>
-                  </li>
-                  <li>Use the component with a button to open the form</li>
-                  <li>
-                    The form will automatically capture: form_name, source
-                    (URL), and prepared field
-                  </li>
-                </ol>
-              </div>
-            </div>
-
-            <div className="px-6 py-4 bg-gray-50 border-t flex justify-end">
-              <button
-                onClick={() => {
-                  setShowCodeModal(false);
-                  setSelectedForm(null);
-                }}
-                className="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };
