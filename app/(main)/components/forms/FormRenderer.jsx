@@ -1,0 +1,474 @@
+"use client";
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { FaSpinner, FaTimes, FaUser } from "react-icons/fa";
+import api from "@/lib/api";
+import { countryCodeMap } from "@/app/(main)/components/constants/formConstants";
+import { useVerification } from "../hooks/useVerification";
+import { validateField as validateFieldUtil } from "./formUtils";
+import FormFieldInput from "./FormFieldInput";
+import VerificationInput from "./VerificationInput";
+import SubmitStatusMessage from "./SubmitStatusMessage";
+
+const FormRenderer = ({
+  formId,
+  isOpen,
+  onClose,
+  prepared = "",
+  buttonLink = "",
+  imageUrl = "",
+  title = "",
+  description = "",
+}) => {
+  const [formConfig, setFormConfig] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({});
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null);
+  const [submitMessage, setSubmitMessage] = useState("");
+  const [imageError, setImageError] = useState(false);
+
+  const {
+    verificationQuestion,
+    userVerificationAnswer,
+    isVerified,
+    generateVerification,
+    handleVerificationChange,
+    validateVerification,
+    resetVerification,
+  } = useVerification();
+
+  // Fetch form configuration
+  useEffect(() => {
+    if (formId && isOpen) {
+      fetchFormConfig();
+      generateVerification();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formId, isOpen]);
+
+  const fetchFormConfig = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get(`/form/${formId}`);
+      if (response.data?.success) {
+        setFormConfig(response.data.data);
+        // Initialize form data with default values
+        const initialData = {};
+        response.data.data.fields.forEach((field) => {
+          if (field.defaultValue) {
+            initialData[field.name] = field.defaultValue;
+          } else {
+            initialData[field.name] = "";
+          }
+        });
+        // Initialize countryCode if phoneNumber field exists
+        const hasPhoneNumber = response.data.data.fields.some(
+          (f) => f.name === "phoneNumber"
+        );
+        if (hasPhoneNumber) {
+          initialData.countryCode = "+91";
+        }
+        setFormData(initialData);
+      }
+    } catch (error) {
+      console.error("Error fetching form config:", error);
+      setSubmitStatus("error");
+      setSubmitMessage("Failed to load form. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => {
+      const newData = { ...prev, [name]: value };
+
+      // Auto-update country code when country changes
+      if (name === "country" && value && countryCodeMap[value]) {
+        newData.countryCode = countryCodeMap[value] || "+1";
+      }
+
+      // Clear error for this field
+      if (errors[name]) {
+        setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
+      }
+
+      return newData;
+    });
+
+    if (submitStatus) {
+      setSubmitStatus(null);
+      setSubmitMessage("");
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formConfig) return false;
+
+    formConfig.fields.forEach((field) => {
+      const value = formData[field.name];
+      const error = validateFieldUtil(field, value);
+      if (error) {
+        newErrors[field.name] = error;
+      }
+    });
+
+    // Validate verification if enabled
+    if (formConfig.settings.showVerification && !validateVerification()) {
+      newErrors.verification = "Please complete the verification";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+    setSubmitMessage("");
+
+    try {
+      // Prepare submission data
+      const submissionData = {
+        ...formData,
+        form_name: formId,
+        source: typeof window !== "undefined" ? window.location.href : "",
+        prepared: prepared || "",
+      };
+
+      // Combine country code and phone number if both exist
+      if (submissionData.countryCode && submissionData.phoneNumber) {
+        submissionData.phoneNumber =
+          submissionData.countryCode + submissionData.phoneNumber.trim();
+        delete submissionData.countryCode;
+      }
+
+      const response = await api.post("/lead", submissionData);
+
+      if (response.data?.success) {
+        setSubmitStatus("success");
+        setSubmitMessage(
+          formConfig.settings.successMessage ||
+            "Thank you! Your request has been submitted successfully."
+        );
+
+        // Reset form
+        const resetData = {};
+        formConfig.fields.forEach((field) => {
+          if (field.defaultValue) {
+            resetData[field.name] = field.defaultValue;
+          } else if (field.type === "tel" && field.name === "countryCode") {
+            resetData[field.name] = "+91";
+          } else {
+            resetData[field.name] = "";
+          }
+        });
+        setFormData(resetData);
+        setErrors({});
+        resetVerification();
+        generateVerification();
+
+        // Handle redirect or auto-close
+        const delay = buttonLink && buttonLink.trim() ? 1500 : 2000;
+        setTimeout(() => {
+          if (buttonLink && buttonLink.trim()) {
+            try {
+              // Validate URL before redirecting
+              const url = buttonLink.trim();
+              if (
+                url.startsWith("http://") ||
+                url.startsWith("https://") ||
+                url.startsWith("/")
+              ) {
+                window.location.href = url;
+              } else {
+                // If no protocol, assume it's a relative URL or add https://
+                window.location.href = url.startsWith("/")
+                  ? url
+                  : `https://${url}`;
+              }
+            } catch (error) {
+              console.error("Error redirecting:", error);
+              // Fallback to closing modal
+              onClose();
+              setSubmitStatus(null);
+              setSubmitMessage("");
+            }
+          } else {
+            // Auto-close if no link
+            onClose();
+            setSubmitStatus(null);
+            setSubmitMessage("");
+          }
+        }, delay);
+      } else {
+        setSubmitStatus("error");
+        setSubmitMessage(
+          response.data?.message ||
+            "Failed to submit your request. Please try again."
+        );
+      }
+    } catch (error) {
+      setSubmitStatus("error");
+      setSubmitMessage(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to submit your request. Please check your connection and try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleClose = () => {
+    if (!isSubmitting) {
+      setFormData({});
+      setErrors({});
+      setSubmitStatus(null);
+      setSubmitMessage("");
+      setImageError(false);
+      resetVerification();
+      onClose();
+    }
+  };
+
+  // Reset form when modal opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({});
+      setErrors({});
+      setSubmitStatus(null);
+      setSubmitMessage("");
+      setImageError(false);
+      resetVerification();
+    }
+  }, [isOpen, resetVerification]);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  // Handle ESC key to close modal
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscape = (e) => {
+      if (e.key === "Escape" && !isSubmitting) {
+        setFormData({});
+        setErrors({});
+        setSubmitStatus(null);
+        setSubmitMessage("");
+        setImageError(false);
+        resetVerification();
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isOpen, isSubmitting, onClose, resetVerification]);
+
+  if (!isOpen) return null;
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <div className="bg-white rounded-xl p-6 flex items-center gap-3">
+          <FaSpinner className="animate-spin text-blue-600" />
+          <span className="text-sm text-gray-700">Loading form...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!formConfig) {
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <div className="bg-white rounded-xl p-6 max-w-md w-full">
+          <div className="text-center">
+            <FaExclamationCircle className="text-red-500 text-3xl mx-auto mb-3" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Form Not Found
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              The form you&apos;re looking for doesn&apos;t exist or is
+              inactive.
+            </p>
+            <button
+              onClick={handleClose}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const sortedFields = [...formConfig.fields].sort(
+    (a, b) => (a.order || 0) - (b.order || 0)
+  );
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center">
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={handleClose}
+        aria-hidden="true"
+      />
+
+      <div
+        className="relative bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="form-title"
+      >
+        <button
+          onClick={handleClose}
+          disabled={isSubmitting}
+          className="absolute top-3 right-3 z-10 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed bg-white/80 backdrop-blur-sm"
+          aria-label="Close modal"
+          type="button"
+        >
+          <FaTimes className="text-lg" aria-hidden="true" />
+        </button>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 flex-1 overflow-hidden">
+          <div className="hidden lg:block relative bg-gradient-to-br from-purple-500 via-purple-600 to-purple-700 overflow-hidden">
+            {imageUrl && !imageError ? (
+              <Image
+                src={imageUrl}
+                alt={title || formConfig?.formName || "Form"}
+                fill
+                className="object-cover object-center"
+                style={{
+                  objectFit: "cover",
+                  objectPosition: "center",
+                  margin: "0",
+                  borderRadius: "0px",
+                }}
+                onError={() => setImageError(true)}
+                unoptimized
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center p-4">
+                <div className="relative w-full h-full flex items-center justify-center">
+                  <div className="w-48 h-64 bg-white/10 rounded-lg backdrop-blur-sm flex items-center justify-center">
+                    <div className="text-white/30 text-center">
+                      <FaUser className="text-6xl mx-auto mb-2" />
+                      <p className="text-xs">Image Placeholder</p>
+                    </div>
+                  </div>
+                  <div className="absolute top-1/4 right-1/4 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-4">
+              {(description || formConfig.settings.description) && (
+                <div className="bg-blue-600 text-white text-xs font-medium px-3 py-1 rounded-full inline-block mb-2">
+                  {description || formConfig.settings.description}
+                </div>
+              )}
+
+              <h2
+                id="form-title"
+                className="text-xl font-bold text-gray-900 mb-3"
+              >
+                {title || formConfig.settings.title || formConfig.formName}
+              </h2>
+
+              <form onSubmit={handleSubmit} className="space-y-2.5" noValidate>
+                <SubmitStatusMessage
+                  status={submitStatus}
+                  message={submitMessage}
+                />
+
+                {sortedFields.map((field) => (
+                  <FormFieldInput
+                    key={field.fieldId}
+                    field={field}
+                    value={formData[field.name] || ""}
+                    error={errors[field.name]}
+                    formData={formData}
+                    isSubmitting={isSubmitting}
+                    onChange={handleChange}
+                  />
+                ))}
+
+                {formConfig.settings.showVerification && (
+                  <VerificationInput
+                    verificationQuestion={verificationQuestion}
+                    userVerificationAnswer={userVerificationAnswer}
+                    isVerified={isVerified}
+                    error={errors.verification}
+                    isSubmitting={isSubmitting}
+                    onChange={(e) =>
+                      handleVerificationChange(e.target.value, setErrors)
+                    }
+                    onRefresh={generateVerification}
+                  />
+                )}
+
+                <div className="pt-1 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleClose}
+                    disabled={isSubmitting}
+                    className="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Cancel form"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    aria-label={
+                      isSubmitting ? "Submitting form" : "Submit form"
+                    }
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <FaSpinner
+                          className="animate-spin text-sm"
+                          aria-hidden="true"
+                        />
+                        <span>Submitting...</span>
+                      </>
+                    ) : (
+                      <span>{formConfig.settings.buttonText || "Submit"}</span>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default FormRenderer;

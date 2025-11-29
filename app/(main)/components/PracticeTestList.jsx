@@ -759,10 +759,7 @@ const PracticeTestList = ({
                   (q) => q._id === result.questionId
                 );
                 return (
-                  <div
-                    key={result.questionId}
-                    className=" p-4 bg-white"
-                  >
+                  <div key={result.questionId} className=" p-4 bg-white">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <span className="flex items-center justify-center w-8 h-8 rounded-full font-medium bg-gray-100 text-gray-900 border border-gray-200 text-xs">
@@ -913,31 +910,7 @@ const PracticeTestList = ({
               </p>
             </div>
 
-            {/* HIGHLIGHT STRIP */}
-            <div
-              className="
-    bg-gradient-to-r from-blue-50 to-indigo-50 
-    border-b border-gray-200 
-    px-3 md:px-6 py-2 flex items-center justify-between
-  "
-            >
-              <span className="text-[10px] md:text-sm font-medium text-gray-700">
-                ⭐ Recommended: Attempt calmly & review before submission
-              </span>
-
-              <span
-                className="
-      px-2 py-[3px] md:px-3 md:py-1
-      text-[10px] md:text-xs
-      font-semibold text-white 
-      bg-blue-600 
-      rounded-full 
-    "
-              >
-                Practice Mode
-              </span>
-            </div>
-
+           
             {/* STATS GRID — FULLY RESPONSIVE */}
             <div
               className="

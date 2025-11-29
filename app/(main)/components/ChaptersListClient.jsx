@@ -5,7 +5,14 @@ import ChapterProgressItem from "./ChapterProgressItem";
 import { useProgress } from "../hooks/useProgress";
 import { createSlug as createSlugUtil } from "@/utils/slug";
 
-const ChaptersListClient = ({ chapters, unitId, examSlug, subjectSlug, unitSlug, onUnitProgressChange }) => {
+const ChaptersListClient = ({
+  chapters,
+  unitId,
+  examSlug,
+  subjectSlug,
+  unitSlug,
+  onUnitProgressChange,
+}) => {
   const {
     chaptersProgress,
     unitProgress,
@@ -56,4 +63,3 @@ const ChaptersListClient = ({ chapters, unitId, examSlug, subjectSlug, unitSlug,
 };
 
 export default ChaptersListClient;
-

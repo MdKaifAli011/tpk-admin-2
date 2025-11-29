@@ -118,31 +118,44 @@ export async function POST(request) {
       previousStatus = existingLead.status;
       const newUpdateCount = (existingLead.updateCount || 0) + 1;
 
-      lead = await Lead.findOneAndUpdate(
-        { email },
-        {
-          name: body.name.trim(),
-          country: body.country.trim(),
-          className: body.className.trim(),
-          phoneNumber: body.phoneNumber.trim(),
-          status: "updated",
-          updateCount: newUpdateCount,
-        },
-        { new: true, runValidators: true }
-      );
+      const updateData = {
+        name: body.name.trim(),
+        country: body.country.trim(),
+        className: body.className.trim(),
+        phoneNumber: body.phoneNumber.trim(),
+        status: "updated",
+        updateCount: newUpdateCount,
+      };
+
+      // Add new fields if provided
+      if (body.form_name) updateData.form_name = body.form_name.trim();
+      if (body.source) updateData.source = body.source.trim();
+      if (body.prepared) updateData.prepared = body.prepared.trim();
+
+      lead = await Lead.findOneAndUpdate({ email }, updateData, {
+        new: true,
+        runValidators: true,
+      });
 
       message = `Lead updated successfully. This is update #${newUpdateCount}.`;
       isUpdated = true;
     } else {
-      lead = await Lead.create({
-      name: body.name.trim(),
+      const createData = {
+        name: body.name.trim(),
         email,
-      country: body.country.trim(),
-      className: body.className.trim(),
+        country: body.country.trim(),
+        className: body.className.trim(),
         phoneNumber: body.phoneNumber.trim(),
         status: "new",
         updateCount: 0,
-    });
+      };
+
+      // Add new fields if provided
+      if (body.form_name) createData.form_name = body.form_name.trim();
+      if (body.source) createData.source = body.source.trim();
+      if (body.prepared) createData.prepared = body.prepared.trim();
+
+      lead = await Lead.create(createData);
       message = "Lead submitted successfully";
     }
 
@@ -157,4 +170,3 @@ export async function POST(request) {
     return handleApiError(error, "Failed to submit lead");
   }
 }
-

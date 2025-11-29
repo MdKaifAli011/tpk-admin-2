@@ -41,6 +41,11 @@ const ALL_MENU_ITEMS = [
     icon: FaUserTag,
   },
   {
+    name: "Form Management",
+    href: "/admin/form",
+    icon: FaClipboardList,
+  },
+  {
     name: "User Role Management",
     href: "/admin/user-role",
     icon: FaUserTag,

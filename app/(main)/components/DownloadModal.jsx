@@ -122,6 +122,9 @@ const DownloadModal = ({ isOpen, onClose }) => {
         country: formData.country.trim(),
         className: formData.className.trim(),
         phoneNumber: formData.countryCode + formData.phoneNumber.trim(),
+        form_name: "download-modal", // Form identifier
+        source: typeof window !== "undefined" ? window.location.href : "", // Current URL
+        prepared: "", // Can be customized if needed
       });
 
       if (response.data?.success) {
@@ -249,11 +252,11 @@ const DownloadModal = ({ isOpen, onClose }) => {
           <div className="flex-1 overflow-y-auto">
             <div className="p-4">
               <div className="bg-blue-600 text-white text-xs font-medium px-3 py-1 rounded-full inline-block mb-2">
-                WE WILL CALL YOU SOON
+              We Will Connect With You Soon
               </div>
 
               <h2 className="text-xl font-bold text-gray-900 mb-3">
-                Connect With TestprepKart
+                Let&apos;s Connect With You Soon
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-2.5">

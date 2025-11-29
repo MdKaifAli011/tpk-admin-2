@@ -27,7 +27,8 @@ const ChaptersSectionClient = ({
               </h2>
               <p className="mt-1 text-xs sm:text-sm text-gray-500">
                 Review your status and progress for each chapter in this unit.
-                Use the slider to set progress or click "Mark as Done" to complete.
+                Use the slider to set progress or click "Mark as Done" to
+                complete.
               </p>
             </div>
           </div>
@@ -52,4 +53,3 @@ const ChaptersSectionClient = ({
 };
 
 export default ChaptersSectionClient;
-
