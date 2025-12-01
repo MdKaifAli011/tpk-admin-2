@@ -1725,8 +1725,22 @@ export async function getPreviousChapter({
   if (currentIndex !== undefined && currentIndex > 0) {
     const prev = allItems[currentIndex - 1];
     const prevSlug = createSlug(prev.name);
-    // Get last item in previous chapter
+    // Use helper to get last definition path from previous chapter
     try {
+      const result = await getLastDefinitionPathFromChapter({
+        examSlug,
+        subjectSlug,
+        unitSlug,
+        chapterSlug: prevSlug,
+        chapterId: prev._id,
+      });
+      if (result) {
+        return {
+          ...result,
+          label: `${prev.name} > ${result.label}`,
+        };
+      }
+      // Fallback if no definition path
       const topics = await fetchTopicsByChapter(prev._id);
       if (topics.length > 0) {
         const lastTopic = topics[topics.length - 1];
@@ -1763,13 +1777,27 @@ export async function getPreviousChapter({
     }
   }
 
-  // 2. Try previous unit
+  // 2. Try previous unit - use helper for drill-down
   try {
     const units = await fetchUnitsBySubject(subjectId, examId);
     const unitIndex = units.findIndex((u) => u._id === unitId);
     if (unitIndex > 0) {
       const prevUnit = units[unitIndex - 1];
       const prevUnitSlug = createSlug(prevUnit.name);
+      // Use helper to get last definition path
+      const result = await getLastDefinitionPathFromUnit({
+        examSlug,
+        subjectSlug,
+        unitSlug: prevUnitSlug,
+        unitId: prevUnit._id,
+      });
+      if (result) {
+        return {
+          ...result,
+          label: `${prevUnit.name} > ${result.label}`,
+        };
+      }
+      // Fallback if no definition path
       const chapters = await fetchChaptersByUnit(prevUnit._id);
       if (chapters.length > 0) {
         const lastChapter = chapters[chapters.length - 1];
@@ -1921,8 +1949,21 @@ export async function getNextChapter({
     if (subjectIndex < subjects.length - 1) {
       const nextSubject = subjects[subjectIndex + 1];
       const nextSubjectSlug = createSlug(nextSubject.name);
-      // Check if next subject has units
+      // Use helper to drill down to deepest level
       try {
+        const result = await getDeepestDefinitionPathFromSubject({
+          examSlug,
+          subjectSlug: nextSubjectSlug,
+          subjectId: nextSubject._id,
+          examId,
+        });
+        if (result) {
+          return {
+            ...result,
+            label: `${nextSubject.name} > ${result.label}`,
+          };
+        }
+        // Fallback to first unit/chapter if no definition path
         const nextSubjectUnits = await fetchUnitsBySubject(
           nextSubject._id,
           examId
@@ -1930,7 +1971,6 @@ export async function getNextChapter({
         if (nextSubjectUnits.length > 0) {
           const firstUnit = nextSubjectUnits[0];
           const firstUnitSlug = createSlug(firstUnit.name);
-          // Check if first unit has chapters
           try {
             const firstUnitChapters = await fetchChaptersByUnit(firstUnit._id);
             if (firstUnitChapters.length > 0) {
@@ -1951,7 +1991,9 @@ export async function getNextChapter({
             type: "unit",
           };
         }
-      } catch (error) {}
+      } catch (error) {
+        // Continue
+      }
       return {
         url: `/${examSlug}/${nextSubjectSlug}`,
         label: nextSubject.name,
@@ -1972,13 +2014,23 @@ export async function getNextChapter({
     if (examIndex < exams.length - 1) {
       const nextExam = exams[examIndex + 1];
       const nextExamSlug = createSlug(nextExam.name);
-      // Check if next exam has subjects
+      // Use helper to drill down to deepest level
+      const result = await getDeepestDefinitionPathFromExam({
+        examSlug: nextExamSlug,
+        examId: nextExam._id,
+      });
+      if (result) {
+        return {
+          ...result,
+          label: `${nextExam.name} > ${result.label}`,
+        };
+      }
+      // Fallback if no definition path
       try {
         const nextExamSubjects = await fetchSubjectsByExam(nextExam._id);
         if (nextExamSubjects.length > 0) {
           const firstSubject = nextExamSubjects[0];
           const firstSubjectSlug = createSlug(firstSubject.name);
-          // Check if first subject has units
           try {
             const firstSubjectUnits = await fetchUnitsBySubject(
               firstSubject._id,
@@ -2002,7 +2054,9 @@ export async function getNextChapter({
             type: "subject",
           };
         }
-      } catch (error) {}
+      } catch (error) {
+        // Continue
+      }
       return {
         url: `/${nextExamSlug}`,
         label: nextExam.name,
@@ -2078,7 +2132,115 @@ export async function getNextUnit({
     };
   }
 
-  // Continue with subject, exam...
+  // 3. Try next subject in same exam
+  try {
+    const subjects = await fetchSubjectsByExam(examId);
+    const subjectIndex = subjects.findIndex((s) => s._id === subjectId);
+    if (subjectIndex < subjects.length - 1) {
+      const nextSubject = subjects[subjectIndex + 1];
+      const nextSubjectSlug = createSlug(nextSubject.name);
+      // Check if next subject has units
+      try {
+        const nextSubjectUnits = await fetchUnitsBySubject(nextSubject._id, examId);
+        if (nextSubjectUnits.length > 0) {
+          const firstUnit = nextSubjectUnits[0];
+          const firstUnitSlug = createSlug(firstUnit.name);
+          // Use helper to drill down to deepest level
+          const result = await getDeepestDefinitionPathFromUnit({
+            examSlug,
+            subjectSlug: nextSubjectSlug,
+            unitSlug: firstUnitSlug,
+            unitId: firstUnit._id,
+          });
+          if (result) {
+            return {
+              ...result,
+              label: `${nextSubject.name} > ${result.label}`,
+            };
+          }
+          // Fallback to first chapter if no definition path
+          try {
+            const firstUnitChapters = await fetchChaptersByUnit(firstUnit._id);
+            if (firstUnitChapters.length > 0) {
+              const firstChapter = firstUnitChapters[0];
+              const firstChapterSlug = createSlug(firstChapter.name);
+              return {
+                url: `/${examSlug}/${nextSubjectSlug}/${firstUnitSlug}/${firstChapterSlug}`,
+                label: `${nextSubject.name} > ${firstUnit.name} > ${firstChapter.name}`,
+                type: "chapter",
+              };
+            }
+          } catch (error) {
+            // Continue
+          }
+          return {
+            url: `/${examSlug}/${nextSubjectSlug}/${firstUnitSlug}`,
+            label: `${nextSubject.name} > ${firstUnit.name}`,
+            type: "unit",
+          };
+        }
+      } catch (error) {
+        // Continue
+      }
+      return {
+        url: `/${examSlug}/${nextSubjectSlug}`,
+        label: nextSubject.name,
+        type: "subject",
+      };
+    }
+  } catch (error) {
+    logger.error("Error fetching next subject:", {
+      error: error.message,
+      context: { subjectId, examId },
+    });
+  }
+
+  // 4. Try next exam
+  try {
+    const exams = await fetchExams({ limit: 100 });
+    const examIndex = exams.findIndex((e) => e._id === examId);
+    if (examIndex < exams.length - 1) {
+      const nextExam = exams[examIndex + 1];
+      const nextExamSlug = createSlug(nextExam.name);
+      // Use helper to drill down to deepest level
+      const result = await getDeepestDefinitionPathFromExam({
+        examSlug: nextExamSlug,
+        examId: nextExam._id,
+      });
+      if (result) {
+        return {
+          ...result,
+          label: `${nextExam.name} > ${result.label}`,
+        };
+      }
+      // Fallback if no definition path
+      try {
+        const nextExamSubjects = await fetchSubjectsByExam(nextExam._id);
+        if (nextExamSubjects.length > 0) {
+          const firstSubject = nextExamSubjects[0];
+          const firstSubjectSlug = createSlug(firstSubject.name);
+          return {
+            url: `/${nextExamSlug}/${firstSubjectSlug}`,
+            label: `${nextExam.name} > ${firstSubject.name}`,
+            type: "subject",
+          };
+        }
+      } catch (error) {
+        // Continue
+      }
+      return {
+        url: `/${nextExamSlug}`,
+        label: nextExam.name,
+        type: "exam",
+      };
+    }
+  } catch (error) {
+    logger.error("Error fetching next exam:", {
+      error: error.message,
+      context: { examId },
+    });
+  }
+
   return null;
 }
 
@@ -2093,12 +2255,28 @@ export async function getNextSubject({
   currentIndex,
   allItems,
 }) {
-  // 1. Try first unit in this subject
+  // 1. Try first unit in this subject - drill down to deepest level
   try {
     const units = await fetchUnitsBySubject(subjectId, examId);
     if (units.length > 0) {
       const firstUnit = units[0];
       const firstUnitSlug = createSlug(firstUnit.name);
+      // Try to drill down to first chapter/topic/subtopic
+      try {
+        const firstUnitChapters = await fetchChaptersByUnit(firstUnit._id);
+        if (firstUnitChapters.length > 0) {
+          const firstChapter = firstUnitChapters[0];
+          const firstChapterSlug = createSlug(firstChapter.name);
+          return {
+            url: `/${examSlug}/${subjectSlug}/${firstUnitSlug}/${firstChapterSlug}`,
+            label: `${firstUnit.name} > ${firstChapter.name}`,
+            type: "chapter",
+          };
+        }
+      } catch (error) {
+        // Continue
+      }
+      // Fallback to unit page if no chapters
       return {
         url: `/${examSlug}/${subjectSlug}/${firstUnitSlug}`,
         label: firstUnit.name,
@@ -2116,12 +2294,40 @@ export async function getNextSubject({
   if (currentIndex !== undefined && currentIndex < allItems.length - 1) {
     const next = allItems[currentIndex + 1];
     const nextSlug = createSlug(next.name);
-    // Check if next subject has units
+    // Check if next subject has units - drill down to deepest level
     try {
       const nextSubjectUnits = await fetchUnitsBySubject(next._id, examId);
       if (nextSubjectUnits.length > 0) {
         const firstUnit = nextSubjectUnits[0];
         const firstUnitSlug = createSlug(firstUnit.name);
+        // Use helper to drill down to deepest level
+        const result = await getDeepestDefinitionPathFromUnit({
+          examSlug,
+          subjectSlug: nextSlug,
+          unitSlug: firstUnitSlug,
+          unitId: firstUnit._id,
+        });
+        if (result) {
+          return {
+            ...result,
+            label: `${next.name} > ${result.label}`,
+          };
+        }
+        // Fallback to first chapter if no definition path
+        try {
+          const firstUnitChapters = await fetchChaptersByUnit(firstUnit._id);
+          if (firstUnitChapters.length > 0) {
+            const firstChapter = firstUnitChapters[0];
+            const firstChapterSlug = createSlug(firstChapter.name);
+            return {
+              url: `/${examSlug}/${nextSlug}/${firstUnitSlug}/${firstChapterSlug}`,
+              label: `${next.name} > ${firstUnit.name} > ${firstChapter.name}`,
+              type: "chapter",
+            };
+          }
+        } catch (error) {
+          // Continue
+        }
         return {
           url: `/${examSlug}/${nextSlug}/${firstUnitSlug}`,
           label: `${next.name} > ${firstUnit.name}`,
@@ -2146,13 +2352,23 @@ export async function getNextSubject({
     if (examIndex < exams.length - 1) {
       const nextExam = exams[examIndex + 1];
       const nextExamSlug = createSlug(nextExam.name);
-      // Check if next exam has subjects
+      // Use helper to drill down to deepest level
+      const result = await getDeepestDefinitionPathFromExam({
+        examSlug: nextExamSlug,
+        examId: nextExam._id,
+      });
+      if (result) {
+        return {
+          ...result,
+          label: `${nextExam.name} > ${result.label}`,
+        };
+      }
+      // Fallback if no definition path
       try {
         const nextExamSubjects = await fetchSubjectsByExam(nextExam._id);
         if (nextExamSubjects.length > 0) {
           const firstSubject = nextExamSubjects[0];
           const firstSubjectSlug = createSlug(firstSubject.name);
-          // Check if first subject has units
           try {
             const firstSubjectUnits = await fetchUnitsBySubject(
               firstSubject._id,
@@ -2176,7 +2392,9 @@ export async function getNextSubject({
             type: "subject",
           };
         }
-      } catch (error) {}
+      } catch (error) {
+        // Continue
+      }
       return {
         url: `/${nextExamSlug}`,
         label: nextExam.name,
@@ -2210,8 +2428,21 @@ export async function getPreviousUnit({
   if (currentIndex !== undefined && currentIndex > 0) {
     const prev = allItems[currentIndex - 1];
     const prevSlug = createSlug(prev.name);
-    // Get last item in previous unit
+    // Use helper to get last definition path from previous unit
     try {
+      const result = await getLastDefinitionPathFromUnit({
+        examSlug,
+        subjectSlug,
+        unitSlug: prevSlug,
+        unitId: prev._id,
+      });
+      if (result) {
+        return {
+          ...result,
+          label: `${prev.name} > ${result.label}`,
+        };
+      }
+      // Fallback if no definition path - drill down manually
       const chapters = await fetchChaptersByUnit(prev._id);
       if (chapters.length > 0) {
         const lastChapter = chapters[chapters.length - 1];
@@ -2266,10 +2497,66 @@ export async function getPreviousUnit({
     if (subjectIndex > 0) {
       const prevSubject = subjects[subjectIndex - 1];
       const prevSubjectSlug = createSlug(prevSubject.name);
+      // Use helper to drill down to deepest level (last definition)
+      const result = await getLastDefinitionPathFromSubject({
+        examSlug,
+        subjectSlug: prevSubjectSlug,
+        subjectId: prevSubject._id,
+        examId,
+      });
+      if (result) {
+        return {
+          ...result,
+          label: `${prevSubject.name} > ${result.label}`,
+        };
+      }
+      // Fallback if no definition path
       const units = await fetchUnitsBySubject(prevSubject._id, examId);
       if (units.length > 0) {
         const lastUnit = units[units.length - 1];
         const lastUnitSlug = createSlug(lastUnit.name);
+        // Try to drill down to last chapter/topic/subtopic
+        try {
+          const lastUnitChapters = await fetchChaptersByUnit(lastUnit._id);
+          if (lastUnitChapters.length > 0) {
+            const lastChapter = lastUnitChapters[lastUnitChapters.length - 1];
+            const lastChapterSlug = createSlug(lastChapter.name);
+            try {
+              const lastChapterTopics = await fetchTopicsByChapter(lastChapter._id);
+              if (lastChapterTopics.length > 0) {
+                const lastTopic = lastChapterTopics[lastChapterTopics.length - 1];
+                const lastTopicSlug = createSlug(lastTopic.name);
+                try {
+                  const lastTopicSubtopics = await fetchSubTopicsByTopic(lastTopic._id);
+                  if (lastTopicSubtopics.length > 0) {
+                    const lastSubtopic = lastTopicSubtopics[lastTopicSubtopics.length - 1];
+                    return {
+                      url: `/${examSlug}/${prevSubjectSlug}/${lastUnitSlug}/${lastChapterSlug}/${lastTopicSlug}/${createSlug(lastSubtopic.name)}`,
+                      label: `${prevSubject.name} > ${lastUnit.name} > ${lastChapter.name} > ${lastTopic.name} > ${lastSubtopic.name}`,
+                      type: "subtopic",
+                    };
+                  }
+                } catch (error) {
+                  // Continue
+                }
+                return {
+                  url: `/${examSlug}/${prevSubjectSlug}/${lastUnitSlug}/${lastChapterSlug}/${lastTopicSlug}`,
+                  label: `${prevSubject.name} > ${lastUnit.name} > ${lastChapter.name} > ${lastTopic.name}`,
+                  type: "topic",
+                };
+              }
+            } catch (error) {
+              // Continue
+            }
+            return {
+              url: `/${examSlug}/${prevSubjectSlug}/${lastUnitSlug}/${lastChapterSlug}`,
+              label: `${prevSubject.name} > ${lastUnit.name} > ${lastChapter.name}`,
+              type: "chapter",
+            };
+          }
+        } catch (error) {
+          // Continue
+        }
         return {
           url: `/${examSlug}/${prevSubjectSlug}/${lastUnitSlug}`,
           label: `${prevSubject.name} > ${lastUnit.name}`,
@@ -2308,51 +2595,73 @@ export async function getPreviousSubject({
   if (currentIndex !== undefined && currentIndex > 0) {
     const prev = allItems[currentIndex - 1];
     const prevSlug = createSlug(prev.name);
-    // Get last item in previous subject
+    // Use helper to drill down to deepest level (last definition)
     try {
+      const result = await getLastDefinitionPathFromSubject({
+        examSlug,
+        subjectSlug: prevSlug,
+        subjectId: prev._id,
+        examId,
+      });
+      if (result) {
+        return {
+          ...result,
+          label: `${prev.name} > ${result.label}`,
+        };
+      }
+      // Fallback if no definition path
       const units = await fetchUnitsBySubject(prev._id, examId);
       if (units.length > 0) {
         const lastUnit = units[units.length - 1];
         const lastUnitSlug = createSlug(lastUnit.name);
-        const chapters = await fetchChaptersByUnit(lastUnit._id);
-        if (chapters.length > 0) {
-          const lastChapter = chapters[chapters.length - 1];
-          const lastChapterSlug = createSlug(lastChapter.name);
-          const topics = await fetchTopicsByChapter(lastChapter._id);
-          if (topics.length > 0) {
-            const lastTopic = topics[topics.length - 1];
-            const lastTopicSlug = createSlug(lastTopic.name);
-            const subtopics = await fetchSubTopicsByTopic(lastTopic._id);
-            if (subtopics.length > 0) {
-              const lastSubtopic = subtopics[subtopics.length - 1];
-              return {
-                url: `/${examSlug}/${prevSlug}/${lastUnitSlug}/${lastChapterSlug}/${lastTopicSlug}/${createSlug(
-                  lastSubtopic.name
-                )}`,
-                label: `${prev.name} > ${lastUnit.name} > ${lastChapter.name} > ${lastTopic.name} > ${lastSubtopic.name}`,
-                type: "subtopic",
-              };
-            } else {
-              return {
-                url: `/${examSlug}/${prevSlug}/${lastUnitSlug}/${lastChapterSlug}/${lastTopicSlug}`,
-                label: `${prev.name} > ${lastUnit.name} > ${lastChapter.name} > ${lastTopic.name}`,
-                type: "topic",
-              };
+        try {
+          const lastUnitChapters = await fetchChaptersByUnit(lastUnit._id);
+          if (lastUnitChapters.length > 0) {
+            const lastChapter = lastUnitChapters[lastUnitChapters.length - 1];
+            const lastChapterSlug = createSlug(lastChapter.name);
+            try {
+              const lastChapterTopics = await fetchTopicsByChapter(lastChapter._id);
+              if (lastChapterTopics.length > 0) {
+                const lastTopic = lastChapterTopics[lastChapterTopics.length - 1];
+                const lastTopicSlug = createSlug(lastTopic.name);
+                try {
+                  const lastTopicSubtopics = await fetchSubTopicsByTopic(lastTopic._id);
+                  if (lastTopicSubtopics.length > 0) {
+                    const lastSubtopic = lastTopicSubtopics[lastTopicSubtopics.length - 1];
+                    return {
+                      url: `/${examSlug}/${prevSlug}/${lastUnitSlug}/${lastChapterSlug}/${lastTopicSlug}/${createSlug(
+                        lastSubtopic.name
+                      )}`,
+                      label: `${prev.name} > ${lastUnit.name} > ${lastChapter.name} > ${lastTopic.name} > ${lastSubtopic.name}`,
+                      type: "subtopic",
+                    };
+                  }
+                } catch (error) {
+                  // Continue
+                }
+                return {
+                  url: `/${examSlug}/${prevSlug}/${lastUnitSlug}/${lastChapterSlug}/${lastTopicSlug}`,
+                  label: `${prev.name} > ${lastUnit.name} > ${lastChapter.name} > ${lastTopic.name}`,
+                  type: "topic",
+                };
+              }
+            } catch (error) {
+              // Continue
             }
-          } else {
             return {
               url: `/${examSlug}/${prevSlug}/${lastUnitSlug}/${lastChapterSlug}`,
               label: `${prev.name} > ${lastUnit.name} > ${lastChapter.name}`,
               type: "chapter",
             };
           }
-        } else {
-          return {
-            url: `/${examSlug}/${prevSlug}/${lastUnitSlug}`,
-            label: `${prev.name} > ${lastUnit.name}`,
-            type: "unit",
-          };
+        } catch (error) {
+          // Continue
         }
+        return {
+          url: `/${examSlug}/${prevSlug}/${lastUnitSlug}`,
+          label: `${prev.name} > ${lastUnit.name}`,
+          type: "unit",
+        };
       } else {
         return {
           url: `/${examSlug}/${prevSlug}`,
@@ -2375,6 +2684,18 @@ export async function getPreviousSubject({
     if (examIndex > 0) {
       const prevExam = exams[examIndex - 1];
       const prevExamSlug = createSlug(prevExam.name);
+      // Use helper to drill down to deepest level (last definition)
+      const result = await getLastDefinitionPathFromExam({
+        examSlug: prevExamSlug,
+        examId: prevExam._id,
+      });
+      if (result) {
+        return {
+          ...result,
+          label: `${prevExam.name} > ${result.label}`,
+        };
+      }
+      // Fallback if no definition path
       const subjects = await fetchSubjectsByExam(prevExam._id);
       if (subjects.length > 0) {
         const lastSubject = subjects[subjects.length - 1];
@@ -2559,23 +2880,31 @@ async function getDeepestDefinitionPath({
   topicSlug,
   topicId,
 }) {
+  if (!topicId) return null;
+  
   try {
     const subtopics = await fetchSubTopicsByTopic(topicId);
-    if (subtopics.length > 0) {
-      const firstSubTopic = subtopics[0];
-      const firstSubTopicSlug = createSlug(firstSubTopic.name);
-      const definitions = await fetchDefinitionsBySubTopic(firstSubTopic._id);
-      if (definitions.length > 0) {
-        return {
-          url: `/${examSlug}/${subjectSlug}/${unitSlug}/${chapterSlug}/${topicSlug}/${firstSubTopicSlug}/${createSlug(
-            definitions[0].name
-          )}`,
-          label: `${firstSubTopic.name} > ${definitions[0].name}`,
-          type: "definition",
-        };
-      }
+    if (!subtopics || subtopics.length === 0) return null;
+    
+    const firstSubTopic = subtopics[0];
+    const firstSubTopicSlug = createSlug(firstSubTopic.name);
+    const definitions = await fetchDefinitionsBySubTopic(firstSubTopic._id);
+    
+    if (definitions && definitions.length > 0) {
+      return {
+        url: `/${examSlug}/${subjectSlug}/${unitSlug}/${chapterSlug}/${topicSlug}/${firstSubTopicSlug}/${createSlug(
+          definitions[0].name
+        )}`,
+        label: `${firstSubTopic.name} > ${definitions[0].name}`,
+        type: "definition",
+      };
     }
-  } catch (error) {}
+  } catch (error) {
+    // Silently fail - expected if no subtopics/definitions exist
+    if (process.env.NODE_ENV === 'development') {
+      logger.error("getDeepestDefinitionPath error:", { error: error.message, topicId });
+    }
+  }
   return null;
 }
 
@@ -2589,27 +2918,35 @@ async function getDeepestDefinitionPathFromChapter({
   chapterSlug,
   chapterId,
 }) {
+  if (!chapterId) return null;
+  
   try {
     const topics = await fetchTopicsByChapter(chapterId);
-    if (topics.length > 0) {
-      const firstTopic = topics[0];
-      const firstTopicSlug = createSlug(firstTopic.name);
-      const result = await getDeepestDefinitionPath({
-        examSlug,
-        subjectSlug,
-        unitSlug,
-        chapterSlug,
-        topicSlug: firstTopicSlug,
-        topicId: firstTopic._id,
-      });
-      if (result) {
-        return {
-          ...result,
-          label: `${firstTopic.name} > ${result.label}`,
-        };
-      }
+    if (!topics || topics.length === 0) return null;
+    
+    const firstTopic = topics[0];
+    const firstTopicSlug = createSlug(firstTopic.name);
+    const result = await getDeepestDefinitionPath({
+      examSlug,
+      subjectSlug,
+      unitSlug,
+      chapterSlug,
+      topicSlug: firstTopicSlug,
+      topicId: firstTopic._id,
+    });
+    
+    if (result) {
+      return {
+        ...result,
+        label: `${firstTopic.name} > ${result.label}`,
+      };
     }
-  } catch (error) {}
+  } catch (error) {
+    // Silently fail - expected if no topics exist
+    if (process.env.NODE_ENV === 'development') {
+      logger.error("getDeepestDefinitionPathFromChapter error:", { error: error.message, chapterId });
+    }
+  }
   return null;
 }
 
@@ -2622,26 +2959,34 @@ async function getDeepestDefinitionPathFromUnit({
   unitSlug,
   unitId,
 }) {
+  if (!unitId) return null;
+  
   try {
     const chapters = await fetchChaptersByUnit(unitId);
-    if (chapters.length > 0) {
-      const firstChapter = chapters[0];
-      const firstChapterSlug = createSlug(firstChapter.name);
-      const result = await getDeepestDefinitionPathFromChapter({
-        examSlug,
-        subjectSlug,
-        unitSlug,
-        chapterSlug: firstChapterSlug,
-        chapterId: firstChapter._id,
-      });
-      if (result) {
-        return {
-          ...result,
-          label: `${firstChapter.name} > ${result.label}`,
-        };
-      }
+    if (!chapters || chapters.length === 0) return null;
+    
+    const firstChapter = chapters[0];
+    const firstChapterSlug = createSlug(firstChapter.name);
+    const result = await getDeepestDefinitionPathFromChapter({
+      examSlug,
+      subjectSlug,
+      unitSlug,
+      chapterSlug: firstChapterSlug,
+      chapterId: firstChapter._id,
+    });
+    
+    if (result) {
+      return {
+        ...result,
+        label: `${firstChapter.name} > ${result.label}`,
+      };
     }
-  } catch (error) {}
+  } catch (error) {
+    // Silently fail - expected if no chapters exist
+    if (process.env.NODE_ENV === 'development') {
+      logger.error("getDeepestDefinitionPathFromUnit error:", { error: error.message, unitId });
+    }
+  }
   return null;
 }
 
@@ -2654,25 +2999,33 @@ async function getDeepestDefinitionPathFromSubject({
   subjectId,
   examId,
 }) {
+  if (!subjectId || !examId) return null;
+  
   try {
     const units = await fetchUnitsBySubject(subjectId, examId);
-    if (units.length > 0) {
-      const firstUnit = units[0];
-      const firstUnitSlug = createSlug(firstUnit.name);
-      const result = await getDeepestDefinitionPathFromUnit({
-        examSlug,
-        subjectSlug,
-        unitSlug: firstUnitSlug,
-        unitId: firstUnit._id,
-      });
-      if (result) {
-        return {
-          ...result,
-          label: `${firstUnit.name} > ${result.label}`,
-        };
-      }
+    if (!units || units.length === 0) return null;
+    
+    const firstUnit = units[0];
+    const firstUnitSlug = createSlug(firstUnit.name);
+    const result = await getDeepestDefinitionPathFromUnit({
+      examSlug,
+      subjectSlug,
+      unitSlug: firstUnitSlug,
+      unitId: firstUnit._id,
+    });
+    
+    if (result) {
+      return {
+        ...result,
+        label: `${firstUnit.name} > ${result.label}`,
+      };
     }
-  } catch (error) {}
+  } catch (error) {
+    // Silently fail - expected if no units exist
+    if (process.env.NODE_ENV === 'development') {
+      logger.error("getDeepestDefinitionPathFromSubject error:", { error: error.message, subjectId, examId });
+    }
+  }
   return null;
 }
 
@@ -2680,25 +3033,33 @@ async function getDeepestDefinitionPathFromSubject({
  * Helper: Get deepest definition path from an exam
  */
 async function getDeepestDefinitionPathFromExam({ examSlug, examId }) {
+  if (!examId || !examSlug) return null;
+  
   try {
     const subjects = await fetchSubjectsByExam(examId);
-    if (subjects.length > 0) {
-      const firstSubject = subjects[0];
-      const firstSubjectSlug = createSlug(firstSubject.name);
-      const result = await getDeepestDefinitionPathFromSubject({
-        examSlug,
-        subjectSlug: firstSubjectSlug,
-        subjectId: firstSubject._id,
-        examId,
-      });
-      if (result) {
-        return {
-          ...result,
-          label: `${firstSubject.name} > ${result.label}`,
-        };
-      }
+    if (!subjects || subjects.length === 0) return null;
+    
+    const firstSubject = subjects[0];
+    const firstSubjectSlug = createSlug(firstSubject.name);
+    const result = await getDeepestDefinitionPathFromSubject({
+      examSlug,
+      subjectSlug: firstSubjectSlug,
+      subjectId: firstSubject._id,
+      examId,
+    });
+    
+    if (result) {
+      return {
+        ...result,
+        label: `${firstSubject.name} > ${result.label}`,
+      };
     }
-  } catch (error) {}
+  } catch (error) {
+    // Silently fail - expected if no subjects exist
+    if (process.env.NODE_ENV === 'development') {
+      logger.error("getDeepestDefinitionPathFromExam error:", { error: error.message, examId });
+    }
+  }
   return null;
 }
 
@@ -2713,24 +3074,32 @@ async function getLastDefinitionPath({
   topicSlug,
   topicId,
 }) {
+  if (!topicId) return null;
+  
   try {
     const subtopics = await fetchSubTopicsByTopic(topicId);
-    if (subtopics.length > 0) {
-      const lastSubTopic = subtopics[subtopics.length - 1];
-      const lastSubTopicSlug = createSlug(lastSubTopic.name);
-      const definitions = await fetchDefinitionsBySubTopic(lastSubTopic._id);
-      if (definitions.length > 0) {
-        const lastDefinition = definitions[definitions.length - 1];
-        return {
-          url: `/${examSlug}/${subjectSlug}/${unitSlug}/${chapterSlug}/${topicSlug}/${lastSubTopicSlug}/${createSlug(
-            lastDefinition.name
-          )}`,
-          label: `${lastSubTopic.name} > ${lastDefinition.name}`,
-          type: "definition",
-        };
-      }
+    if (!subtopics || subtopics.length === 0) return null;
+    
+    const lastSubTopic = subtopics[subtopics.length - 1];
+    const lastSubTopicSlug = createSlug(lastSubTopic.name);
+    const definitions = await fetchDefinitionsBySubTopic(lastSubTopic._id);
+    
+    if (definitions && definitions.length > 0) {
+      const lastDefinition = definitions[definitions.length - 1];
+      return {
+        url: `/${examSlug}/${subjectSlug}/${unitSlug}/${chapterSlug}/${topicSlug}/${lastSubTopicSlug}/${createSlug(
+          lastDefinition.name
+        )}`,
+        label: `${lastSubTopic.name} > ${lastDefinition.name}`,
+        type: "definition",
+      };
     }
-  } catch (error) {}
+  } catch (error) {
+    // Silently fail - expected if no subtopics/definitions exist
+    if (process.env.NODE_ENV === 'development') {
+      logger.error("getLastDefinitionPath error:", { error: error.message, topicId });
+    }
+  }
   return null;
 }
 
@@ -2744,27 +3113,35 @@ async function getLastDefinitionPathFromChapter({
   chapterSlug,
   chapterId,
 }) {
+  if (!chapterId) return null;
+  
   try {
     const topics = await fetchTopicsByChapter(chapterId);
-    if (topics.length > 0) {
-      const lastTopic = topics[topics.length - 1];
-      const lastTopicSlug = createSlug(lastTopic.name);
-      const result = await getLastDefinitionPath({
-        examSlug,
-        subjectSlug,
-        unitSlug,
-        chapterSlug,
-        topicSlug: lastTopicSlug,
-        topicId: lastTopic._id,
-      });
-      if (result) {
-        return {
-          ...result,
-          label: `${lastTopic.name} > ${result.label}`,
-        };
-      }
+    if (!topics || topics.length === 0) return null;
+    
+    const lastTopic = topics[topics.length - 1];
+    const lastTopicSlug = createSlug(lastTopic.name);
+    const result = await getLastDefinitionPath({
+      examSlug,
+      subjectSlug,
+      unitSlug,
+      chapterSlug,
+      topicSlug: lastTopicSlug,
+      topicId: lastTopic._id,
+    });
+    
+    if (result) {
+      return {
+        ...result,
+        label: `${lastTopic.name} > ${result.label}`,
+      };
     }
-  } catch (error) {}
+  } catch (error) {
+    // Silently fail - expected if no topics exist
+    if (process.env.NODE_ENV === 'development') {
+      logger.error("getLastDefinitionPathFromChapter error:", { error: error.message, chapterId });
+    }
+  }
   return null;
 }
 
@@ -2777,26 +3154,34 @@ async function getLastDefinitionPathFromUnit({
   unitSlug,
   unitId,
 }) {
+  if (!unitId) return null;
+  
   try {
     const chapters = await fetchChaptersByUnit(unitId);
-    if (chapters.length > 0) {
-      const lastChapter = chapters[chapters.length - 1];
-      const lastChapterSlug = createSlug(lastChapter.name);
-      const result = await getLastDefinitionPathFromChapter({
-        examSlug,
-        subjectSlug,
-        unitSlug,
-        chapterSlug: lastChapterSlug,
-        chapterId: lastChapter._id,
-      });
-      if (result) {
-        return {
-          ...result,
-          label: `${lastChapter.name} > ${result.label}`,
-        };
-      }
+    if (!chapters || chapters.length === 0) return null;
+    
+    const lastChapter = chapters[chapters.length - 1];
+    const lastChapterSlug = createSlug(lastChapter.name);
+    const result = await getLastDefinitionPathFromChapter({
+      examSlug,
+      subjectSlug,
+      unitSlug,
+      chapterSlug: lastChapterSlug,
+      chapterId: lastChapter._id,
+    });
+    
+    if (result) {
+      return {
+        ...result,
+        label: `${lastChapter.name} > ${result.label}`,
+      };
     }
-  } catch (error) {}
+  } catch (error) {
+    // Silently fail - expected if no chapters exist
+    if (process.env.NODE_ENV === 'development') {
+      logger.error("getLastDefinitionPathFromUnit error:", { error: error.message, unitId });
+    }
+  }
   return null;
 }
 
@@ -2809,25 +3194,33 @@ async function getLastDefinitionPathFromSubject({
   subjectId,
   examId,
 }) {
+  if (!subjectId || !examId) return null;
+  
   try {
     const units = await fetchUnitsBySubject(subjectId, examId);
-    if (units.length > 0) {
-      const lastUnit = units[units.length - 1];
-      const lastUnitSlug = createSlug(lastUnit.name);
-      const result = await getLastDefinitionPathFromUnit({
-        examSlug,
-        subjectSlug,
-        unitSlug: lastUnitSlug,
-        unitId: lastUnit._id,
-      });
-      if (result) {
-        return {
-          ...result,
-          label: `${lastUnit.name} > ${result.label}`,
-        };
-      }
+    if (!units || units.length === 0) return null;
+    
+    const lastUnit = units[units.length - 1];
+    const lastUnitSlug = createSlug(lastUnit.name);
+    const result = await getLastDefinitionPathFromUnit({
+      examSlug,
+      subjectSlug,
+      unitSlug: lastUnitSlug,
+      unitId: lastUnit._id,
+    });
+    
+    if (result) {
+      return {
+        ...result,
+        label: `${lastUnit.name} > ${result.label}`,
+      };
     }
-  } catch (error) {}
+  } catch (error) {
+    // Silently fail - expected if no units exist
+    if (process.env.NODE_ENV === 'development') {
+      logger.error("getLastDefinitionPathFromSubject error:", { error: error.message, subjectId, examId });
+    }
+  }
   return null;
 }
 
@@ -2835,25 +3228,33 @@ async function getLastDefinitionPathFromSubject({
  * Helper: Get last definition of deepest path from an exam
  */
 async function getLastDefinitionPathFromExam({ examSlug, examId }) {
+  if (!examId || !examSlug) return null;
+  
   try {
     const subjects = await fetchSubjectsByExam(examId);
-    if (subjects.length > 0) {
-      const lastSubject = subjects[subjects.length - 1];
-      const lastSubjectSlug = createSlug(lastSubject.name);
-      const result = await getLastDefinitionPathFromSubject({
-        examSlug,
-        subjectSlug: lastSubjectSlug,
-        subjectId: lastSubject._id,
-        examId,
-      });
-      if (result) {
-        return {
-          ...result,
-          label: `${lastSubject.name} > ${result.label}`,
-        };
-      }
+    if (!subjects || subjects.length === 0) return null;
+    
+    const lastSubject = subjects[subjects.length - 1];
+    const lastSubjectSlug = createSlug(lastSubject.name);
+    const result = await getLastDefinitionPathFromSubject({
+      examSlug,
+      subjectSlug: lastSubjectSlug,
+      subjectId: lastSubject._id,
+      examId,
+    });
+    
+    if (result) {
+      return {
+        ...result,
+        label: `${lastSubject.name} > ${result.label}`,
+      };
     }
-  } catch (error) {}
+  } catch (error) {
+    // Silently fail - expected if no subjects exist
+    if (process.env.NODE_ENV === 'development') {
+      logger.error("getLastDefinitionPathFromExam error:", { error: error.message, examId });
+    }
+  }
   return null;
 }
 
