@@ -95,8 +95,8 @@ const SubjectCompletionTracker = ({ subjectId, subjectName, unitIds = [] }) => {
     window.addEventListener("progress-updated", handleProgressUpdate);
     window.addEventListener("chapterProgressUpdate", handleChapterProgressUpdate);
 
-    // Poll for changes as backup
-    const interval = setInterval(checkProgress, 1000);
+    // Poll for changes as backup - reduced frequency to improve performance
+    const interval = setInterval(checkProgress, 3000); // Increased from 1s to 3s
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);

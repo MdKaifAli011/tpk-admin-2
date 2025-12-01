@@ -132,9 +132,9 @@ const UnitsListClient = ({ units, subjectId, examSlug, subjectSlug }) => {
     window.addEventListener("progress-updated", handleProgressUpdate);
     window.addEventListener("chapterProgressUpdate", handleChapterProgressUpdate);
 
-    // Poll for changes as backup (more frequently if authenticated)
-    const pollInterval = authStatus ? 2000 : 1000;
-    const interval = setInterval(updateProgress, pollInterval);
+        // Poll for changes as backup - reduced frequency to improve performance
+        const pollInterval = authStatus ? 5000 : 3000; // Increased from 2s/1s to 5s/3s
+        const interval = setInterval(updateProgress, pollInterval);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);

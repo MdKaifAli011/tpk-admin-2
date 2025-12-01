@@ -22,7 +22,7 @@ import { ERROR_MESSAGES, PLACEHOLDERS, SEO_DEFAULTS } from "@/constants";
 // Lazy load components
 const ExamCard = lazy(() => import("./components/ExamCard"));
 
-// Default exam icons and styling
+// Default exam icons and styling - memoized to avoid recreation
 const getExamIcon = (examName) => {
   const name = examName?.toUpperCase() || "";
   if (name.includes("JEE")) {
@@ -124,24 +124,24 @@ const HomePage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-
   useEffect(() => {
     let isMounted = true;
+    let abortController = new AbortController();
 
     const loadExams = async () => {
       try {
         setIsLoading(true);
         setError(null);
         const fetchedExams = await fetchExams({ limit: 100 });
-        if (isMounted) {
+        if (isMounted && !abortController.signal.aborted) {
           setExams(fetchedExams);
         }
       } catch (err) {
-        if (isMounted) {
+        if (isMounted && !abortController.signal.aborted) {
           setError(ERROR_MESSAGES.FETCH_FAILED);
         }
       } finally {
-        if (isMounted) {
+        if (isMounted && !abortController.signal.aborted) {
           setIsLoading(false);
         }
       }
@@ -151,15 +151,31 @@ const HomePage = () => {
 
     return () => {
       isMounted = false;
+      abortController.abort();
     };
   }, []);
+
+  // Memoize exam cards to prevent unnecessary re-renders
+  const examCards = useMemo(() => {
+    if (exams.length === 0) return null;
+    return exams.map((exam) => (
+      <Suspense
+        key={exam._id}
+        fallback={
+          <div className="bg-gray-200 animate-pulse rounded-xl h-64 sm:h-72 xl:h-80" />
+        }
+      >
+        <ExamCard exam={exam} />
+      </Suspense>
+    ));
+  }, [exams]);
 
   return (
     <>
       <Navbar />
 
       {/* Spacer for fixed navbar - Mobile: ~70px, Desktop: ~102px (top bar + main nav) */}
-      <div className="h-[70px] md:h-[102px] flex-shrink-0" />
+      <div className="h-[70px] md:h-[102px] flex-shrink-0" aria-hidden="true" />
 
       {/* Hero Section */}
       <section className="bg-linear-to-b from-purple-50 via-purple-50/50 to-white py-10 sm:py-12 md:py-16 lg:py-24 xl:py-28">
@@ -169,7 +185,7 @@ const HomePage = () => {
             <div className="order-1 md:order-1 lg:order-1 lg:col-span-5 space-y-5 md:space-y-6 max-w-2xl mx-auto md:mx-0">
               {/* Tag */}
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm mx-auto md:mx-0">
-                <FaTrophy className="text-yellow-500 text-sm" />
+                <FaTrophy className="text-yellow-500 text-sm" aria-hidden="true" />
                 <span className="text-xs sm:text-sm font-medium text-gray-700">
                   Entrance Exam Preparation For Students Worldwide
                 </span>
@@ -188,16 +204,21 @@ const HomePage = () => {
 
               {/* CTA Button */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start gap-3 sm:gap-4 md:gap-3">
-                <button className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl">
-                  <span>Schedule Demo Session</span>
-                  <FaArrowRight className="text-sm" />
-                </button>
                 <Link
-                  href="#"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg border border-blue-100 hover:border-blue-200 hover:bg-blue-50 transition-colors shadow-sm"
+                  href="/contact"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Schedule a demo session"
+                >
+                  <span>Schedule Demo Session</span>
+                  <FaArrowRight className="text-sm" aria-hidden="true" />
+                </Link>
+                <Link
+                  href="#exams"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg border border-blue-100 hover:border-blue-200 hover:bg-blue-50 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Learn more about our exam preparation services"
                 >
                   Learn More
-                  <FaArrowRight className="text-sm" />
+                  <FaArrowRight className="text-sm" aria-hidden="true" />
                 </Link>
               </div>
             </div>
@@ -205,9 +226,9 @@ const HomePage = () => {
             {/* Center Image */}
             <div className="order-3 md:order-2 lg:order-2 lg:col-span-4 md:col-span-1 flex justify-center items-center relative w-full">
               <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-full">
-                <div className="absolute inset-0 bg-pink-200 rounded-full blur-3xl opacity-40 md:opacity-30"></div>
+                <div className="absolute inset-0 bg-pink-200 rounded-full blur-3xl opacity-40 md:opacity-30" aria-hidden="true"></div>
                 <div className="relative bg-white border border-gray-100 rounded-2xl aspect-5/6 sm:aspect-4/5 flex items-center justify-center shadow-lg">
-                  <FaUsers className="text-5xl sm:text-6xl text-gray-300" />
+                  <FaUsers className="text-5xl sm:text-6xl text-gray-300" aria-label="Students studying" />
                 </div>
               </div>
             </div>
@@ -217,18 +238,18 @@ const HomePage = () => {
               <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-5 sm:p-6 hover:shadow-xl transition-shadow max-w-sm md:max-w-xl lg:max-w-none mx-auto md:mx-auto lg:mx-0">
                 {/* Course Image */}
                 <div className="relative w-full h-36 sm:h-40 bg-linear-to-br from-blue-100 to-purple-100 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
-                  <div className="absolute inset-0 bg-white/40"></div>
-                  <FaBook className="text-3xl sm:text-4xl text-gray-400 relative z-10" />
+                  <div className="absolute inset-0 bg-white/40" aria-hidden="true"></div>
+                  <FaBook className="text-3xl sm:text-4xl text-gray-400 relative z-10" aria-hidden="true" />
                 </div>
 
                 {/* Stats */}
                 <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-3 text-xs sm:text-sm text-gray-600">
                   <div className="flex items-center gap-1.5">
-                    <FaBook className="text-xs" />
+                    <FaBook className="text-xs" aria-hidden="true" />
                     <span>63 Lessons</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <FaUsers className="text-xs" />
+                    <FaUsers className="text-xs" aria-hidden="true" />
                     <span>1872 Students</span>
                   </div>
                 </div>
@@ -245,10 +266,10 @@ const HomePage = () => {
                 </p>
 
                 {/* Rating */}
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center gap-0.5">
+                <div className="flex items-center gap-2 mb-3" aria-label="Rating: 5 stars out of 208 reviews">
+                  <div className="flex items-center gap-0.5" role="img" aria-label="5 stars">
                     {[...Array(5)].map((_, i) => (
-                      <FaStar key={i} className="text-yellow-400 text-xs" />
+                      <FaStar key={i} className="text-yellow-400 text-xs" aria-hidden="true" />
                     ))}
                   </div>
                   <span className="text-xs text-gray-500">(208 Reviews)</span>
@@ -261,11 +282,12 @@ const HomePage = () => {
 
                 {/* Explore Link */}
                 <Link
-                  href="#"
-                  className="flex items-center justify-end gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                  href="/#exams"
+                  className="flex items-center justify-end gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
+                  aria-label="Explore JEE preparation courses"
                 >
                   <span>Explore Courses</span>
-                  <FaArrowRight className="text-xs" />
+                  <FaArrowRight className="text-xs" aria-hidden="true" />
                 </Link>
               </div>
             </div>
@@ -274,7 +296,7 @@ const HomePage = () => {
       </section>
 
       {/* Mastered Entrance Examinations Section */}
-      <section className="py-14 sm:py-16 md:py-20 lg:py-24 bg-white">
+      <section id="exams" className="py-14 sm:py-16 md:py-20 lg:py-24 bg-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {/* Heading Section */}
           <div className="text-center mb-10 sm:mb-12">
@@ -293,32 +315,24 @@ const HomePage = () => {
 
           {/* Exam Category Cards */}
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 xl:gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 xl:gap-8" aria-label="Loading exams">
               {[...Array(4)].map((_, index) => (
                 <div
                   key={index}
                   className="bg-gray-200 animate-pulse rounded-xl h-64 sm:h-72 xl:h-80"
+                  aria-hidden="true"
                 />
               ))}
             </div>
           ) : error ? (
             <div className="text-center py-10 sm:py-12">
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg inline-block">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg inline-block" role="alert">
                 {error}
               </div>
             </div>
           ) : exams.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 xl:gap-8">
-              {exams.map((exam) => (
-                <Suspense
-                  key={exam._id}
-                  fallback={
-                    <div className="bg-gray-200 animate-pulse rounded-xl h-64 sm:h-72 xl:h-80" />
-                  }
-                >
-                  <ExamCard exam={exam} />
-                </Suspense>
-              ))}
+              {examCards}
             </div>
           ) : (
             <div className="text-center py-10 sm:py-12 text-gray-500">

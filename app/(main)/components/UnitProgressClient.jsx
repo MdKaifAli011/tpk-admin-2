@@ -179,8 +179,9 @@ const UnitProgressClient = ({ unitId, unitName, initialProgress = 0 }) => {
     window.addEventListener("storage", handleStorageChange);
 
     // Poll for changes as backup (since storage event doesn't fire in same tab)
-    // Poll more frequently if authenticated to get database updates
-    const pollInterval = authStatus ? 2000 : 1000;
+    // Reduced polling frequency to improve performance and reduce memory usage
+    // Poll less frequently - only when authenticated and visible
+    const pollInterval = authStatus ? 5000 : 3000; // Increased from 2s/1s to 5s/3s
     const interval = setInterval(calculateProgress, pollInterval);
 
     return () => {

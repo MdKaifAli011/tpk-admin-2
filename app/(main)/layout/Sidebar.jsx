@@ -239,7 +239,8 @@ export default function Sidebar({ isOpen = true, onClose }) {
   /* -------------------- lifecycle -------------------- */
   useEffect(() => {
     loadExams();
-    const interval = setInterval(() => loadExams(true), 2 * 60 * 1000);
+    // Increased interval from 2 minutes to 5 minutes to reduce API calls
+    const interval = setInterval(() => loadExams(true), 5 * 60 * 1000);
     const onFocus = () => loadExams(true);
     window.addEventListener("focus", onFocus);
     return () => {

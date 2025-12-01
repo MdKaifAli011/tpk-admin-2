@@ -24,10 +24,18 @@ const capitalizeButtonText = (text) => {
 };
 
 // Cache for decoded attributes to avoid repeated processing
+// Limited size with LRU eviction to prevent memory leaks
+const MAX_DECODE_CACHE_SIZE = 50;
 const decodeCache = new Map();
 const decodeAttr = (str) => {
   if (!str) return "";
-  if (decodeCache.has(str)) return decodeCache.get(str);
+  if (decodeCache.has(str)) {
+    // Move to end (LRU)
+    const value = decodeCache.get(str);
+    decodeCache.delete(str);
+    decodeCache.set(str, value);
+    return value;
+  }
   const decoded = str
     .replace(/&quot;/g, '"')
     .replace(/&amp;/g, "&")
@@ -36,10 +44,12 @@ const decodeAttr = (str) => {
     .replace(/&#39;/g, "'")
     .replace(/&#x27;/g, "'")
     .trim();
-  // Limit cache size to prevent memory issues
-  if (decodeCache.size < 100) {
-    decodeCache.set(str, decoded);
+  // LRU eviction: remove oldest if cache is full
+  if (decodeCache.size >= MAX_DECODE_CACHE_SIZE) {
+    const firstKey = decodeCache.keys().next().value;
+    decodeCache.delete(firstKey);
   }
+  decodeCache.set(str, decoded);
   return decoded;
 };
 
