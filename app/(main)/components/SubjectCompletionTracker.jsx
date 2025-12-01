@@ -110,7 +110,8 @@ const SubjectCompletionTracker = ({ subjectId, subjectName, unitIds = [] }) => {
     <CongratulationsModal
       isOpen={showModal}
       onClose={() => setShowModal(false)}
-      chapterName={subjectName ? `Subject: ${subjectName}` : "this subject"}
+      subjectName={subjectName}
+      type="subject"
     />
   );
 };

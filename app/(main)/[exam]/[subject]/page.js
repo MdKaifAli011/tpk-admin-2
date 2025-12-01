@@ -110,6 +110,7 @@ const SubjectPage = async ({ params }) => {
             {/* Progress */}
             <SubjectProgressClient
               subjectId={subject._id}
+              subjectName={subject.name}
               unitIds={fetchedUnits.map((unit) => unit._id)}
               initialProgress={0}
             />

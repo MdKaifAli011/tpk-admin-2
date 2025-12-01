@@ -7,12 +7,60 @@ import { createSlug as createSlugUtil } from "@/utils/slug";
 
 const UnitsListClient = ({ units, subjectId, examSlug, subjectSlug }) => {
   const [progressData, setProgressData] = useState({});
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const getUnitProgress = (unitId) => {
-    // Use state if available, otherwise calculate
+  // Check if student is authenticated
+  const checkAuth = () => {
+    if (typeof window === "undefined") return false;
+    return !!localStorage.getItem("student_token");
+  };
+
+  // Fetch unit progress from database
+  const fetchUnitProgressFromDB = async (unitId) => {
+    if (!isAuthenticated) return null;
+
+    try {
+      const token = localStorage.getItem("student_token");
+      if (!token) return null;
+
+      const response = await fetch(`/api/student/progress?unitId=${unitId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data && data.data.length > 0) {
+          const progressDoc = data.data[0];
+          return progressDoc.unitProgress || 0;
+        }
+      }
+    } catch (error) {
+      console.error(`Error fetching progress for unit ${unitId}:`, error);
+    }
+    return null;
+  };
+
+  const getUnitProgress = async (unitId) => {
+    // Use state if available
     if (progressData[unitId] !== undefined) {
       return progressData[unitId];
     }
+    
+    // Try to fetch from database first if authenticated
+    if (isAuthenticated) {
+      const dbProgress = await fetchUnitProgressFromDB(unitId);
+      if (dbProgress !== null) {
+        return {
+          progress: dbProgress,
+          isCompleted: dbProgress === 100,
+        };
+      }
+    }
+
+    // Fallback to localStorage
     if (typeof window === "undefined") return { progress: 0, isCompleted: false };
     
     try {
@@ -48,12 +96,15 @@ const UnitsListClient = ({ units, subjectId, examSlug, subjectSlug }) => {
 
   // Update progress data for all units
   useEffect(() => {
-    const updateProgress = () => {
+    const authStatus = checkAuth();
+    setIsAuthenticated(authStatus);
+
+    const updateProgress = async () => {
       const newProgressData = {};
-      units.forEach((unit) => {
-        const progress = getUnitProgress(unit._id);
+      for (const unit of units) {
+        const progress = await getUnitProgress(unit._id);
         newProgressData[unit._id] = progress;
-      });
+      }
       setProgressData(newProgressData);
     };
 
@@ -61,28 +112,29 @@ const UnitsListClient = ({ units, subjectId, examSlug, subjectSlug }) => {
     updateProgress();
 
     // Listen for storage events
-    const handleStorageChange = (e) => {
+    const handleStorageChange = async (e) => {
       if (e.key && e.key.startsWith('unit-progress-')) {
-        updateProgress();
+        await updateProgress();
       }
     };
 
     // Listen for custom progress-updated event
-    const handleProgressUpdate = () => {
-      updateProgress();
+    const handleProgressUpdate = async () => {
+      await updateProgress();
     };
 
     // Also listen for chapterProgressUpdate event
-    const handleChapterProgressUpdate = () => {
-      updateProgress();
+    const handleChapterProgressUpdate = async () => {
+      await updateProgress();
     };
 
     window.addEventListener("storage", handleStorageChange);
     window.addEventListener("progress-updated", handleProgressUpdate);
     window.addEventListener("chapterProgressUpdate", handleChapterProgressUpdate);
 
-    // Poll for changes as backup
-    const interval = setInterval(updateProgress, 1000);
+    // Poll for changes as backup (more frequently if authenticated)
+    const pollInterval = authStatus ? 2000 : 1000;
+    const interval = setInterval(updateProgress, pollInterval);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
@@ -90,7 +142,7 @@ const UnitsListClient = ({ units, subjectId, examSlug, subjectSlug }) => {
       window.removeEventListener("chapterProgressUpdate", handleChapterProgressUpdate);
       clearInterval(interval);
     };
-  }, [units]);
+  }, [units, isAuthenticated]);
 
   const colorVariants = {
     blue: "bg-blue-500",

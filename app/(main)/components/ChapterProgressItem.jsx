@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { FaCheck, FaEye } from "react-icons/fa";
 import CongratulationsModal from "./CongratulationsModal";
@@ -20,6 +20,22 @@ const ChapterProgressItem = ({
   const [isDragging, setIsDragging] = useState(false);
   const [showCongratulations, setShowCongratulations] = useState(false);
   const [hasShownCongratulations, setHasShownCongratulations] = useState(false);
+  const prevProgressRef = useRef(initialProgress);
+
+  // Sync with prop changes (from database updates)
+  useEffect(() => {
+    const prevProgress = prevProgressRef.current;
+    setLocalProgress(initialProgress);
+    setIsCompleted(initialIsCompleted);
+    
+    // Show congratulations when progress reaches 100% from database updates
+    if (initialProgress === 100 && prevProgress < 100 && !hasShownCongratulations) {
+      setShowCongratulations(true);
+      setHasShownCongratulations(true);
+    }
+    
+    prevProgressRef.current = initialProgress;
+  }, [initialProgress, initialIsCompleted, hasShownCongratulations]);
 
   const weightage = chapter.weightage ?? "20%";
   const engagement = chapter.engagement ?? "2.2K";

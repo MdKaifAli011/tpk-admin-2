@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 
-const CongratulationsModal = ({ isOpen, onClose, chapterName }) => {
+const CongratulationsModal = ({ isOpen, onClose, chapterName, unitName, subjectName, type = "chapter" }) => {
   const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
@@ -196,13 +196,23 @@ const CongratulationsModal = ({ isOpen, onClose, chapterName }) => {
             Congratulations
           </h2>
           <p className="text-base sm:text-lg md:text-xl text-blue-600 font-medium leading-relaxed px-2">
-            {chapterName ? (
+            {type === "chapter" && chapterName ? (
               <>
-                You completed{" "}
+                You completed the chapter{" "}
                 <span className="font-bold text-blue-700">{chapterName}</span>!
               </>
+            ) : type === "unit" && unitName ? (
+              <>
+                You completed the unit{" "}
+                <span className="font-bold text-blue-700">{unitName}</span>!
+              </>
+            ) : type === "subject" && subjectName ? (
+              <>
+                You completed the subject{" "}
+                <span className="font-bold text-blue-700">{subjectName}</span>!
+              </>
             ) : (
-              "You did a Great job in the test!"
+              "You did a Great job!"
             )}
           </p>
         </div>

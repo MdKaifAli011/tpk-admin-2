@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   FaInstagram,
   FaFacebook,
@@ -13,11 +14,16 @@ import {
   FaTh,
   FaBars,
   FaChevronDown,
+  FaSignOutAlt,
 } from "react-icons/fa";
 import Image from "next/image";
+import { useStudent } from "../hooks/useStudent";
 
 const Navbar = ({ onMenuToggle, isMenuOpen }) => {
   const [isNavMenuOpen, setIsNavMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const router = useRouter();
+  const { student, isLoading, isAuthenticated, logout } = useStudent();
 
   // Handle default props
   const handleMenuToggle = onMenuToggle || (() => {});
@@ -41,6 +47,35 @@ const Navbar = ({ onMenuToggle, isMenuOpen }) => {
       }
     };
   }, [isNavMenuOpen, isMenuOpen]);
+
+  // Close user menu when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isUserMenuOpen && !event.target.closest('.user-menu-container')) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isUserMenuOpen]);
+
+  // Handle logout
+  const handleLogout = () => {
+    logout();
+    setIsUserMenuOpen(false);
+    router.push("/");
+  };
+
+  // Get user display name
+  const getUserDisplayName = () => {
+    if (!student) return "User";
+    if (student.firstName && student.lastName) {
+      return `${student.firstName} ${student.lastName}`;
+    }
+    if (student.firstName) return student.firstName;
+    if (student.email) return student.email.split("@")[0];
+    return "User";
+  };
 
   const navLinks = [
     "Examinations",
@@ -154,14 +189,45 @@ const Navbar = ({ onMenuToggle, isMenuOpen }) => {
                 <FaSearch className="text-base sm:text-lg md:text-xl" />
               </button>
 
-              {/* Sign In */}
-              <Link
-                href="#"
-                className="hidden md:flex items-center gap-1.5 xl:gap-2 px-2 xl:px-3 py-1.5 xl:py-2 text-xs xl:text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors whitespace-nowrap touch-manipulation"
-              >
-                <FaUser className="text-xs sm:text-sm" />
-                <span>Sign In</span>
-              </Link>
+              {/* User Menu / Sign In */}
+              {isAuthenticated && !isLoading ? (
+                <div className="hidden md:block user-menu-container relative">
+                  <button
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className="flex items-center gap-1.5 xl:gap-2 px-2 xl:px-3 py-1.5 xl:py-2 text-xs xl:text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors whitespace-nowrap touch-manipulation"
+                  >
+                    <FaUser className="text-xs sm:text-sm" />
+                    <span className="max-w-[100px] truncate">{getUserDisplayName()}</span>
+                    <FaChevronDown className={`text-xs transition-transform ${isUserMenuOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  
+                  {isUserMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
+                      <div className="px-4 py-2 border-b border-gray-100">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{getUserDisplayName()}</p>
+                        {student?.email && (
+                          <p className="text-xs text-gray-500 truncate mt-0.5">{student.email}</p>
+                        )}
+                      </div>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <FaSignOutAlt className="text-xs" />
+                        <span>Logout</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className="hidden md:flex items-center gap-1.5 xl:gap-2 px-2 xl:px-3 py-1.5 xl:py-2 text-xs xl:text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors whitespace-nowrap touch-manipulation"
+                >
+                  <FaUser className="text-xs sm:text-sm" />
+                  <span>Sign In</span>
+                </Link>
+              )}
 
               {/* Enroll Now Button */}
               <Link
@@ -237,15 +303,38 @@ const Navbar = ({ onMenuToggle, isMenuOpen }) => {
                     </Link>
                   ))}
 
-                  {/* Sign In Link */}
-                  <Link
-                    href="#"
-                    className="flex items-center gap-2 px-4 py-3 sm:py-3.5 text-sm sm:text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 active:bg-gray-100 transition-colors rounded-lg touch-manipulation min-h-[44px]"
-                    onClick={() => setIsNavMenuOpen(false)}
-                  >
-                    <FaUser className="text-sm sm:text-base" />
-                    <span>Sign In</span>
-                  </Link>
+                  {/* User Menu / Sign In Link */}
+                  {isAuthenticated && !isLoading ? (
+                    <>
+                      <div className="px-4 py-3 sm:py-3.5 border-t border-gray-200">
+                        <div className="mb-2">
+                          <p className="text-sm font-semibold text-gray-900 truncate">{getUserDisplayName()}</p>
+                          {student?.email && (
+                            <p className="text-xs text-gray-500 truncate mt-0.5">{student.email}</p>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => {
+                            handleLogout();
+                            setIsNavMenuOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 active:bg-gray-100 transition-colors rounded-lg touch-manipulation min-h-[44px]"
+                        >
+                          <FaSignOutAlt className="text-sm" />
+                          <span>Logout</span>
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <Link
+                      href="/login"
+                      className="flex items-center gap-2 px-4 py-3 sm:py-3.5 text-sm sm:text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 active:bg-gray-100 transition-colors rounded-lg touch-manipulation min-h-[44px]"
+                      onClick={() => setIsNavMenuOpen(false)}
+                    >
+                      <FaUser className="text-sm sm:text-base" />
+                      <span>Sign In</span>
+                    </Link>
+                  )}
                 </div>
               </div>
             </>

@@ -131,7 +131,7 @@ const UnitPage = async ({ params }) => {
             </div>
 
             {/* Progress */}
-            <UnitProgressClient unitId={unit._id} initialProgress={0} />
+            <UnitProgressClient unitId={unit._id} unitName={unit.name} initialProgress={0} />
           </div>
         </section>
 

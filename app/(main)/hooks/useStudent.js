@@ -1,0 +1,101 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+
+/**
+ * Custom hook to fetch and manage student data from the database
+ * Replaces localStorage usage for student data
+ */
+export const useStudent = () => {
+  const [student, setStudent] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Get student token
+  const getToken = useCallback(() => {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem("student_token");
+  }, []);
+
+  // Check if student is authenticated
+  const isAuthenticated = useCallback(() => {
+    return !!getToken();
+  }, [getToken]);
+
+  // Fetch student data from API
+  const fetchStudent = useCallback(async () => {
+    const token = getToken();
+    if (!token) {
+      setStudent(null);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const response = await fetch("/api/student/auth/verify", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data?.student) {
+          setStudent(data.data.student);
+        } else {
+          setStudent(null);
+          // Token might be invalid, clear it
+          if (typeof window !== "undefined") {
+            localStorage.removeItem("student_token");
+          }
+        }
+      } else {
+        // Token invalid or expired
+        setStudent(null);
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("student_token");
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching student data:", err);
+      setError("Failed to load student data");
+      setStudent(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [getToken]);
+
+  // Logout - clear token and student data
+  const logout = useCallback(() => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("student_token");
+    }
+    setStudent(null);
+    setError(null);
+  }, []);
+
+  // Refresh student data
+  const refresh = useCallback(() => {
+    return fetchStudent();
+  }, [fetchStudent]);
+
+  // Fetch student data on mount and when token changes
+  useEffect(() => {
+    fetchStudent();
+  }, [fetchStudent]);
+
+  return {
+    student,
+    isLoading,
+    error,
+    isAuthenticated: isAuthenticated(),
+    refresh,
+    logout,
+    getToken,
+  };
+};
+

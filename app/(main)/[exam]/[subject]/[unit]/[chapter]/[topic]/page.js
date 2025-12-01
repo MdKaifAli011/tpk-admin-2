@@ -6,6 +6,7 @@ import TabsClient from "../../../../../components/TabsClient";
 import NavigationClient from "../../../../../components/NavigationClient";
 import ChaptersSectionClient from "../../../../../components/ChaptersSectionClient";
 import UnitProgressClient from "../../../../../components/UnitProgressClient";
+import ProgressTracker from "../../../../../components/ProgressTracker";
 import { ERROR_MESSAGES } from "@/constants";
 import {
   fetchExamById,
@@ -167,6 +168,12 @@ const TopicPage = async ({ params }) => {
 
   return (
     <MainLayout>
+      <ProgressTracker
+        unitId={unit._id}
+        chapterId={chapter._id}
+        itemType="topic"
+        itemId={topic._id}
+      />
       <div className="space-y-4">
         {/* Header */}
         <section className="bg-linear-to-b from-purple-50/40 via-white to-purple-50/30 border border-purple-100 rounded-xl p-4 sm:p-5">
@@ -187,7 +194,7 @@ const TopicPage = async ({ params }) => {
             </div>
 
             {/* Progress */}
-            <UnitProgressClient unitId={unit._id} initialProgress={0} />
+            <UnitProgressClient unitId={unit._id} unitName={unit.name} initialProgress={0} />
           </div>
         </section>
 

@@ -52,14 +52,25 @@ export const fetchExams = async (options = {}) => {
       }
       return [];
     } else {
-      // Client-side: use axios
+      // Client-side: use axios (for active exams, no auth needed)
+      // For inactive/all, axios will automatically include token if available
       const response = await api.get(
-        `/exam?page=${page}&limit=${limit}&status=${status}`
-      );
+        `/exam?page=${page}&limit=${limit}&status=${status}`,
+        {
+          // Don't send auth header for active exams (public access)
+          ...(status === STATUS.ACTIVE ? { headers: {} } : {}),
+        }
+      ).catch((error) => {
+        // If axios fails, try with fetch (no auth)
+        if (status === STATUS.ACTIVE) {
+          return fetch(`${baseUrl || ''}/api/exam?page=${page}&limit=${limit}&status=${status}`)
+            .then(res => res.json())
+            .catch(() => ({ success: false, data: [] }));
+        }
+        throw error;
+      });
 
-      if (response.data.success && response.data.data) {
-        // API already filters by status correctly, so return all data
-        // Only do a safety check to ensure we have valid exams with names
+      if (response.data?.success && response.data?.data) {
         const exams = response.data.data || [];
         return exams.filter((exam) => exam && exam.name);
       }
