@@ -1,18 +1,30 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import CongratulationsModal from "./CongratulationsModal";
+import {
+  checkSubjectCongratulationsShown,
+  markSubjectCongratulationsShown,
+} from "@/lib/congratulations";
 
 const SubjectCompletionTracker = ({ subjectId, subjectName, unitIds = [] }) => {
   const [showModal, setShowModal] = useState(false);
   const [previousProgress, setPreviousProgress] = useState(null);
+  const [congratulationsShown, setCongratulationsShown] = useState(false);
+  const isInitializedRef = useRef(false);
+  const isCheckingRef = useRef(false);
+
+  // Reset initialization flag when subjectId or unitIds change
+  useEffect(() => {
+    isInitializedRef.current = false;
+    setPreviousProgress(null);
+    setCongratulationsShown(false);
+  }, [subjectId, unitIds.length]);
 
   useEffect(() => {
     if (!subjectId || unitIds.length === 0) return;
 
-    const completionKey = `subject-completion-shown-${subjectId}`;
-
-    const checkProgress = () => {
+    const checkProgress = async () => {
       try {
         // Loop through ALL units and get their progress (0 if not found)
         const totalUnitProgress = unitIds.reduce((sum, unitId) => {
@@ -48,20 +60,39 @@ const SubjectCompletionTracker = ({ subjectId, subjectName, unitIds = [] }) => {
         // This ensures ALL units are included in the calculation (even with 0% progress)
         const subjectProgress = Math.round(totalUnitProgress / unitIds.length);
 
+        // On first check (initialization), set previousProgress to current progress
+        // This prevents showing modal when visiting a page where subject is already completed
+        // IMPORTANT: Once shown, NEVER show again, even on page reload or revisit
+        if (!isInitializedRef.current && !isCheckingRef.current) {
+          isCheckingRef.current = true;
+          checkSubjectCongratulationsShown(subjectId).then((hasShown) => {
+            setCongratulationsShown(hasShown);
+            setPreviousProgress(subjectProgress);
+            isInitializedRef.current = true;
+            // If already shown before, ensure modal is closed
+            if (hasShown) {
+              setShowModal(false);
+            }
+            isCheckingRef.current = false;
+          });
+          return; // Don't show modal on initial load
+        }
+
         // Check if we've already shown the modal for this completion
-        const hasShownCompletion = localStorage.getItem(completionKey) === "true";
         const wasCompleted = previousProgress === 100;
         const isNowCompleted = subjectProgress === 100;
 
         // Show modal only if:
         // 1. Progress just reached exactly 100% (wasn't 100% before)
         // 2. We haven't shown the modal for this completion yet
-        if (isNowCompleted && !wasCompleted && !hasShownCompletion) {
+        if (isNowCompleted && !wasCompleted && !congratulationsShown) {
           setShowModal(true);
-          localStorage.setItem(completionKey, "true");
-        } else if (subjectProgress < 100) {
-          // Reset completion flag if progress drops below 100%
-          localStorage.removeItem(completionKey);
+          // Mark as shown in database
+          markSubjectCongratulationsShown(subjectId).then((success) => {
+            if (success) {
+              setCongratulationsShown(true);
+            }
+          });
         }
 
         setPreviousProgress(subjectProgress);
@@ -71,7 +102,7 @@ const SubjectCompletionTracker = ({ subjectId, subjectName, unitIds = [] }) => {
       }
     };
 
-    // Initial check
+    // Initial check (will set previousProgress but not show modal)
     checkProgress();
 
     // Listen for storage events
@@ -104,7 +135,7 @@ const SubjectCompletionTracker = ({ subjectId, subjectName, unitIds = [] }) => {
       window.removeEventListener("chapterProgressUpdate", handleChapterProgressUpdate);
       clearInterval(interval);
     };
-  }, [subjectId, subjectName, unitIds, previousProgress]);
+  }, [subjectId, subjectName, unitIds, previousProgress, congratulationsShown]);
 
   return (
     <CongratulationsModal

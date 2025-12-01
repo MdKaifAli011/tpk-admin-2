@@ -12,7 +12,15 @@ import loadMathJax from "../lib/utils/mathJaxLoader";
 import { logger } from "@/utils/logger";
 
 // Lazy load FormRenderer to reduce initial bundle size
-const FormRenderer = lazy(() => import("./forms/FormRenderer"));
+const FormRenderer = lazy(() =>
+  import("./forms/FormRenderer").catch(() => ({
+    default: () => (
+      <div className="text-red-600 text-sm p-2">
+        Failed to load form. Please refresh the page.
+      </div>
+    ),
+  }))
+);
 
 // Helper function to capitalize button text - moved outside component to avoid recreation
 const capitalizeButtonText = (text) => {
@@ -183,7 +191,6 @@ const RichContent = ({ html }) => {
         }
       })
       .catch((error) => {
-        console.error("Unable to load MathJax:", error);
         logger.error("Unable to load MathJax", error);
         if (isMounted) {
           setMathJaxError(true);
@@ -295,7 +302,7 @@ const RichContent = ({ html }) => {
             }
           }
         } catch (error) {
-          console.error(`Error fetching form config for ${formId}:`, error);
+          logger.error(`Error fetching form config for ${formId}:`, error);
         }
         return null;
       });

@@ -2,11 +2,12 @@
 import React from "react";
 import { FaExclamationTriangle, FaHome, FaRedo } from "react-icons/fa";
 import { ERROR_MESSAGES } from "@/constants";
+import { logger } from "@/utils/logger";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, errorInfo: null };
   }
 
   static getDerivedStateFromError(error) {
@@ -14,7 +15,17 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error("ErrorBoundary caught an error:", error, errorInfo);
+    // Log error with proper logger (only in development)
+    logger.error("ErrorBoundary caught an error:", {
+      error: error?.toString(),
+      stack: error?.stack,
+      componentStack: errorInfo?.componentStack,
+    });
+    
+    // In production, you can send to error tracking service
+    // Example: Sentry.captureException(error, { contexts: { react: errorInfo } });
+    
+    this.setState({ errorInfo });
   }
 
   handleReset = () => {

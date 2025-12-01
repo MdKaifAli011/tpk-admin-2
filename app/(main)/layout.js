@@ -17,6 +17,18 @@ export const metadata = generateSEO(
 );
 
 export default function MainLayout({ children }) {
-  return <>{children}</>;
+  return (
+    <>
+      {/* Preload critical resources for better FCP and LCP */}
+      <link
+        rel="preload"
+        href="/logo.png"
+        as="image"
+        type="image/png"
+        fetchPriority="high"
+      />
+      {children}
+    </>
+  );
 }
 

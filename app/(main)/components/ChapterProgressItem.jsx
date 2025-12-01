@@ -4,11 +4,16 @@ import React, { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { FaCheck, FaEye } from "react-icons/fa";
 import CongratulationsModal from "./CongratulationsModal";
+import {
+  checkChapterCongratulationsShown,
+  markChapterCongratulationsShown,
+} from "@/lib/congratulations";
 
 const ChapterProgressItem = ({
   chapter,
   index,
   href,
+  unitId,
   progress: initialProgress = 0,
   isCompleted: initialIsCompleted = false,
   onProgressChange,
@@ -19,23 +24,60 @@ const ChapterProgressItem = ({
   const [isCompleted, setIsCompleted] = useState(initialIsCompleted);
   const [isDragging, setIsDragging] = useState(false);
   const [showCongratulations, setShowCongratulations] = useState(false);
-  const [hasShownCongratulations, setHasShownCongratulations] = useState(false);
+  const [congratulationsShown, setCongratulationsShown] = useState(false);
   const prevProgressRef = useRef(initialProgress);
+  const hasCheckedCompletionRef = useRef(false);
+  const isCheckingRef = useRef(false);
+  
+  // Initialize: Check if already completed on mount (prevent showing on page load if already completed)
+  useEffect(() => {
+    if (!hasCheckedCompletionRef.current && !isCheckingRef.current && unitId) {
+      isCheckingRef.current = true;
+      checkChapterCongratulationsShown(chapter._id, unitId).then((hasShown) => {
+        setCongratulationsShown(hasShown);
+        // If already shown before OR if progress is already 100% on mount, set prevProgress to 100
+        // This prevents showing modal when navigating back to a completed chapter
+        // IMPORTANT: Once shown, NEVER show again, even on page reload or revisit
+        if (hasShown || initialProgress === 100) {
+          prevProgressRef.current = 100;
+          // If already shown, ensure we don't show again
+          if (hasShown) {
+            setShowCongratulations(false);
+          }
+        } else {
+          prevProgressRef.current = initialProgress;
+        }
+        hasCheckedCompletionRef.current = true;
+        isCheckingRef.current = false;
+      });
+    }
+  }, [chapter._id, unitId, initialProgress]);
 
   // Sync with prop changes (from database updates)
   useEffect(() => {
+    if (!hasCheckedCompletionRef.current || !unitId) return;
+    
     const prevProgress = prevProgressRef.current;
     setLocalProgress(initialProgress);
     setIsCompleted(initialIsCompleted);
     
-    // Show congratulations when progress reaches 100% from database updates
-    if (initialProgress === 100 && prevProgress < 100 && !hasShownCongratulations) {
+    // Only show congratulations if:
+    // 1. Progress is exactly 100%
+    // 2. Previous progress was less than 100% (just completed)
+    // 3. We haven't shown the modal for this completion yet
+    if (initialProgress === 100 && prevProgress < 100 && !congratulationsShown) {
       setShowCongratulations(true);
-      setHasShownCongratulations(true);
+      // Mark as shown in database
+      markChapterCongratulationsShown(chapter._id, unitId).then((success) => {
+        if (success) {
+          setCongratulationsShown(true);
+        }
+      });
     }
     
+    // Update previous progress reference
     prevProgressRef.current = initialProgress;
-  }, [initialProgress, initialIsCompleted, hasShownCongratulations]);
+  }, [initialProgress, initialIsCompleted, chapter._id, unitId, congratulationsShown]);
 
   const weightage = chapter.weightage ?? "20%";
   const engagement = chapter.engagement ?? "2.2K";
@@ -62,19 +104,27 @@ const ChapterProgressItem = ({
   const handleSliderChange = useCallback((e) => {
     e.stopPropagation();
     const newProgress = parseInt(e.target.value);
+    const prevProgress = localProgress;
     setLocalProgress(newProgress);
     setIsCompleted(newProgress === 100);
     
-    // Show congratulations when reaching 100%
-    if (newProgress === 100 && !hasShownCongratulations) {
+    // Show congratulations only if:
+    // 1. Progress just reached exactly 100% (wasn't 100% before)
+    // 2. We haven't shown the modal for this completion yet
+    if (newProgress === 100 && prevProgress < 100 && !congratulationsShown && unitId) {
       setShowCongratulations(true);
-      setHasShownCongratulations(true);
+      // Mark as shown in database
+      markChapterCongratulationsShown(chapter._id, unitId).then((success) => {
+        if (success) {
+          setCongratulationsShown(true);
+        }
+      });
     }
     
     if (onProgressChange) {
       onProgressChange(chapter._id, newProgress, newProgress === 100);
     }
-  }, [chapter._id, onProgressChange, hasShownCongratulations]);
+  }, [chapter._id, onProgressChange, localProgress, congratulationsShown, unitId]);
 
   const handleMarkAsDone = useCallback((e) => {
     e.stopPropagation();
@@ -82,10 +132,24 @@ const ChapterProgressItem = ({
     
     if (checked) {
       // Mark as done
+      const prevProgress = localProgress;
       setLocalProgress(100);
       setIsCompleted(true);
-      setShowCongratulations(true);
-      setHasShownCongratulations(true);
+      
+      // Show congratulations only if:
+      // 1. Previous progress was less than 100% (just completed)
+      // 2. We haven't shown the modal for this completion yet
+      if (prevProgress < 100 && !congratulationsShown && unitId) {
+        setShowCongratulations(true);
+        // Mark as shown in database
+        markChapterCongratulationsShown(chapter._id, unitId).then((success) => {
+          if (success) {
+            setCongratulationsShown(true);
+          }
+        });
+      }
+      prevProgressRef.current = 100;
+      
       if (onMarkAsDone) {
         onMarkAsDone(chapter._id);
       }
@@ -93,12 +157,12 @@ const ChapterProgressItem = ({
       // Reset if unchecked
       setLocalProgress(0);
       setIsCompleted(false);
-      setHasShownCongratulations(false);
+      setCongratulationsShown(false);
       if (onReset) {
         onReset(chapter._id);
       }
     }
-  }, [chapter._id, onMarkAsDone, onReset]);
+  }, [chapter._id, onMarkAsDone, onReset, localProgress, congratulationsShown, unitId]);
 
   const handleMouseDown = useCallback((e) => {
     e.stopPropagation();

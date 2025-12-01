@@ -69,6 +69,7 @@ export const useProgress = (unitId, chapters = []) => {
                   subtopics: [],
                   definitions: [],
                 },
+                congratulationsShown: value.congratulationsShown || false,
               };
             });
           }

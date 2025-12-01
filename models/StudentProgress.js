@@ -48,6 +48,10 @@ const studentProgressSchema = new mongoose.Schema(
           subtopics: [mongoose.Schema.Types.ObjectId],
           definitions: [mongoose.Schema.Types.ObjectId],
         },
+        congratulationsShown: {
+          type: Boolean,
+          default: false,
+        },
       },
       default: {},
     },
@@ -56,6 +60,10 @@ const studentProgressSchema = new mongoose.Schema(
       default: 0,
       min: 0,
       max: 100,
+    },
+    unitCongratulationsShown: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }

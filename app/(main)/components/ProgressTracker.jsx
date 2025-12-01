@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { logger } from "@/utils/logger";
 
 /**
  * Client component to track student visits to chapters, topics, subtopics, and definitions
@@ -65,7 +66,7 @@ const ProgressTracker = ({
             }
           } else {
             // Log the error message from the API
-            console.warn("Failed to track visit:", data.message || "Unknown error");
+            logger.warn("Failed to track visit:", data.message || "Unknown error");
           }
         } else {
           // Try to get error details from response
@@ -76,10 +77,10 @@ const ProgressTracker = ({
           } catch (e) {
             errorMessage = `Failed to track visit: ${response.status} ${response.statusText}`;
           }
-          console.warn(errorMessage);
+          logger.warn(errorMessage);
         }
       } catch (error) {
-        console.error("Error tracking visit:", error);
+        logger.error("Error tracking visit:", error);
       }
     };
 

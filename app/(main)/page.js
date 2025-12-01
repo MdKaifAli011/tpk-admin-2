@@ -18,6 +18,7 @@ import Navbar from "./layout/Navbar";
 import Footer from "./layout/Footer";
 import { fetchExams, createSlug } from "./lib/api";
 import { ERROR_MESSAGES, PLACEHOLDERS, SEO_DEFAULTS } from "@/constants";
+import { ExamCardSkeleton } from "./components/SkeletonLoader";
 
 // Lazy load components
 const ExamCard = lazy(() => import("./components/ExamCard"));
@@ -317,11 +318,7 @@ const HomePage = () => {
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 xl:gap-8" aria-label="Loading exams">
               {[...Array(4)].map((_, index) => (
-                <div
-                  key={index}
-                  className="bg-gray-200 animate-pulse rounded-xl h-64 sm:h-72 xl:h-80"
-                  aria-hidden="true"
-                />
+                <ExamCardSkeleton key={index} />
               ))}
             </div>
           ) : error ? (

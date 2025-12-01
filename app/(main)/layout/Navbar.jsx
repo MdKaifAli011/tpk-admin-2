@@ -149,7 +149,7 @@ const Navbar = ({ onMenuToggle, isMenuOpen }) => {
                   height={150}
                   className="w-20 sm:w-24 md:w-28 lg:w-32 xl:w-36 h-auto"
                   priority
-                  loading="eager"
+                  fetchPriority="high"
                   placeholder="blur"
                   blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PC9zdmc+"
                 />

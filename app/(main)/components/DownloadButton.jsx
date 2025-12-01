@@ -1,4 +1,5 @@
 "use client";
+import PropTypes from "prop-types";
 import React, { useState } from "react";
 import { FaDownload } from "react-icons/fa";
 import DownloadModal from "./DownloadModal";
@@ -22,6 +23,10 @@ const DownloadButton = ({ unitName }) => {
       />
     </>
   );
+};
+
+DownloadButton.propTypes = {
+  unitName: PropTypes.string.isRequired,
 };
 
 export default DownloadButton;

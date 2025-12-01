@@ -2,19 +2,25 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import CongratulationsModal from "./CongratulationsModal";
+import {
+  checkSubjectCongratulationsShown,
+  markSubjectCongratulationsShown,
+} from "@/lib/congratulations";
 
 const SubjectProgressClient = ({ subjectId, subjectName, unitIds = [], initialProgress = 0 }) => {
   const [progress, setProgress] = useState(initialProgress);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showCongratulations, setShowCongratulations] = useState(false);
-  const hasShownCongratulationsRef = useRef(false);
+  const [congratulationsShown, setCongratulationsShown] = useState(false);
   const prevProgressRef = useRef(initialProgress);
+  const isInitializedRef = useRef(false);
+  const isCheckingRef = useRef(false);
   
-  // Reset congratulations flag when subjectId changes
+  // Reset initialization flag when subjectId or unitIds change
   useEffect(() => {
-    hasShownCongratulationsRef.current = false;
+    isInitializedRef.current = false;
     prevProgressRef.current = initialProgress;
-  }, [subjectId, initialProgress]);
+  }, [subjectId, unitIds.length, initialProgress]);
 
   useEffect(() => {
     if (unitIds.length === 0) {
@@ -82,10 +88,39 @@ const SubjectProgressClient = ({ subjectId, subjectName, unitIds = [], initialPr
           const dbProgress = await fetchProgressFromDB();
           if (dbProgress !== null) {
             setProgress(dbProgress);
-            // Check if subject just reached 100%
-            if (dbProgress === 100 && prevProgressRef.current < 100 && !hasShownCongratulationsRef.current) {
+            
+            // On first check (initialization), set prevProgress to current progress
+            // This prevents showing modal when visiting a page where subject is already completed
+            if (!isInitializedRef.current && !isCheckingRef.current) {
+              isCheckingRef.current = true;
+              checkSubjectCongratulationsShown(subjectId).then((hasShown) => {
+                setCongratulationsShown(hasShown);
+                prevProgressRef.current = dbProgress;
+                isInitializedRef.current = true;
+                // If already shown before, ensure modal is closed
+                if (hasShown) {
+                  setShowCongratulations(false);
+                }
+                isCheckingRef.current = false;
+              });
+              return; // Don't show modal on initial load
+            }
+            
+            // Check if we've already shown congratulations for this completion
+            const wasCompleted = prevProgressRef.current === 100;
+            const isNowCompleted = dbProgress === 100;
+            
+            // Show congratulations only if:
+            // 1. Progress just reached exactly 100% (wasn't 100% before)
+            // 2. We haven't shown the modal for this completion yet
+            if (isNowCompleted && !wasCompleted && !congratulationsShown) {
               setShowCongratulations(true);
-              hasShownCongratulationsRef.current = true;
+              // Mark as shown in database
+              markSubjectCongratulationsShown(subjectId).then((success) => {
+                if (success) {
+                  setCongratulationsShown(true);
+                }
+              });
             }
             prevProgressRef.current = dbProgress;
             return;
@@ -126,11 +161,43 @@ const SubjectProgressClient = ({ subjectId, subjectName, unitIds = [], initialPr
         // Calculate: Sum of all unit progress / Total number of units
         // This ensures ALL units are included in the calculation (even with 0% progress)
         const subjectProgress = Math.round(totalUnitProgress / unitIds.length);
-        // Check if subject just reached 100% before updating state
-        if (subjectProgress === 100 && prevProgressRef.current < 100 && !hasShownCongratulationsRef.current) {
-          setShowCongratulations(true);
-          hasShownCongratulationsRef.current = true;
+        
+        // On first check (initialization), set prevProgress to current progress
+        // This prevents showing modal when visiting a page where subject is already completed
+        // IMPORTANT: Once shown, NEVER show again, even on page reload or revisit
+        if (!isInitializedRef.current && !isCheckingRef.current) {
+          isCheckingRef.current = true;
+          checkSubjectCongratulationsShown(subjectId).then((hasShown) => {
+            setCongratulationsShown(hasShown);
+            setProgress(subjectProgress);
+            prevProgressRef.current = subjectProgress;
+            isInitializedRef.current = true;
+            // If already shown before, ensure modal is closed
+            if (hasShown) {
+              setShowCongratulations(false);
+            }
+            isCheckingRef.current = false;
+          });
+          return; // Don't show modal on initial load
         }
+        
+        // Check if we've already shown congratulations for this completion
+        const wasCompleted = prevProgressRef.current === 100;
+        const isNowCompleted = subjectProgress === 100;
+        
+        // Show congratulations only if:
+        // 1. Progress just reached exactly 100% (wasn't 100% before)
+        // 2. We haven't shown the modal for this completion yet
+        if (isNowCompleted && !wasCompleted && !congratulationsShown) {
+          setShowCongratulations(true);
+          // Mark as shown in database
+          markSubjectCongratulationsShown(subjectId).then((success) => {
+            if (success) {
+              setCongratulationsShown(true);
+            }
+          });
+        }
+        
         setProgress(subjectProgress);
         prevProgressRef.current = subjectProgress;
       } catch (error) {
@@ -175,7 +242,7 @@ const SubjectProgressClient = ({ subjectId, subjectName, unitIds = [], initialPr
       window.removeEventListener("chapterProgressUpdate", handleChapterProgressUpdate);
       clearInterval(interval);
     };
-  }, [subjectId, unitIds, isAuthenticated]);
+  }, [subjectId, unitIds, isAuthenticated, congratulationsShown]);
 
   return (
     <>

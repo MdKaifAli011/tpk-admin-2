@@ -23,7 +23,16 @@ const getBaseUrl = () => {
   );
 };
 
-// Fetch all active exams (with pagination support)
+// Request cache for deduplication (prevents duplicate requests)
+const requestCache = new Map();
+const CACHE_DURATION = 5000; // 5 seconds
+
+// Helper to get cache key
+const getCacheKey = (url, params = {}) => {
+  return `${url}_${JSON.stringify(params)}`;
+};
+
+// Fetch all active exams (with pagination support and request deduplication)
 export const fetchExams = async (options = {}) => {
   try {
     const { page = 1, limit = 100, status = STATUS.ACTIVE } = options;
@@ -32,8 +41,19 @@ export const fetchExams = async (options = {}) => {
     const isServer = typeof window === "undefined";
     const baseUrl = getBaseUrl();
     const url = `${baseUrl}/api/exam?page=${page}&limit=${limit}&status=${status}`;
+    const cacheKey = getCacheKey(url, { page, limit, status });
+
+    // Check cache for recent requests (deduplication)
+    if (!isServer && requestCache.has(cacheKey)) {
+      const cached = requestCache.get(cacheKey);
+      if (Date.now() - cached.timestamp < CACHE_DURATION) {
+        return cached.data;
+      }
+      requestCache.delete(cacheKey);
+    }
 
     // Use fetch for server-side, axios for client-side
+    let result = [];
     if (isServer) {
       const response = await fetch(url, {
         cache: "no-store", // Always fetch fresh data for exams
@@ -48,9 +68,8 @@ export const fetchExams = async (options = {}) => {
         // API already filters by status correctly, so return all data
         // Only do a safety check to ensure we have valid exams with names
         const exams = data.data || [];
-        return exams.filter((exam) => exam && exam.name);
+        result = exams.filter((exam) => exam && exam.name);
       }
-      return [];
     } else {
       // Client-side: use axios (for active exams, no auth needed)
       // For inactive/all, axios will automatically include token if available
@@ -72,10 +91,23 @@ export const fetchExams = async (options = {}) => {
 
       if (response.data?.success && response.data?.data) {
         const exams = response.data.data || [];
-        return exams.filter((exam) => exam && exam.name);
+        result = exams.filter((exam) => exam && exam.name);
       }
-      return [];
     }
+
+    // Cache result for deduplication
+    if (!isServer && result.length > 0) {
+      requestCache.set(cacheKey, {
+        data: result,
+        timestamp: Date.now(),
+      });
+      // Clean up old cache entries
+      setTimeout(() => {
+        requestCache.delete(cacheKey);
+      }, CACHE_DURATION);
+    }
+
+    return result;
   } catch (error) {
     logger.error("Error fetching exams:", error);
     return [];
@@ -988,9 +1020,7 @@ export const fetchSubjectDetailsById = async (subjectId) => {
 // Fetch unit details
 export const fetchUnitDetailsById = async (unitId) => {
   if (!unitId) {
-    console.warn(
-      `[API] fetchUnitDetailsById called with null/undefined unitId`
-    );
+    logger.warn("fetchUnitDetailsById called with null/undefined unitId");
     return null;
   }
 
@@ -1000,39 +1030,30 @@ export const fetchUnitDetailsById = async (unitId) => {
   // Convert unitId to string if it's an ObjectId object
   const unitIdString = unitId.toString ? unitId.toString() : String(unitId);
 
-  console.log(
-    `[API] Fetching unit details for unitId: ${unitIdString} (type: ${typeof unitId})`
-  );
-
   try {
     if (isServer) {
       const url = `${baseUrl}/api/unit/${unitIdString}/details`;
-      console.log(`[API] Fetch URL: ${url}`);
       const response = await fetch(url, {
         cache: "no-store", // Always fetch fresh data for metadata (no caching)
       });
 
-      console.log(`[API] Response status: ${response.status}`);
       if (response.ok) {
         const data = await response.json();
-        console.log(
-          `[API] Response data (full):`,
-          JSON.stringify(data, null, 2)
-        );
         if (data.success && data.data) {
-          console.log(
-            `[API] Unit details found:`,
-            JSON.stringify(data.data, null, 2)
-          );
-          console.log(`[API] Title from API: "${data.data.title}"`);
-          console.log(`[API] Title type: ${typeof data.data.title}`);
           return data.data;
         } else {
-          console.warn(`[API] Response not successful or no data:`, data);
+          logger.warn("Unit details response not successful or no data", {
+            unitId: unitIdString,
+            response: data,
+          });
         }
       } else {
         const errorText = await response.text();
-        console.error(`[API] Response not OK: ${response.status}`, errorText);
+        logger.error("Unit details API response not OK", {
+          status: response.status,
+          unitId: unitIdString,
+          error: errorText,
+        });
       }
       return {
         content: "",

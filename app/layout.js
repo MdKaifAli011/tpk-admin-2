@@ -5,11 +5,15 @@ import { SEO_DEFAULTS } from "@/constants";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap", // Improve FCP - prevents invisible text during font load
+  preload: true, // Preload critical font
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap", // Improve FCP
+  preload: false, // Not critical, can load later
 });
 
 export const metadata = {

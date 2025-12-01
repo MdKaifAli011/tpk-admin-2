@@ -1,10 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
-import OverviewTab from "./OverviewTab";
-import DiscussionForumTab from "./DiscussionForumTab";
-import PracticeTestTab from "./PracticeTestTab";
-import PerformanceTab from "./PerformanceTab";
+import React, { useState, lazy, Suspense } from "react";
+import { ExamCardSkeleton } from "./SkeletonLoader";
+
+// Lazy load tabs for code splitting - only load when needed
+const OverviewTab = lazy(() => import("./OverviewTab"));
+const DiscussionForumTab = lazy(() => import("./DiscussionForumTab"));
+const PracticeTestTab = lazy(() => import("./PracticeTestTab"));
+const PerformanceTab = lazy(() => import("./PerformanceTab"));
 
 const TABS = ["Overview", "Discussion Forum", "Practice Test", "Performance"];
 
@@ -39,56 +42,73 @@ const TabsClient = ({
   const [activeTab, setActiveTab] = useState(initialTab);
 
   const renderTabContent = () => {
-    switch (activeTab) {
-      case "Overview":
-        return (
-          <OverviewTab
-            content={content}
-            entityType={entityType}
-            entityName={entityName}
-            unitName={unitName}
-            unitsCount={unitsCount}
-            definitions={definitions}
-            subtopics={subtopics}
-            chapters={chapters}
-            topics={topics}
-            units={units}
-            subjectsWithUnits={subjectsWithUnits}
-            examSlug={examSlug}
-            subjectSlug={subjectSlug}
-            unitSlug={unitSlug}
-            chapterSlug={chapterSlug}
-            topicSlug={topicSlug}
-            subTopicSlug={subTopicSlug}
-            activeTab={activeTab}
-          />
-        );
+    const tabContent = (() => {
+      switch (activeTab) {
+        case "Overview":
+          return (
+            <OverviewTab
+              content={content}
+              entityType={entityType}
+              entityName={entityName}
+              unitName={unitName}
+              unitsCount={unitsCount}
+              definitions={definitions}
+              subtopics={subtopics}
+              chapters={chapters}
+              topics={topics}
+              units={units}
+              subjectsWithUnits={subjectsWithUnits}
+              examSlug={examSlug}
+              subjectSlug={subjectSlug}
+              unitSlug={unitSlug}
+              chapterSlug={chapterSlug}
+              topicSlug={topicSlug}
+              subTopicSlug={subTopicSlug}
+              activeTab={activeTab}
+            />
+          );
 
-      case "Discussion Forum":
-        return (
-          <DiscussionForumTab entityType={entityType} entityName={entityName} />
-        );
+        case "Discussion Forum":
+          return (
+            <DiscussionForumTab entityType={entityType} entityName={entityName} />
+          );
 
-      case "Practice Test":
-        return (
-          <PracticeTestTab
-            examId={examId}
-            subjectId={subjectId}
-            unitId={unitId}
-            chapterId={chapterId}
-            topicId={topicId}
-            subTopicId={subTopicId}
-          />
-        );
+        case "Practice Test":
+          return (
+            <PracticeTestTab
+              examId={examId}
+              subjectId={subjectId}
+              unitId={unitId}
+              chapterId={chapterId}
+              topicId={topicId}
+              subTopicId={subTopicId}
+            />
+          );
 
-      case "Performance":
-        return (
-          <PerformanceTab entityType={entityType} entityName={entityName} />
-        );
+        case "Performance":
+          return (
+            <PerformanceTab entityType={entityType} entityName={entityName} />
+          );
 
-      default:
-        return null;
-    }
+        default:
+          return null;
+      }
+    })();
+
+    return (
+      <Suspense
+        fallback={
+          <div className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-6 w-6 border-3 border-blue-600 border-t-transparent mb-3"></div>
+              <p className="text-xs text-gray-600">Loading...</p>
+            </div>
+          </div>
+        }
+      >
+        {tabContent}
+      </Suspense>
+    );
   };
 
   return (

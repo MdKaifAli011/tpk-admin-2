@@ -1,6 +1,7 @@
 "use client";
 import React, { useMemo, memo } from "react";
 import Link from "next/link";
+import PropTypes from "prop-types";
 import {
   FaBook,
   FaFlag,
@@ -11,6 +12,7 @@ import {
   FaLightbulb,
 } from "react-icons/fa";
 import { createSlug } from "../lib/api";
+import { examPropType } from "./PropTypes";
 
 const getExamIcon = (examName) => {
   const name = examName?.toUpperCase() || "";
@@ -152,5 +154,9 @@ const ExamCard = memo(({ exam }) => {
 });
 
 ExamCard.displayName = "ExamCard";
+
+ExamCard.propTypes = {
+  exam: examPropType.isRequired,
+};
 
 export default ExamCard;

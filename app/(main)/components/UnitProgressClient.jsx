@@ -2,17 +2,24 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import CongratulationsModal from "./CongratulationsModal";
+import { logger } from "@/utils/logger";
+import {
+  checkUnitCongratulationsShown,
+  markUnitCongratulationsShown,
+} from "@/lib/congratulations";
 
 const UnitProgressClient = ({ unitId, unitName, initialProgress = 0 }) => {
   const [progress, setProgress] = useState(initialProgress);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showCongratulations, setShowCongratulations] = useState(false);
-  const hasShownCongratulationsRef = useRef(false);
+  const [congratulationsShown, setCongratulationsShown] = useState(false);
   const prevProgressRef = useRef(initialProgress);
+  const isInitializedRef = useRef(false);
+  const isCheckingRef = useRef(false);
   
-  // Reset congratulations flag when unitId changes
+  // Reset initialization flag when unitId changes
   useEffect(() => {
-    hasShownCongratulationsRef.current = false;
+    isInitializedRef.current = false;
     prevProgressRef.current = initialProgress;
   }, [unitId, initialProgress]);
 
@@ -51,7 +58,7 @@ const UnitProgressClient = ({ unitId, unitName, initialProgress = 0 }) => {
           }
         }
       } catch (error) {
-        console.error("Error fetching progress from database:", error);
+        logger.error("Error fetching progress from database:", error);
       }
       return null;
     };
@@ -64,10 +71,40 @@ const UnitProgressClient = ({ unitId, unitName, initialProgress = 0 }) => {
           const dbProgress = await fetchProgressFromDB();
           if (dbProgress !== null) {
             setProgress(dbProgress);
-            // Check if unit just reached 100%
-            if (dbProgress === 100 && prevProgressRef.current < 100 && !hasShownCongratulationsRef.current) {
+            
+            // On first check (initialization), set prevProgress to current progress
+            // This prevents showing modal when visiting a page where unit is already completed
+            // IMPORTANT: Once shown, NEVER show again, even on page reload or revisit
+            if (!isInitializedRef.current && !isCheckingRef.current) {
+              isCheckingRef.current = true;
+              checkUnitCongratulationsShown(unitId).then((hasShown) => {
+                setCongratulationsShown(hasShown);
+                prevProgressRef.current = dbProgress;
+                isInitializedRef.current = true;
+                // If already shown before, ensure modal is closed
+                if (hasShown) {
+                  setShowCongratulations(false);
+                }
+                isCheckingRef.current = false;
+              });
+              return dbProgress; // Don't show modal on initial load
+            }
+            
+            // Check if we've already shown congratulations for this completion
+            const wasCompleted = prevProgressRef.current === 100;
+            const isNowCompleted = dbProgress === 100;
+            
+            // Show congratulations only if:
+            // 1. Progress just reached exactly 100% (wasn't 100% before)
+            // 2. We haven't shown the modal for this completion yet
+            if (isNowCompleted && !wasCompleted && !congratulationsShown) {
               setShowCongratulations(true);
-              hasShownCongratulationsRef.current = true;
+              // Mark as shown in database
+              markUnitCongratulationsShown(unitId).then((success) => {
+                if (success) {
+                  setCongratulationsShown(true);
+                }
+              });
             }
             prevProgressRef.current = dbProgress;
             return dbProgress;
@@ -83,10 +120,39 @@ const UnitProgressClient = ({ unitId, unitName, initialProgress = 0 }) => {
           if (data._unitProgress !== undefined) {
             const newProgress = data._unitProgress;
             setProgress(newProgress);
-            // Check if unit just reached 100%
-            if (newProgress === 100 && prevProgressRef.current < 100 && !hasShownCongratulationsRef.current) {
+            
+            // On first check (initialization), set prevProgress to current progress
+            // IMPORTANT: Once shown, NEVER show again, even on page reload or revisit
+            if (!isInitializedRef.current && !isCheckingRef.current) {
+              isCheckingRef.current = true;
+              checkUnitCongratulationsShown(unitId).then((hasShown) => {
+                setCongratulationsShown(hasShown);
+                prevProgressRef.current = newProgress;
+                isInitializedRef.current = true;
+                // If already shown before, ensure modal is closed
+                if (hasShown) {
+                  setShowCongratulations(false);
+                }
+                isCheckingRef.current = false;
+              });
+              return newProgress; // Don't show modal on initial load
+            }
+            
+            // Check if we've already shown congratulations for this completion
+            const wasCompleted = prevProgressRef.current === 100;
+            const isNowCompleted = newProgress === 100;
+            
+            // Show congratulations only if:
+            // 1. Progress just reached exactly 100% (wasn't 100% before)
+            // 2. We haven't shown the modal for this completion yet
+            if (isNowCompleted && !wasCompleted && !congratulationsShown) {
               setShowCongratulations(true);
-              hasShownCongratulationsRef.current = true;
+              // Mark as shown in database
+              markUnitCongratulationsShown(unitId).then((success) => {
+                if (success) {
+                  setCongratulationsShown(true);
+                }
+              });
             }
             prevProgressRef.current = newProgress;
             return newProgress;
@@ -100,25 +166,60 @@ const UnitProgressClient = ({ unitId, unitName, initialProgress = 0 }) => {
             }, 0);
             const avgProgress = Math.round(totalProgress / chapterKeys.length);
             setProgress(avgProgress);
-            // Check if unit just reached 100%
-            if (avgProgress === 100 && prevProgressRef.current < 100 && !hasShownCongratulationsRef.current) {
+            
+            // On first check (initialization), set prevProgress to current progress
+            // IMPORTANT: Once shown, NEVER show again, even on page reload or revisit
+            if (!isInitializedRef.current && !isCheckingRef.current) {
+              isCheckingRef.current = true;
+              checkUnitCongratulationsShown(unitId).then((hasShown) => {
+                setCongratulationsShown(hasShown);
+                prevProgressRef.current = avgProgress;
+                isInitializedRef.current = true;
+                // If already shown before, ensure modal is closed
+                if (hasShown) {
+                  setShowCongratulations(false);
+                }
+                isCheckingRef.current = false;
+              });
+              return avgProgress; // Don't show modal on initial load
+            }
+            
+            // Check if we've already shown congratulations for this completion
+            const wasCompleted = prevProgressRef.current === 100;
+            const isNowCompleted = avgProgress === 100;
+            
+            // Show congratulations only if:
+            // 1. Progress just reached exactly 100% (wasn't 100% before)
+            // 2. We haven't shown the modal for this completion yet
+            if (isNowCompleted && !wasCompleted && !congratulationsShown) {
               setShowCongratulations(true);
-              hasShownCongratulationsRef.current = true;
+              // Mark as shown in database
+              markUnitCongratulationsShown(unitId).then((success) => {
+                if (success) {
+                  setCongratulationsShown(true);
+                }
+              });
             }
             prevProgressRef.current = avgProgress;
             return avgProgress;
           } else {
             setProgress(0);
-            prevProgressRef.current = 0;
+            if (!isInitializedRef.current) {
+              prevProgressRef.current = 0;
+              isInitializedRef.current = true;
+            }
             return 0;
           }
         } else {
           setProgress(0);
-          prevProgressRef.current = 0;
+          if (!isInitializedRef.current) {
+            prevProgressRef.current = 0;
+            isInitializedRef.current = true;
+          }
           return 0;
         }
       } catch (error) {
-        console.error("Error reading progress:", error);
+        logger.error("Error reading progress:", error);
         setProgress(0);
         prevProgressRef.current = 0;
         return 0;
@@ -134,20 +235,41 @@ const UnitProgressClient = ({ unitId, unitName, initialProgress = 0 }) => {
         const newProgress = event.detail.unitProgress;
         setProgress(newProgress);
         
-        // Check if unit just reached 100%
-        if (newProgress === 100 && prevProgressRef.current < 100 && !hasShownCongratulationsRef.current) {
+        // Check if we've already shown congratulations for this completion
+        const wasCompleted = prevProgressRef.current === 100;
+        const isNowCompleted = newProgress === 100;
+        
+        // Show congratulations only if:
+        // 1. Progress just reached exactly 100% (wasn't 100% before)
+        // 2. We haven't shown the modal for this completion yet
+        if (isNowCompleted && !wasCompleted && !congratulationsShown) {
           setShowCongratulations(true);
-          hasShownCongratulationsRef.current = true;
+          // Mark as shown in database
+          markUnitCongratulationsShown(unitId).then((success) => {
+            if (success) {
+              setCongratulationsShown(true);
+            }
+          });
         }
         prevProgressRef.current = newProgress;
       } else {
         // Also recalculate if event doesn't have unitId (might be from chapters)
         const newProgress = await calculateProgress();
         if (newProgress !== null) {
-          // Check if unit just reached 100%
-          if (newProgress === 100 && prevProgressRef.current < 100 && !hasShownCongratulationsRef.current) {
+          // Check if we've already shown congratulations for this completion
+          const hasShownCompletion = localStorage.getItem(completionKey) === "true";
+          const wasCompleted = prevProgressRef.current === 100;
+          const isNowCompleted = newProgress === 100;
+          
+          // Show congratulations only if:
+          // 1. Progress just reached exactly 100% (wasn't 100% before)
+          // 2. We haven't shown the modal for this completion yet
+          if (isNowCompleted && !wasCompleted && !hasShownCompletion) {
             setShowCongratulations(true);
-            hasShownCongratulationsRef.current = true;
+            localStorage.setItem(completionKey, "true");
+          } else if (newProgress < 100) {
+            // Reset completion flag if progress drops below 100%
+            localStorage.removeItem(completionKey);
           }
           prevProgressRef.current = newProgress;
         }
@@ -158,10 +280,21 @@ const UnitProgressClient = ({ unitId, unitName, initialProgress = 0 }) => {
     const handleChapterProgressUpdate = async () => {
       const newProgress = await calculateProgress();
       if (newProgress !== null) {
-        // Check if unit just reached 100%
-        if (newProgress === 100 && prevProgressRef.current < 100 && !hasShownCongratulationsRef.current) {
+        // Check if we've already shown congratulations for this completion
+        const wasCompleted = prevProgressRef.current === 100;
+        const isNowCompleted = newProgress === 100;
+        
+        // Show congratulations only if:
+        // 1. Progress just reached exactly 100% (wasn't 100% before)
+        // 2. We haven't shown the modal for this completion yet
+        if (isNowCompleted && !wasCompleted && !congratulationsShown) {
           setShowCongratulations(true);
-          hasShownCongratulationsRef.current = true;
+          // Mark as shown in database
+          markUnitCongratulationsShown(unitId).then((success) => {
+            if (success) {
+              setCongratulationsShown(true);
+            }
+          });
         }
         prevProgressRef.current = newProgress;
       }
@@ -190,7 +323,7 @@ const UnitProgressClient = ({ unitId, unitName, initialProgress = 0 }) => {
       window.removeEventListener("storage", handleStorageChange);
       clearInterval(interval);
     };
-  }, [unitId, isAuthenticated]);
+  }, [unitId, isAuthenticated, congratulationsShown]);
 
   return (
     <>

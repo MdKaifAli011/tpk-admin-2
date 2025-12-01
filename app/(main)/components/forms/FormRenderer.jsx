@@ -9,6 +9,7 @@ import { validateField as validateFieldUtil } from "./formUtils";
 import FormFieldInput from "./FormFieldInput";
 import VerificationInput from "./VerificationInput";
 import SubmitStatusMessage from "./SubmitStatusMessage";
+import { logger } from "@/utils/logger";
 
 // Helper function to capitalize button text
 const capitalizeButtonText = (text) => {
@@ -82,7 +83,7 @@ const FormRenderer = ({
         setFormData(initialData);
       }
     } catch (error) {
-      console.error("Error fetching form config:", error);
+      logger.error("Error fetching form config:", error);
       setSubmitStatus("error");
       setSubmitMessage("Failed to load form. Please try again.");
     } finally {
@@ -242,7 +243,7 @@ const FormRenderer = ({
                   : `https://${url}`;
               }
             } catch (error) {
-              console.error("Error redirecting:", error);
+              logger.error("Error redirecting:", error);
               // Fallback to closing modal
               onClose();
               setSubmitStatus(null);

@@ -65,6 +65,7 @@ export async function GET(request) {
               subtopics: [],
               definitions: [],
             },
+            congratulationsShown: value.congratulationsShown || false,
           };
         });
       }
@@ -74,6 +75,7 @@ export async function GET(request) {
         unitId: doc.unitId,
         progress: progressObj,
         unitProgress: doc.unitProgress || 0,
+        unitCongratulationsShown: doc.unitCongratulationsShown || false,
         createdAt: doc.createdAt,
         updatedAt: doc.updatedAt,
       };

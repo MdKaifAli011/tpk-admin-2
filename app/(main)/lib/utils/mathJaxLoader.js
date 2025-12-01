@@ -87,7 +87,10 @@ const loadMathJax = () => {
       script.onerror = (error) => {
         mathJaxError = true;
         mathJaxPromise = null;
-        console.error("MathJax script failed to load from:", MATHJAX_SCRIPT_SRC);
+        // Only log in development
+        if (process.env.NODE_ENV === "development") {
+          console.error("MathJax script failed to load from:", MATHJAX_SCRIPT_SRC);
+        }
         if (script.parentNode) {
           script.parentNode.removeChild(script);
         }
@@ -127,8 +130,10 @@ const loadMathJax = () => {
             // Keep checking every 50ms
             setTimeout(checkMathJax, 50);
           } else {
-            // Timeout
-            console.error("MathJax not available after 10 seconds");
+            // Timeout - only log in development
+            if (process.env.NODE_ENV === "development") {
+              console.error("MathJax not available after 10 seconds");
+            }
             reject(new Error("MathJax not available after script load"));
           }
         };
@@ -148,7 +153,10 @@ const loadMathJax = () => {
 
     // Clear promise on error to allow retry
     mathJaxPromise.catch((error) => {
-      console.error("MathJax load promise rejected:", error);
+      // Only log in development
+      if (process.env.NODE_ENV === "development") {
+        console.error("MathJax load promise rejected:", error);
+      }
     });
   }
 

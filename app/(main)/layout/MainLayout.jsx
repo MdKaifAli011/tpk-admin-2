@@ -5,6 +5,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
+import ServiceWorkerRegistration from "../components/ServiceWorkerRegistration";
 
 const MainLayout = ({ children, showSidebar = true }) => {
   // Initialize sidebar as open on desktop, closed on mobile (only if showSidebar is true)
@@ -39,7 +40,7 @@ const MainLayout = ({ children, showSidebar = true }) => {
   // Keep sidebar open on desktop when window is resized (only if showSidebar is true)
   useEffect(() => {
     if (!showSidebar) return;
-    
+
     const handleResize = () => {
       const isDesktop = window.innerWidth >= 1024;
       if (isDesktop && !isSidebarOpen) {
@@ -53,6 +54,7 @@ const MainLayout = ({ children, showSidebar = true }) => {
 
   return (
     <ErrorBoundary>
+      <ServiceWorkerRegistration />
       <div className="flex flex-col min-h-screen bg-gray-50">
         {/* NAVBAR */}
         <Navbar onMenuToggle={toggleSidebar} isMenuOpen={isSidebarOpen} />

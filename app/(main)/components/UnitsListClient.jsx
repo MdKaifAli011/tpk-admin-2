@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { FaCheck, FaEye } from "react-icons/fa";
 import { createSlug as createSlugUtil } from "@/utils/slug";
+import { logger } from "@/utils/logger";
 
 const UnitsListClient = ({ units, subjectId, examSlug, subjectSlug }) => {
   const [progressData, setProgressData] = useState({});
@@ -38,7 +39,7 @@ const UnitsListClient = ({ units, subjectId, examSlug, subjectSlug }) => {
         }
       }
     } catch (error) {
-      console.error(`Error fetching progress for unit ${unitId}:`, error);
+      logger.error(`Error fetching progress for unit ${unitId}:`, error);
     }
     return null;
   };
@@ -89,7 +90,7 @@ const UnitsListClient = ({ units, subjectId, examSlug, subjectSlug }) => {
         }
       }
     } catch (error) {
-      console.error(`Error reading progress for unit ${unitId}:`, error);
+      logger.error(`Error reading progress for unit ${unitId}:`, error);
     }
     return { progress: 0, isCompleted: false };
   };

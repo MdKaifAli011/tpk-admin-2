@@ -1,11 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import Link from "next/link";
 import { FaBook, FaChartLine, FaTrophy } from "react-icons/fa";
 import RichContent from "./RichContent";
-import DownloadButton from "./DownloadButton";
 import { createSlug } from "../lib/api";
+
+// Lazy load DownloadButton - only needed for unit pages
+const DownloadButton = lazy(() => import("./DownloadButton"));
 
 const OverviewTab = ({
   content,
@@ -32,7 +34,13 @@ const OverviewTab = ({
       {/* Download Button - only for unit type */}
       {entityType === "unit" && unitName && (
         <div className="flex justify-end mb-2">
-          <DownloadButton unitName={unitName} />
+          <Suspense
+            fallback={
+              <div className="h-10 w-32 bg-gray-200 animate-pulse rounded-lg" />
+            }
+          >
+            <DownloadButton unitName={unitName} />
+          </Suspense>
         </div>
       )}
 

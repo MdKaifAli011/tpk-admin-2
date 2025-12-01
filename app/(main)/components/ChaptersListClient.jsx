@@ -50,6 +50,7 @@ const ChaptersListClient = ({
             chapter={chapter}
             index={index}
             href={chapterUrl}
+            unitId={unitId}
             progress={chapterProgressData.progress}
             isCompleted={chapterProgressData.isCompleted}
             onProgressChange={updateChapterProgress}
