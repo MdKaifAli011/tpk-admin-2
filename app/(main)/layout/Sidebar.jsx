@@ -441,7 +441,7 @@ export default function Sidebar({ isOpen = true, onClose }) {
       {/* Mobile open button */}
       {!sidebarOpen && (
         <button
-          className="fixed top-[70px] sm:top-[74px] md:top-[106px] left-3 sm:left-4 z-[60] lg:hidden bg-blue-600 text-white p-2.5 sm:p-3 rounded-lg shadow-lg hover:bg-blue-700 active:bg-blue-800 transition-all touch-manipulation"
+          className="fixed top-[70px] sm:top-[74px] md:top-[106px] left-3 sm:left-4 z-[60] lg:hidden bg-blue-600 text-white p-2.5 sm:p-3 rounded-lg shadow-lg hover:bg-blue-700 active:bg-blue-800 transition-all touch-manipulation cursor-pointer"
           onClick={openSidebarMobile}
           aria-label="Open sidebar"
         >

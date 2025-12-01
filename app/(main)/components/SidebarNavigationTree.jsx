@@ -48,7 +48,7 @@ const SidebarNavigationTree = ({
             >
               <button
                 onClick={() => navigateTo([subject.slug])}
-                className="flex-1 min-w-0 text-left outline-none overflow-hidden"
+                className="flex-1 min-w-0 text-left outline-none overflow-hidden cursor-pointer"
                 style={{
                   fontWeight: isActiveSubject || isOpenSubject ? "600" : "500",
                 }}
@@ -65,7 +65,7 @@ const SidebarNavigationTree = ({
               </button>
               {subject.units.length > 0 && (
                 <button
-                  className={`shrink-0 p-0.5 transition-all duration-200 ${
+                  className={`shrink-0 p-0.5 transition-all duration-200 cursor-pointer ${
                     isActiveSubject
                       ? "text-white/80 hover:text-white"
                       : isOpenSubject
@@ -121,7 +121,7 @@ const SidebarNavigationTree = ({
                           onClick={() =>
                             navigateTo([subject.slug, unit.slug])
                           }
-                          className="flex-1 min-w-0 text-left outline-none overflow-hidden"
+                          className="flex-1 min-w-0 text-left outline-none overflow-hidden cursor-pointer"
                           style={{
                             fontWeight: isActiveUnit || isOpenUnit ? "500" : "400",
                             color: "rgb(20, 164, 49)",
@@ -139,7 +139,7 @@ const SidebarNavigationTree = ({
                         </button>
                         {unit.chapters.length > 0 && (
                           <button
-                            className="shrink-0 p-0.5 transition-all duration-200"
+                            className="shrink-0 p-0.5 transition-all duration-200 cursor-pointer"
                             style={{
                               color: "rgb(20, 164, 49)",
                             }}
@@ -197,7 +197,7 @@ const SidebarNavigationTree = ({
                                         chapter.slug,
                                       ])
                                     }
-                                    className="flex-1 min-w-0 text-left outline-none overflow-hidden"
+                                    className="flex-1 min-w-0 text-left outline-none overflow-hidden cursor-pointer"
                                     style={{
                                       fontWeight:
                                         isActiveChapter || isOpenChapter
@@ -218,7 +218,7 @@ const SidebarNavigationTree = ({
                                   </button>
                                   {chapter.topics.length > 0 && (
                                     <button
-                                      className="shrink-0 p-0.5 transition-all duration-200"
+                                      className="shrink-0 p-0.5 transition-all duration-200 cursor-pointer"
                                       style={{
                                         color: "rgb(22, 82, 198)",
                                       }}
@@ -275,7 +275,7 @@ const SidebarNavigationTree = ({
                                                 topic.slug,
                                               ])
                                             }
-                                            className={`w-full px-2.5 py-1.5 rounded transition text-left overflow-hidden ${
+                                            className={`w-full px-2.5 py-1.5 rounded transition text-left overflow-hidden cursor-pointer ${
                                               isTopicActive
                                                 ? "bg-[#FCE7F3] text-[rgb(227,48,141)] font-medium"
                                                 : "hover:bg-gray-100"
