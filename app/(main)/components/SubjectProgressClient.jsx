@@ -12,23 +12,22 @@ const SubjectProgressClient = ({ subjectId, unitIds = [], initialProgress = 0 })
     }
 
     // Calculate subject progress from all units
-    // Method: Sum of all unit progress / Total possible progress (number of units × 100)
-    // Example: 4 units, each at 90% = (90+90+90+90) / (4×100) = 360/400 = 90%
+    // Method: Sum of all unit progress / Total number of units
+    // Example: 4 units with progress [80%, 60%, 0%, 0%] = (80+60+0+0) / 4 = 35%
+    // IMPORTANT: Includes ALL units (even those with 0% progress) for accurate calculation
     const calculateProgress = () => {
       try {
-        let sumOfUnitProgress = 0;
-        let validUnits = 0;
-
-        unitIds.forEach((unitId) => {
+        // Loop through ALL units and get their progress (0 if not found)
+        const totalUnitProgress = unitIds.reduce((sum, unitId) => {
           const storageKey = `unit-progress-${unitId}`;
           const stored = localStorage.getItem(storageKey);
+          
           if (stored) {
             try {
               const data = JSON.parse(stored);
               // Check if unit progress is already calculated
               if (data._unitProgress !== undefined) {
-                sumOfUnitProgress += data._unitProgress;
-                validUnits++;
+                return sum + data._unitProgress;
               } else {
                 // Calculate from chapters (fallback)
                 const chapterKeys = Object.keys(data).filter(key => !key.startsWith('_'));
@@ -37,25 +36,21 @@ const SubjectProgressClient = ({ subjectId, unitIds = [], initialProgress = 0 })
                     return sum + (data[key]?.progress || 0);
                   }, 0);
                   const avgProgress = Math.round(unitProgress / chapterKeys.length);
-                  sumOfUnitProgress += avgProgress;
-                  validUnits++;
+                  return sum + avgProgress;
                 }
               }
             } catch (error) {
               console.error(`Error parsing progress for unit ${unitId}:`, error);
             }
           }
-        });
+          // Return 0 for units without progress data
+          return sum;
+        }, 0);
 
-        if (validUnits > 0) {
-          // Calculate: Sum of all unit progress / Total possible progress
-          // Total possible = number of units × 100 (since each unit max is 100%)
-          const totalPossibleProgress = validUnits * 100;
-          const subjectProgress = Math.round((sumOfUnitProgress / totalPossibleProgress) * 100);
-          setProgress(subjectProgress);
-        } else {
-          setProgress(0);
-        }
+        // Calculate: Sum of all unit progress / Total number of units
+        // This ensures ALL units are included in the calculation (even with 0% progress)
+        const subjectProgress = Math.round(totalUnitProgress / unitIds.length);
+        setProgress(subjectProgress);
       } catch (error) {
         console.error("Error calculating subject progress:", error);
         setProgress(0);
