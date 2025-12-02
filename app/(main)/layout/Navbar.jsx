@@ -341,7 +341,7 @@ const Navbar = ({ onMenuToggle, isMenuOpen }) => {
             <>
               {/* Mobile Overlay for Nav Menu */}
               <div
-                className="fixed inset-0 z-[45] lg:hidden bg-black/20 backdrop-blur-[1px]"
+                className="fixed inset-0 lg:hidden"
                 onClick={() => setIsNavMenuOpen(false)}
                 aria-hidden="true"
               />
