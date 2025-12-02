@@ -4,51 +4,67 @@ import React from "react";
 import Link from "next/link";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
-const NavigationClient = ({ 
-  backUrl, 
-  backLabel, 
-  prevNav, 
-  nextNav 
-}) => {
+const base =
+  "group flex flex-col justify-center rounded-lg min-h-[58px] transition-all duration-200 w-full p-2.5 sm:p-3";
+
+const NavigationClient = ({ prevNav, nextNav }) => {
   return (
-    <section className="bg-white rounded-xl shadow-lg border border-gray-100 p-5 sm:p-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
-        {backUrl && (
+    <section className="w-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+
+        {/* PREVIOUS */}
+        {prevNav ? (
           <Link
-            href={backUrl}
-            className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
+            href={prevNav.url}
+            title={prevNav.label}
+            className={`${base}
+              bg-indigo-50 border border-indigo-200 
+              hover:bg-indigo-100 hover:border-indigo-300
+              shadow-sm hover:shadow`}
           >
-            <FaChevronLeft className="text-xs" />
-            <span>{backLabel || "Back"}</span>
+            <span className="text-[9px] sm:text-xs text-indigo-500 font-semibold uppercase">
+              Previous
+            </span>
+
+            <div className="flex items-center gap-1.5 min-w-0">
+              <FaChevronLeft className="text-indigo-600 group-hover:text-indigo-700 text-xs sm:text-sm" />
+              <span className="text-xs sm:text-sm font-medium text-indigo-700 truncate">
+                {prevNav.label}
+              </span>
+            </div>
           </Link>
+        ) : (
+          <div className="hidden md:block" />
         )}
 
-        <div className="flex items-center gap-3 sm:gap-4">
-          {prevNav && (
-            <Link
-              href={prevNav.url}
-              className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
-              title={prevNav.label}
-            >
-              <FaChevronLeft className="text-xs" />
-              <span className="hidden sm:inline">Previous</span>
-            </Link>
-          )}
-          {nextNav && (
-            <Link
-              href={nextNav.url}
-              className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
-              title={nextNav.label}
-            >
-              <span className="hidden sm:inline">Next</span>
-              <FaChevronRight className="text-xs" />
-            </Link>
-          )}
-        </div>
+        {/* NEXT */}
+        {nextNav ? (
+          <Link
+            href={nextNav.url}
+            title={nextNav.label}
+            className={`${base}
+              bg-gradient-to-r from-blue-600 to-indigo-600
+              hover:from-blue-700 hover:to-indigo-700
+              text-white shadow-md hover:shadow-lg items-end`}
+          >
+            <span className="text-[9px] sm:text-xs text-blue-100 font-semibold uppercase">
+              Next
+            </span>
+
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-xs sm:text-sm font-semibold truncate max-w-full">
+                {nextNav.label}
+              </span>
+              <FaChevronRight className="text-white text-xs sm:text-sm" />
+            </div>
+          </Link>
+        ) : (
+          <div className="hidden md:block" />
+        )}
+
       </div>
     </section>
   );
 };
 
 export default NavigationClient;
-
