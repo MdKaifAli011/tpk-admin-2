@@ -44,8 +44,14 @@ const MainLayout = ({ children, showSidebar = true, fullWidth = false }) => {
 
     const handleResize = () => {
       const isDesktop = window.innerWidth >= 1024;
+      const isMobile = window.innerWidth < 1024;
+
+      // Auto-open on desktop, auto-close on mobile
       if (isDesktop && !isSidebarOpen) {
         setIsSidebarOpen(true);
+      } else if (isMobile && isSidebarOpen) {
+        // Optionally close on mobile resize, but let user control it
+        // setIsSidebarOpen(false);
       }
     };
 
@@ -63,23 +69,22 @@ const MainLayout = ({ children, showSidebar = true, fullWidth = false }) => {
 
         <div className="flex flex-1 relative">
           {/* SIDEBAR (Premium 300px Glass UI) - Only show if showSidebar is true */}
+          {/* Sidebar is fixed positioned and handled independently */}
           {showSidebar && (
             <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
           )}
-
-          {/* OVERLAY (Mobile only) - Removed duplicate, handled in Sidebar */}
 
           {/* MAIN CONTENT */}
           <main
             className={`
               flex-1
               pt-[110px] md:pt-[120px]
-              ${showSidebar ? "lg:ml-[300px]" : ""}
+              ${showSidebar && isSidebarOpen ? "lg:ml-[300px]" : ""}
               bg-white
               overflow-y-auto
               min-h-0
               ${fullWidth ? "" : "px-4 md:px-6 pb-6"}
-              transition-all
+              transition-all duration-300 ease-out
               [&::-webkit-scrollbar]:hidden
               [-ms-overflow-style:none]
               [scrollbar-width:none]

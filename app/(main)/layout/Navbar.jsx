@@ -28,6 +28,47 @@ const Navbar = ({ onMenuToggle, isMenuOpen }) => {
   // Handle default props
   const handleMenuToggle = onMenuToggle || (() => {});
 
+  // Calculate navbar height and set CSS variable for sidebar positioning
+  React.useEffect(() => {
+    const navbar = document.querySelector("nav[data-navbar]");
+    if (!navbar) return;
+
+    const updateNavbarHeight = () => {
+      const height = navbar.offsetHeight;
+      if (height > 0) {
+        document.documentElement.style.setProperty(
+          "--navbar-height",
+          `${height}px`
+        );
+      }
+    };
+
+    // Set initial height immediately
+    updateNavbarHeight();
+
+    // Use ResizeObserver for more accurate height tracking
+    const resizeObserver = new ResizeObserver(() => {
+      updateNavbarHeight();
+    });
+    resizeObserver.observe(navbar);
+
+    // Also listen to window resize as fallback
+    window.addEventListener("resize", updateNavbarHeight);
+
+    // Recalculate after multiple delays to catch all render phases
+    const timeouts = [
+      setTimeout(updateNavbarHeight, 0),
+      setTimeout(updateNavbarHeight, 100),
+      setTimeout(updateNavbarHeight, 300),
+    ];
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateNavbarHeight);
+      timeouts.forEach(clearTimeout);
+    };
+  }, []);
+
   // Prevent body scroll when nav menu is open on mobile
   React.useEffect(() => {
     if (isNavMenuOpen) {
@@ -51,12 +92,12 @@ const Navbar = ({ onMenuToggle, isMenuOpen }) => {
   // Close user menu when clicking outside
   React.useEffect(() => {
     const handleClickOutside = (event) => {
-      if (isUserMenuOpen && !event.target.closest('.user-menu-container')) {
+      if (isUserMenuOpen && !event.target.closest(".user-menu-container")) {
         setIsUserMenuOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isUserMenuOpen]);
 
   // Handle logout
@@ -86,7 +127,7 @@ const Navbar = ({ onMenuToggle, isMenuOpen }) => {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 w-full z-50">
+    <nav data-navbar className="fixed top-0 left-0 right-0 w-full z-50">
       {/* Top Bar - Dark Gray (Condensed on mobile) */}
       <div className="bg-gray-800 text-white text-[10px] sm:text-xs py-1.5 sm:py-2">
         <div className="container mx-auto px-2 sm:px-4">
@@ -95,17 +136,23 @@ const Navbar = ({ onMenuToggle, isMenuOpen }) => {
             <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 xl:gap-4 flex-wrap">
               <div className="flex items-center gap-1">
                 <FaInstagram className="text-[10px] sm:text-xs md:text-sm" />
-                <span className="hidden sm:inline text-[10px] sm:text-xs">100k Followers</span>
+                <span className="hidden sm:inline text-[10px] sm:text-xs">
+                  100k Followers
+                </span>
                 <span className="sm:hidden text-[10px]">100k</span>
               </div>
               <div className="flex items-center gap-1">
                 <FaFacebook className="text-[10px] sm:text-xs md:text-sm" />
-                <span className="hidden sm:inline text-[10px] sm:text-xs">500k Followers</span>
+                <span className="hidden sm:inline text-[10px] sm:text-xs">
+                  500k Followers
+                </span>
                 <span className="sm:hidden text-[10px]">500k</span>
               </div>
               <div className="flex items-center gap-1">
                 <FaWhatsapp className="text-[10px] sm:text-xs md:text-sm" />
-                <span className="hidden lg:inline text-[10px] sm:text-xs">+1 (510) 706-9331</span>
+                <span className="hidden lg:inline text-[10px] sm:text-xs">
+                  +1 (510) 706-9331
+                </span>
                 <span className="lg:hidden hidden sm:inline text-[10px] sm:text-xs">
                   +1 (510) 706-9331
                 </span>
@@ -197,16 +244,26 @@ const Navbar = ({ onMenuToggle, isMenuOpen }) => {
                     className="flex items-center gap-1.5 xl:gap-2 px-2 xl:px-3 py-1.5 xl:py-2 text-xs xl:text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors whitespace-nowrap touch-manipulation"
                   >
                     <FaUser className="text-xs sm:text-sm" />
-                    <span className="max-w-[100px] truncate">{getUserDisplayName()}</span>
-                    <FaChevronDown className={`text-xs transition-transform ${isUserMenuOpen ? "rotate-180" : ""}`} />
+                    <span className="max-w-[100px] truncate">
+                      {getUserDisplayName()}
+                    </span>
+                    <FaChevronDown
+                      className={`text-xs transition-transform ${
+                        isUserMenuOpen ? "rotate-180" : ""
+                      }`}
+                    />
                   </button>
-                  
+
                   {isUserMenuOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
                       <div className="px-4 py-2 border-b border-gray-100">
-                        <p className="text-sm font-semibold text-gray-900 truncate">{getUserDisplayName()}</p>
+                        <p className="text-sm font-semibold text-gray-900 truncate">
+                          {getUserDisplayName()}
+                        </p>
                         {student?.email && (
-                          <p className="text-xs text-gray-500 truncate mt-0.5">{student.email}</p>
+                          <p className="text-xs text-gray-500 truncate mt-0.5">
+                            {student.email}
+                          </p>
                         )}
                       </div>
                       <button
@@ -243,11 +300,23 @@ const Navbar = ({ onMenuToggle, isMenuOpen }) => {
                 {/* Sidebar Menu Button - Controls Exam/Subject/Unit Navigation */}
                 <button
                   onClick={handleMenuToggle}
-                  className="p-2 sm:p-2.5 text-gray-600 hover:text-blue-600 active:text-blue-700 transition-colors relative touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center"
-                  aria-label="Toggle navigation menu"
+                  className={`p-2 sm:p-2.5 transition-colors relative touch-manipulation min-w-[44px] min-h-[44px] flex items-center justify-center ${
+                    isMenuOpen
+                      ? "text-blue-600 bg-blue-50"
+                      : "text-gray-600 hover:text-blue-600 active:text-blue-700"
+                  }`}
+                  aria-label={
+                    isMenuOpen
+                      ? "Close navigation menu"
+                      : "Open navigation menu"
+                  }
+                  aria-expanded={isMenuOpen}
                   title="Navigation Menu"
                 >
                   <FaBars className="text-base sm:text-lg" />
+                  {isMenuOpen && (
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-600 rounded-full"></span>
+                  )}
                 </button>
 
                 {/* Nav Menu Button - Controls Category/Examinations/Courses */}
@@ -308,9 +377,13 @@ const Navbar = ({ onMenuToggle, isMenuOpen }) => {
                     <>
                       <div className="px-4 py-3 sm:py-3.5 border-t border-gray-200">
                         <div className="mb-2">
-                          <p className="text-sm font-semibold text-gray-900 truncate">{getUserDisplayName()}</p>
+                          <p className="text-sm font-semibold text-gray-900 truncate">
+                            {getUserDisplayName()}
+                          </p>
                           {student?.email && (
-                            <p className="text-xs text-gray-500 truncate mt-0.5">{student.email}</p>
+                            <p className="text-xs text-gray-500 truncate mt-0.5">
+                              {student.email}
+                            </p>
                           )}
                         </div>
                         <button

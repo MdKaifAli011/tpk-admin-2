@@ -8,7 +8,7 @@ import React, {
   useState,
 } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { FaSearch, FaBars } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
 import { fetchExams, fetchTree, createSlug, findByIdOrSlug } from "../lib/api";
 import { logger } from "@/utils/logger";
 import ExamDropdown from "../components/ExamDropdown";
@@ -58,6 +58,7 @@ export default function Sidebar({ isOpen = true, onClose }) {
   const [openSubjectId, setOpenSubjectId] = useState(null);
   const [openUnitId, setOpenUnitId] = useState(null);
   const [openChapterId, setOpenChapterId] = useState(null);
+  const [navbarHeight, setNavbarHeight] = useState(120); // Default fallback
 
   // refs for auto-scrolling active items
   const sidebarBodyRef = useRef(null);
@@ -67,6 +68,33 @@ export default function Sidebar({ isOpen = true, onClose }) {
 
   // sync prop
   useEffect(() => setSidebarOpen(isOpen), [isOpen]);
+
+  // Monitor navbar height CSS variable for accurate positioning
+  useEffect(() => {
+    const updateNavbarHeight = () => {
+      const height = getComputedStyle(document.documentElement)
+        .getPropertyValue("--navbar-height")
+        .trim();
+      if (height && height !== "0px") {
+        const numericHeight = parseInt(height, 10);
+        if (!isNaN(numericHeight) && numericHeight > 0) {
+          setNavbarHeight(numericHeight);
+        }
+      }
+    };
+
+    // Initial check
+    updateNavbarHeight();
+
+    // Watch for changes
+    const interval = setInterval(updateNavbarHeight, 100);
+    const timeout = setTimeout(() => clearInterval(interval), 2000); // Stop after 2s
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, []);
 
   // debounce search
   useEffect(() => {
@@ -101,10 +129,11 @@ export default function Sidebar({ isOpen = true, onClose }) {
     ? activeExam.slug || createSlug(activeExam.name)
     : "";
 
-  // close on mobile helper
+  // close on mobile helper - closes sidebar when navigating on mobile
   const closeOnMobile = useCallback(() => {
-    if (onClose && typeof window !== "undefined" && window.innerWidth < 1024)
+    if (onClose && typeof window !== "undefined" && window.innerWidth < 1024) {
       onClose();
+    }
   }, [onClose]);
 
   const navigateTo = useCallback(
@@ -430,8 +459,7 @@ export default function Sidebar({ isOpen = true, onClose }) {
     setOpenChapterId((prev) => (prev === chapterId ? null : chapterId));
   }, []);
 
-  // mobile handlers
-  const openSidebarMobile = useCallback(() => setSidebarOpen(true), []);
+  // mobile handler for overlay close
   const closeSidebarMobile = useCallback(() => {
     setSidebarOpen(false);
     if (onClose) onClose();
@@ -439,17 +467,6 @@ export default function Sidebar({ isOpen = true, onClose }) {
 
   return (
     <>
-      {/* Mobile open button */}
-      {!sidebarOpen && (
-        <button
-          className="fixed top-[70px] sm:top-[74px] md:top-[106px] left-3 sm:left-4 z-[60] lg:hidden bg-blue-600 text-white p-2.5 sm:p-3 rounded-lg shadow-lg hover:bg-blue-700 active:bg-blue-800 transition-all touch-manipulation cursor-pointer"
-          onClick={openSidebarMobile}
-          aria-label="Open sidebar"
-        >
-          <FaBars size={18} className="sm:w-5 sm:h-5" />
-        </button>
-      )}
-
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -460,13 +477,18 @@ export default function Sidebar({ isOpen = true, onClose }) {
       )}
 
       {/* Sidebar - Premium Compact 300px (280px on mobile) */}
+      {/* Positioned right after navbar - no overlap */}
       <aside
         className={`fixed left-0 z-[40] w-[280px] sm:w-[300px] min-w-[280px] sm:min-w-[300px] max-w-[280px] sm:max-w-[300px] bg-white/98 backdrop-blur-md border-r border-gray-200 transform transition-transform duration-300 ease-out ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        } lg:flex lg:flex-col top-[70px] sm:top-[74px] md:top-[102px] h-[calc(100vh-70px)] sm:h-[calc(100vh-74px)] md:h-[calc(100vh-102px)]`}
+        } lg:flex lg:flex-col`}
+        style={{
+          top: `${navbarHeight}px`,
+          height: `calc(100vh - ${navbarHeight}px)`,
+          boxShadow: "0 8px 24px rgba(15, 23, 42, 0.12)",
+        }}
         role="complementary"
         aria-label="Exam navigation sidebar"
-        style={{ boxShadow: "0 8px 24px rgba(15, 23, 42, 0.12)" }}
       >
         <div className="flex h-full flex-col overflow-y-auto overflow-x-hidden p-2 sm:p-2.5 min-h-0 min-w-[280px] sm:min-w-[300px] max-w-[280px] sm:max-w-[300px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           {/* Exam dropdown */}
