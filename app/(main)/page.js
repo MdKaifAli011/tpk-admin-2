@@ -1,346 +1,605 @@
 "use client";
-import React, { useState, useEffect, useMemo, Suspense, lazy } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import MainLayout from "./layout/MainLayout";
+import ExamCard from "./components/ExamCard";
+import { ExamCardSkeleton } from "./components/SkeletonLoader";
+import { fetchExams } from "./lib/api";
+import { STATUS, PLACEHOLDERS } from "@/constants";
 import {
-  FaTrophy,
+  FaArrowRight,
   FaBook,
   FaUsers,
-  FaStar,
-  FaArrowRight,
-  FaFlag,
-  FaCog,
-  FaSyringe,
-  FaUniversity,
+  FaChartLine,
+  FaAward,
+  FaGraduationCap,
   FaLightbulb,
-  FaSpinner,
+  FaRocket,
+  FaCheckCircle,
+  FaStar,
+  FaQuoteLeft,
+  FaPlayCircle,
+  FaClock,
+  FaTrophy,
+  FaShieldAlt,
 } from "react-icons/fa";
-import Navbar from "./layout/Navbar";
-import Footer from "./layout/Footer";
-import { fetchExams, createSlug } from "./lib/api";
-import { ERROR_MESSAGES, PLACEHOLDERS, SEO_DEFAULTS } from "@/constants";
-import { ExamCardSkeleton } from "./components/SkeletonLoader";
 
-// Lazy load components
-const ExamCard = lazy(() => import("./components/ExamCard"));
+/* =======================================================
+   STAT COMPONENT - Trust Building
+======================================================= */
+function Stat({ number, label, subtext }) {
+  return (
+    <div className="bg-white/90 backdrop-blur-sm shadow-lg border border-gray-100 rounded-2xl p-6 text-center hover:shadow-xl hover:-translate-y-1 transition-all group">
+      <div className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-indigo-600 to-pink-500 bg-clip-text text-transparent mb-2">
+        {number}
+      </div>
+      <div className="text-base font-semibold text-gray-900 mb-1">{label}</div>
+      {subtext && <div className="text-xs text-gray-500 mt-1">{subtext}</div>}
+    </div>
+  );
+}
 
-// Default exam icons and styling - memoized to avoid recreation
-const getExamIcon = (examName) => {
-  const name = examName?.toUpperCase() || "";
-  if (name.includes("JEE")) {
-    return <FaCog className="text-3xl sm:text-4xl md:text-5xl text-gray-700" />;
-  }
-  if (name.includes("NEET")) {
-    return (
-      <FaSyringe className="text-3xl sm:text-4xl md:text-5xl text-white" />
-    );
-  }
-  if (name.includes("SAT")) {
-    return (
-      <FaUniversity className="text-3xl sm:text-4xl md:text-5xl text-gray-700" />
-    );
-  }
-  if (name.includes("IB")) {
-    return (
-      <FaLightbulb className="text-3xl sm:text-4xl md:text-5xl text-yellow-400" />
-    );
-  }
-  return <FaBook className="text-3xl sm:text-4xl md:text-5xl text-gray-700" />;
-};
+/* =======================================================
+   TESTIMONIAL COMPONENT
+======================================================= */
+function Testimonial({ name, role, text, rating = 5, image = null }) {
+  return (
+    <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all h-full flex flex-col">
+      <div className="flex items-center gap-1 mb-4">
+        {[...Array(rating)].map((_, i) => (
+          <FaStar key={i} className="text-yellow-400 text-sm" />
+        ))}
+      </div>
+      <FaQuoteLeft className="text-indigo-200 text-3xl mb-4" />
+      <p className="text-gray-700 text-sm leading-relaxed mb-6 flex-grow">
+        {text}
+      </p>
+      <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
+        <div className="w-12 h-12 rounded-full bg-gradient-to-r from-indigo-500 to-pink-500 flex items-center justify-center text-white font-bold">
+          {name.charAt(0)}
+        </div>
+        <div>
+          <div className="font-semibold text-gray-900 text-sm">{name}</div>
+          <div className="text-xs text-gray-500">{role}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-const getExamStyle = (examName) => {
-  const name = examName?.toUpperCase() || "";
-  if (name.includes("JEE")) {
-    return {
-      bgColor: "bg-yellow-400",
-      gradient: "from-yellow-400 to-yellow-500",
-    };
-  }
-  if (name.includes("NEET")) {
-    return {
-      bgColor: "bg-purple-300",
-      gradient: "from-purple-300 to-purple-400",
-    };
-  }
-  if (name.includes("SAT")) {
-    return {
-      bgColor: "bg-pink-200",
-      gradient: "from-pink-200 to-pink-300",
-    };
-  }
-  if (name.includes("IB")) {
-    return {
-      bgColor: "bg-blue-300",
-      gradient: "from-blue-300 to-blue-400",
-    };
-  }
-  return {
-    bgColor: "bg-gray-300",
-    gradient: "from-gray-300 to-gray-400",
-  };
-};
-
-const getDefaultServices = (examName) => {
-  const name = examName?.toUpperCase() || "";
-  if (name.includes("JEE")) {
-    return [
-      "JEE Prep Courses",
-      "NRIs Admission & Help",
-      "NRI Quota Application",
-      "JEE Prep Resources",
-      "JEE Analysis Session",
-    ];
-  }
-  if (name.includes("NEET")) {
-    return [
-      "NEET Prep Courses",
-      "NRIs Admission & Help",
-      "NRI Quota Application",
-      "NEET Prep Resources",
-      "NEET Analysis Session",
-    ];
-  }
-  if (name.includes("SAT")) {
-    return [
-      "SAT Prep Courses",
-      "College Shortlisting",
-      "Scholarship Help",
-      "Rush Reports",
-      "SAT Analysis Session",
-    ];
-  }
-  if (name.includes("IB")) {
-    return [
-      "IB Prep Courses",
-      "MYP & DP Courses",
-      "Exam Compatibility",
-      "IB Prep Resources",
-      "IB Analysis Session",
-    ];
-  }
-  return ["Exam Prep Courses", "Study Materials", "Practice Tests"];
-};
-
-const HomePage = () => {
+/* =======================================================
+   MAIN HOMEPAGE CONTENT
+======================================================= */
+function HomepageContent() {
   const [exams, setExams] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
+  /* --- Fetch exams --- */
   useEffect(() => {
-    let isMounted = true;
-    let abortController = new AbortController();
-
     const loadExams = async () => {
       try {
-        setIsLoading(true);
-        setError(null);
-        const fetchedExams = await fetchExams({ limit: 100 });
-        if (isMounted && !abortController.signal.aborted) {
-          setExams(fetchedExams);
-        }
-      } catch (err) {
-        if (isMounted && !abortController.signal.aborted) {
-          setError(ERROR_MESSAGES.FETCH_FAILED);
-        }
+        const res = await fetchExams({ limit: 100, status: STATUS.ACTIVE });
+        setExams(res || []);
+      } catch (error) {
+        console.error(error);
+        setExams([]);
       } finally {
-        if (isMounted && !abortController.signal.aborted) {
-          setIsLoading(false);
-        }
+        setLoading(false);
       }
     };
-
     loadExams();
-
-    return () => {
-      isMounted = false;
-      abortController.abort();
-    };
   }, []);
 
-  // Memoize exam cards to prevent unnecessary re-renders
-  const examCards = useMemo(() => {
-    if (exams.length === 0) return null;
-    return exams.map((exam) => (
-      <Suspense
-        key={exam._id}
-        fallback={
-          <div className="bg-gray-200 animate-pulse rounded-xl h-64 sm:h-72 xl:h-80" />
-        }
-      >
-        <ExamCard exam={exam} />
-      </Suspense>
-    ));
-  }, [exams]);
+  /* --- Feature Data --- */
+  const features = [
+    {
+      icon: FaBook,
+      title: "Comprehensive Study Material",
+      desc: "Expertly curated notes, theory, and practice papers designed for maximum retention and understanding.",
+      color: "bg-blue-50 text-blue-600",
+      benefit: "Learn Faster",
+    },
+    {
+      icon: FaUsers,
+      title: "Expert Faculty",
+      desc: "Learn from top-rated teachers with proven track records of helping students excel in competitive exams.",
+      color: "bg-purple-50 text-purple-600",
+      benefit: "Expert Guidance",
+    },
+    {
+      icon: FaChartLine,
+      title: "Smart Progress Tracking",
+      desc: "Track your performance across chapters, topics, and subjects with detailed analytics and insights.",
+      color: "bg-green-50 text-green-600",
+      benefit: "Track Growth",
+    },
+    {
+      icon: FaAward,
+      title: "Proven Success Rate",
+      desc: "Join thousands of successful students who cracked their dream exams with our comprehensive preparation.",
+      color: "bg-yellow-50 text-yellow-700",
+      benefit: "95% Success",
+    },
+  ];
+
+  const steps = [
+    {
+      step: "01",
+      icon: FaLightbulb,
+      title: "Choose Your Exam",
+      desc: "Select from our comprehensive range of exam preparation courses tailored to your goals.",
+      bg: "bg-indigo-600",
+    },
+    {
+      step: "02",
+      icon: FaBook,
+      title: "Study & Practice",
+      desc: "Access structured modules, interactive lessons, practice tests, and mock exams at your pace.",
+      bg: "bg-purple-600",
+    },
+    {
+      step: "03",
+      icon: FaTrophy,
+      title: "Ace Your Exam",
+      desc: "Build confidence with comprehensive test series and personalized strategies for exam success.",
+      bg: "bg-pink-500",
+    },
+  ];
+
+  const testimonials = [
+    {
+      name: "Priya Sharma",
+      role: "NEET 2024, AIR 342",
+      text: "The structured approach and detailed explanations helped me understand concepts I struggled with. The practice tests were a game-changer!",
+      rating: 5,
+    },
+    {
+      name: "Arjun Patel",
+      role: "JEE Main 2024, 99.2 Percentile",
+      text: "Best platform for JEE preparation! The chapter-wise tracking kept me motivated, and the quality of study material is excellent.",
+      rating: 5,
+    },
+    {
+      name: "Sarah Johnson",
+      role: "SAT 2024, 1520 Score",
+      text: "As an NRI student, finding quality prep material was challenging. TestPrepKart made it easy with their comprehensive resources.",
+      rating: 5,
+    },
+    {
+      name: "Rahul Kumar",
+      role: "JEE Advanced 2024, IIT Delhi",
+      text: "The progress tracking feature helped me identify weak areas. The mock tests perfectly simulated the actual exam environment.",
+      rating: 5,
+    },
+  ];
+
+  const guarantees = [
+    {
+      icon: FaShieldAlt,
+      title: "100% Quality Guarantee",
+      desc: "Premium study material curated by experts",
+    },
+    {
+      icon: FaClock,
+      title: "24/7 Access",
+      desc: "Learn anytime, anywhere at your convenience",
+    },
+    {
+      icon: FaAward,
+      title: "Proven Results",
+      desc: "95% success rate with thousands of successful students",
+    },
+    {
+      icon: FaUsers,
+      title: "Expert Support",
+      desc: "Get help from experienced faculty whenever you need",
+    },
+  ];
 
   return (
-    <>
-      <Navbar />
+    <div className="min-h-screen bg-white">
+      {/* =======================================================
+          HERO SECTION (PREMIUM & CONVERSION-FOCUSED)
+      ======================================================= */}
+      <section className="relative overflow-hidden">
+        {/* Animated Background Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 opacity-60"></div>
 
-      {/* Spacer for fixed navbar - Mobile: ~70px, Desktop: ~102px (top bar + main nav) */}
-      <div className="h-[70px] md:h-[102px] flex-shrink-0" aria-hidden="true" />
+        {/* Subtle Pattern Overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.03] pointer-events-none"
+          style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, rgba(0,0,0,0.25) 1px, transparent 0)`,
+            backgroundSize: "18px 18px",
+          }}
+        />
 
-      {/* Hero Section */}
-      <section className="bg-linear-to-b from-purple-50 via-purple-50/50 to-white py-10 sm:py-12 md:py-16 lg:py-24 xl:py-28">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 md:gap-8 lg:gap-6 items-center">
-            {/* Left Content */}
-            <div className="order-1 md:order-1 lg:order-1 lg:col-span-5 space-y-5 md:space-y-6 max-w-2xl mx-auto md:mx-0">
-              {/* Tag */}
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm mx-auto md:mx-0">
-                <FaTrophy className="text-yellow-500 text-sm" aria-hidden="true" />
-                <span className="text-xs sm:text-sm font-medium text-gray-700">
-                  Entrance Exam Preparation For Students Worldwide
-                </span>
+        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-28">
+          <div className="text-center max-w-5xl mx-auto space-y-8">
+            {/* Trust Badge */}
+            <div className="inline-flex items-center gap-3 bg-white/90 backdrop-blur-sm shadow-lg border border-gray-200 px-6 py-3 rounded-full font-semibold text-sm">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-600 to-pink-500 flex items-center justify-center">
+                <FaRocket className="text-white text-sm" />
               </div>
-
-              {/* Main Heading */}
-              <h1 className="text-3xl sm:text-[2.35rem] md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight text-center md:text-left">
-                Highest NRI Selections From USA & Middle East
-              </h1>
-
-              {/* Subheading */}
-              <p className="text-base sm:text-lg text-gray-600 leading-relaxed text-center md:text-left">
-                Helping NRI students prepare for JEE / NEET / SAT / IB with
-                highest selection rate
-              </p>
-
-              {/* CTA Button */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-start gap-3 sm:gap-4 md:gap-3">
-                <Link
-                  href="/contact"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                  aria-label="Schedule a demo session"
-                >
-                  <span>Schedule Demo Session</span>
-                  <FaArrowRight className="text-sm" aria-hidden="true" />
-                </Link>
-                <Link
-                  href="#exams"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg border border-blue-100 hover:border-blue-200 hover:bg-blue-50 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                  aria-label="Learn more about our exam preparation services"
-                >
-                  Learn More
-                  <FaArrowRight className="text-sm" aria-hidden="true" />
-                </Link>
+              <span className="text-gray-900">
+                Trusted by 50,000+ Students Worldwide
+              </span>
+              <div className="flex items-center gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <FaStar key={i} className="text-yellow-400 text-xs" />
+                ))}
               </div>
             </div>
 
-            {/* Center Image */}
-            <div className="order-3 md:order-2 lg:order-2 lg:col-span-4 md:col-span-1 flex justify-center items-center relative w-full">
-              <div className="relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-full">
-                <div className="absolute inset-0 bg-pink-200 rounded-full blur-3xl opacity-40 md:opacity-30" aria-hidden="true"></div>
-                <div className="relative bg-white border border-gray-100 rounded-2xl aspect-5/6 sm:aspect-4/5 flex items-center justify-center shadow-lg">
-                  <FaUsers className="text-5xl sm:text-6xl text-gray-300" aria-label="Students studying" />
-                </div>
-              </div>
+            {/* Main Headline - Value Proposition */}
+            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold leading-[1.1] text-gray-900">
+              Crack Your{" "}
+              <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
+                Dream Exam
+              </span>
+              <br />
+              with Confidence
+            </h1>
+
+            {/* Subheadline - Benefit-Focused */}
+            <p className="text-xl sm:text-2xl text-gray-700 max-w-4xl mx-auto leading-relaxed font-medium">
+              Master concepts, track progress, and ace competitive exams with
+              our comprehensive preparation platform designed for serious
+              students.
+            </p>
+
+            {/* Primary CTA Section */}
+            <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
+              <Link
+                href="#exams"
+                className="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all"
+              >
+                Start Free Learning Journey
+                <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+
+              <Link
+                href="/contact"
+                className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-white border-2 border-gray-300 text-gray-900 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl hover:border-indigo-500 transition-all"
+              >
+                <FaPlayCircle className="text-indigo-600" />
+                Watch Demo
+              </Link>
             </div>
 
-            {/* Right Featured Course Card */}
-            <div className="order-2 md:order-3 lg:order-3 lg:col-span-3 md:col-span-2 w-full">
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-5 sm:p-6 hover:shadow-xl transition-shadow max-w-sm md:max-w-xl lg:max-w-none mx-auto md:mx-auto lg:mx-0">
-                {/* Course Image */}
-                <div className="relative w-full h-36 sm:h-40 bg-linear-to-br from-blue-100 to-purple-100 rounded-lg mb-4 flex items-center justify-center overflow-hidden">
-                  <div className="absolute inset-0 bg-white/40" aria-hidden="true"></div>
-                  <FaBook className="text-3xl sm:text-4xl text-gray-400 relative z-10" aria-hidden="true" />
-                </div>
+            {/* Social Proof - Stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-12 max-w-4xl mx-auto">
+              <Stat
+                number="50K+"
+                label="Active Students"
+                subtext="Learning daily"
+              />
+              <Stat
+                number="100+"
+                label="Expert Teachers"
+                subtext="top-rated faculty"
+              />
+              <Stat
+                number="95%"
+                label="Success Rate"
+                subtext="exam clearance"
+              />
+              <Stat
+                number="24/7"
+                label="Available"
+                subtext="Always accessible"
+              />
+            </div>
 
-                {/* Stats */}
-                <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-3 text-xs sm:text-sm text-gray-600">
-                  <div className="flex items-center gap-1.5">
-                    <FaBook className="text-xs" aria-hidden="true" />
-                    <span>63 Lessons</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <FaUsers className="text-xs" aria-hidden="true" />
-                    <span>1872 Students</span>
-                  </div>
-                </div>
-
-                {/* Course Title */}
-                <h3 className="text-lg font-bold text-gray-900 mb-2">
-                  JEE Preparation
-                </h3>
-
-                {/* Description */}
-                <p className="text-sm text-gray-600 mb-3 leading-relaxed">
-                  Batch & 1 on 1 Session For NRI Students Worldwide. Get In
-                  Touch!
-                </p>
-
-                {/* Rating */}
-                <div className="flex items-center gap-2 mb-3" aria-label="Rating: 5 stars out of 208 reviews">
-                  <div className="flex items-center gap-0.5" role="img" aria-label="5 stars">
-                    {[...Array(5)].map((_, i) => (
-                      <FaStar key={i} className="text-yellow-400 text-xs" aria-hidden="true" />
-                    ))}
-                  </div>
-                  <span className="text-xs text-gray-500">(208 Reviews)</span>
-                </div>
-
-                {/* Price */}
-                <div className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-                  $2136
-                </div>
-
-                {/* Explore Link */}
-                <Link
-                  href="/#exams"
-                  className="flex items-center justify-end gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
-                  aria-label="Explore JEE preparation courses"
-                >
-                  <span>Explore Courses</span>
-                  <FaArrowRight className="text-xs" aria-hidden="true" />
-                </Link>
+            {/* Trust Indicators */}
+            <div className="flex flex-wrap items-center justify-center gap-6 pt-8 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <FaCheckCircle className="text-green-500" />
+                <span>Free to Start</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FaCheckCircle className="text-green-500" />
+                <span>No Credit Card Required</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FaCheckCircle className="text-green-500" />
+                <span>Cancel Anytime</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Mastered Entrance Examinations Section */}
-      <section id="exams" className="py-14 sm:py-16 md:py-20 lg:py-24 bg-white">
+      {/* =======================================================
+          FEATURES SECTION (BENEFIT-FOCUSED)
+      ======================================================= */}
+      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-24 bg-white">
+        <div className="text-center mb-20">
+          <div className="inline-block px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-semibold mb-4">
+            Why Choose Us
+          </div>
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
+            Everything You Need to Succeed
+          </h2>
+          <p className="text-gray-600 text-xl max-w-3xl mx-auto">
+            A comprehensive learning platform designed to help you master
+            concepts, track progress, and achieve exam success.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {features.map((item, i) => (
+            <div
+              key={i}
+              className="group bg-white p-8 rounded-2xl shadow-lg border-2 border-gray-100 hover:border-indigo-200 hover:shadow-xl transition-all"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div
+                  className={`w-16 h-16 rounded-xl flex items-center justify-center ${item.color} group-hover:scale-110 transition-transform`}
+                >
+                  <item.icon className="text-3xl" />
+                </div>
+                <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">
+                  {item.benefit}
+                </span>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">
+                {item.title}
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                {item.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* =======================================================
+          EXAM SECTION (PRIMARY CONVERSION POINT)
+      ======================================================= */}
+      <section
+        id="exams"
+        className="relative bg-gradient-to-b from-gray-50 to-white py-24"
+      >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Heading Section */}
-          <div className="text-center mb-10 sm:mb-12">
-            <p className="text-xs sm:text-sm md:text-base text-purple-600 font-medium mb-2">
-              ONLINE PREP FOR
-            </p>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight">
-              Mastered{" "}
-              <span className="text-purple-600">Entrance Examinations</span>
+          <div className="text-center mb-16">
+            <div className="inline-block px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-semibold mb-4">
+              Get Started Today
+            </div>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
+              Choose Your Exam Path
             </h2>
-            <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              We help NRI students prepare for following entrance examination
-              and provide an ecosystem from planning to admission.
+            <p className="text-gray-600 text-xl max-w-3xl mx-auto">
+              Select from our comprehensive range of exam preparation courses
+              and start your journey to success.
             </p>
           </div>
 
-          {/* Exam Category Cards */}
-          {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 xl:gap-8" aria-label="Loading exams">
-              {[...Array(4)].map((_, index) => (
-                <ExamCardSkeleton key={index} />
-              ))}
-            </div>
-          ) : error ? (
-            <div className="text-center py-10 sm:py-12">
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg inline-block" role="alert">
-                {error}
+          <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 p-10 md:p-12">
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                {[...Array(4)].map((_, i) => (
+                  <ExamCardSkeleton key={i} />
+                ))}
               </div>
-            </div>
-          ) : exams.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 xl:gap-8">
-              {examCards}
-            </div>
-          ) : (
-            <div className="text-center py-10 sm:py-12 text-gray-500">
-              <p>{PLACEHOLDERS.NO_DATA}</p>
+            ) : exams.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                {exams.slice(0, 8).map((exam) => (
+                  <ExamCard key={exam._id} exam={exam} />
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-gray-500 py-12 text-lg">
+                {PLACEHOLDERS.NO_DATA}
+              </p>
+            )}
+          </div>
+
+          {/* Secondary CTA */}
+          {exams.length > 8 && (
+            <div className="text-center mt-12">
+              <Link
+                href="#exams"
+                className="inline-flex items-center gap-2 text-indigo-600 font-semibold hover:text-indigo-700 text-lg"
+              >
+                View All Exams
+                <FaArrowRight />
+              </Link>
             </div>
           )}
         </div>
       </section>
-      <Footer />
-    </>
-  );
-};
 
-export default HomePage;
+      {/* =======================================================
+          HOW IT WORKS (PROCESS SIMPLIFICATION)
+      ======================================================= */}
+      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-24 bg-white">
+        <div className="text-center mb-20">
+          <div className="inline-block px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-semibold mb-4">
+            Simple Process
+          </div>
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
+            Your Journey to Success in 3 Steps
+          </h2>
+          <p className="text-gray-600 text-xl max-w-3xl mx-auto">
+            Getting started is easy. Follow these simple steps to begin your
+            exam preparation journey.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-6xl mx-auto">
+          {steps.map((step, i) => (
+            <div key={i} className="text-center relative">
+              {i < 2 && (
+                <div className="hidden md:block absolute top-16 right-[-50%] w-full h-[4px] bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300 opacity-60 z-0" />
+              )}
+
+              <div
+                className={`${step.bg} w-24 h-24 rounded-full flex items-center justify-center text-white text-3xl font-extrabold mx-auto shadow-2xl mb-6 relative z-10`}
+              >
+                {step.step}
+              </div>
+
+              <div className="bg-gray-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <step.icon className="text-4xl text-gray-700" />
+              </div>
+
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                {step.title}
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed">{step.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* =======================================================
+          TESTIMONIALS (SOCIAL PROOF)
+      ======================================================= */}
+      <section className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-24">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <div className="inline-block px-4 py-2 bg-white text-indigo-700 rounded-full text-sm font-semibold mb-4 shadow-sm">
+              Success Stories
+            </div>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
+              Loved by Thousands of Students
+            </h2>
+            <p className="text-gray-600 text-xl max-w-3xl mx-auto">
+              See what our successful students have to say about their journey
+              with TestPrepKart.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {testimonials.map((testimonial, i) => (
+              <Testimonial key={i} {...testimonial} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* =======================================================
+          GUARANTEES (RISK REVERSAL)
+      ======================================================= */}
+      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-24 bg-white">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
+            Your Success is Our Commitment
+          </h2>
+          <p className="text-gray-600 text-xl max-w-3xl mx-auto">
+            We&apos;re committed to providing you with the best learning
+            experience and helping you achieve your goals.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+          {guarantees.map((item, i) => (
+            <div
+              key={i}
+              className="text-center p-8 bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-gray-100 hover:shadow-lg transition-all"
+            >
+              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-indigo-600 to-pink-500 flex items-center justify-center mx-auto mb-4">
+                <item.icon className="text-white text-2xl" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">
+                {item.title}
+              </h3>
+              <p className="text-gray-600 text-sm">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* =======================================================
+          FINAL CTA (CONVERSION CLOSER)
+      ======================================================= */}
+      <section className="relative overflow-hidden py-24 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white">
+        {/* Background Pattern */}
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
+            backgroundSize: "30px 30px",
+          }}
+        />
+
+        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="max-w-4xl mx-auto space-y-8">
+            <div className="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-semibold mb-4">
+              Ready to Start Your Journey?
+            </div>
+
+            <h2 className="text-4xl md:text-6xl font-extrabold leading-tight">
+              Join 50,000+ Students
+              <br />
+              <span className="text-yellow-300">
+                Cracking Their Dream Exams
+              </span>
+            </h2>
+
+            <p className="text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
+              Start your free learning journey today. No credit card required.
+              Access premium study material and track your progress instantly.
+            </p>
+
+            <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
+              <Link
+                href="#exams"
+                className="group inline-flex items-center justify-center gap-3 px-10 py-5 bg-white text-indigo-700 rounded-xl font-bold text-lg shadow-2xl hover:shadow-3xl hover:scale-105 transition-all"
+              >
+                Start Learning Free
+                <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+
+              <Link
+                href="/register"
+                className="inline-flex items-center justify-center gap-3 px-10 py-5 bg-transparent border-3 border-white text-white rounded-xl font-bold text-lg hover:bg-white/10 transition-all"
+              >
+                Create Free Account
+              </Link>
+            </div>
+
+            {/* Final Trust Indicators */}
+            <div className="flex flex-wrap items-center justify-center gap-6 pt-8 text-sm text-white/80">
+              <div className="flex items-center gap-2">
+                <FaCheckCircle />
+                <span>100% Free to Start</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FaCheckCircle />
+                <span>No Hidden Charges</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FaCheckCircle />
+                <span>Instant Access</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+/* =======================================================
+   MAIN PAGE WRAPPER
+======================================================= */
+export default function HomePage() {
+  return (
+    <MainLayout showSidebar={false}>
+      <Suspense
+        fallback={
+          <div className="flex justify-center items-center min-h-screen">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent mb-4"></div>
+              <p className="text-gray-500">Loading amazing content...</p>
+            </div>
+          </div>
+        }
+      >
+        <HomepageContent />
+      </Suspense>
+    </MainLayout>
+  );
+}

@@ -37,7 +37,9 @@ const PerformanceTab = ({ entityType, entityName }) => {
         <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
           Performance Analytics
         </h3>
-        <p className="text-sm text-gray-700 leading-normal">{getDescription()}</p>
+        <p className="text-sm text-gray-700 leading-normal">
+          {getDescription()}
+        </p>
       </div>
       <div className="bg-linear-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
         <div className="flex items-center gap-2 mb-2">
@@ -58,11 +60,12 @@ const PerformanceTab = ({ entityType, entityName }) => {
           </div>
           <p className="text-sm font-semibold text-gray-700">Coming Soon</p>
         </div>
-        <p className="text-xs text-gray-600 leading-normal">{getFooterText()}</p>
+        <p className="text-xs text-gray-600 leading-normal">
+          {getFooterText()}
+        </p>
       </div>
     </div>
   );
 };
 
 export default PerformanceTab;
-

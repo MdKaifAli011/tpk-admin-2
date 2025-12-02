@@ -6,8 +6,9 @@ import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
 import ServiceWorkerRegistration from "../components/ServiceWorkerRegistration";
+import ScrollToTop from "../components/ScrollToTop";
 
-const MainLayout = ({ children, showSidebar = true }) => {
+const MainLayout = ({ children, showSidebar = true, fullWidth = false }) => {
   // Initialize sidebar as open on desktop, closed on mobile (only if showSidebar is true)
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     if (!showSidebar) return false;
@@ -55,6 +56,7 @@ const MainLayout = ({ children, showSidebar = true }) => {
   return (
     <ErrorBoundary>
       <ServiceWorkerRegistration />
+      <ScrollToTop />
       <div className="flex flex-col min-h-screen bg-gray-50">
         {/* NAVBAR */}
         <Navbar onMenuToggle={toggleSidebar} isMenuOpen={isSidebarOpen} />
@@ -76,14 +78,14 @@ const MainLayout = ({ children, showSidebar = true }) => {
               bg-white
               overflow-y-auto
               min-h-0
-              px-4 md:px-6 pb-6
+              ${fullWidth ? "" : "px-4 md:px-6 pb-6"}
               transition-all
               [&::-webkit-scrollbar]:hidden
               [-ms-overflow-style:none]
               [scrollbar-width:none]
             `}
           >
-            <div className="w-full max-w-7xl mx-auto">
+            {fullWidth ? (
               <Suspense
                 fallback={
                   <div className="flex items-center justify-center py-16">
@@ -96,7 +98,22 @@ const MainLayout = ({ children, showSidebar = true }) => {
               >
                 {children}
               </Suspense>
-            </div>
+            ) : (
+              <div className="w-full max-w-7xl mx-auto">
+                <Suspense
+                  fallback={
+                    <div className="flex items-center justify-center py-16">
+                      <div className="text-center">
+                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent mb-4"></div>
+                        <p className="text-gray-600 text-sm">Loading...</p>
+                      </div>
+                    </div>
+                  }
+                >
+                  {children}
+                </Suspense>
+              </div>
+            )}
           </main>
         </div>
 

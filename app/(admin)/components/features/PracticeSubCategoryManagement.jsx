@@ -42,6 +42,7 @@ const PracticeSubCategoryManagement = ({ categoryId: propCategoryId }) => {
     chapterId: "",
     topicId: "",
     subTopicId: "",
+    definitionId: "",
     orderNumber: "",
     duration: "",
     maximumMarks: "",
@@ -53,6 +54,7 @@ const PracticeSubCategoryManagement = ({ categoryId: propCategoryId }) => {
   const [chapters, setChapters] = useState([]);
   const [topics, setTopics] = useState([]);
   const [subTopics, setSubTopics] = useState([]);
+  const [definitions, setDefinitions] = useState([]);
   const [formError, setFormError] = useState(null);
   const { toasts, removeToast, success, error: showError } = useToast();
   const isFetchingRef = useRef(false);
@@ -163,6 +165,22 @@ const PracticeSubCategoryManagement = ({ categoryId: propCategoryId }) => {
     }
   };
 
+  // ✅ Fetch Definitions based on selected subtopic
+  const fetchDefinitions = async (subTopicId) => {
+    if (!subTopicId) {
+      setDefinitions([]);
+      return;
+    }
+    try {
+      const response = await api.get(`/definition?subTopicId=${subTopicId}&status=all`);
+      if (response.data?.success) {
+        setDefinitions(response.data.data || []);
+      }
+    } catch (err) {
+      console.error("❌ Error fetching definitions:", err);
+    }
+  };
+
   // ✅ Fetch SubCategories using Axios
   const fetchSubCategories = useCallback(async () => {
     if (isFetchingRef.current) return;
@@ -262,6 +280,7 @@ const PracticeSubCategoryManagement = ({ categoryId: propCategoryId }) => {
       setChapters([]);
       setTopics([]);
       setSubTopics([]);
+      setDefinitions([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentCategory, formData.categoryId, categories, categoryId, showAddForm, editingSubCategory]);
@@ -279,10 +298,12 @@ const PracticeSubCategoryManagement = ({ categoryId: propCategoryId }) => {
         newData.chapterId = "";
         newData.topicId = "";
         newData.subTopicId = "";
+        newData.definitionId = "";
         setUnits([]);
         setChapters([]);
         setTopics([]);
         setSubTopics([]);
+        setDefinitions([]);
         // Fetch units for the new category
         // Check both categories array and currentCategory
         let selectedCategory = categories.find((c) => c._id === value);
@@ -299,20 +320,30 @@ const PracticeSubCategoryManagement = ({ categoryId: propCategoryId }) => {
         newData.chapterId = "";
         newData.topicId = "";
         newData.subTopicId = "";
+        newData.definitionId = "";
         setChapters([]);
         setTopics([]);
         setSubTopics([]);
+        setDefinitions([]);
         if (value) fetchChapters(value);
       } else if (name === "chapterId") {
         newData.topicId = "";
         newData.subTopicId = "";
+        newData.definitionId = "";
         setTopics([]);
         setSubTopics([]);
+        setDefinitions([]);
         if (value) fetchTopics(value);
       } else if (name === "topicId") {
         newData.subTopicId = "";
+        newData.definitionId = "";
         setSubTopics([]);
+        setDefinitions([]);
         if (value) fetchSubTopics(value);
+      } else if (name === "subTopicId") {
+        newData.definitionId = "";
+        setDefinitions([]);
+        if (value) fetchDefinitions(value);
       }
 
       return newData;
@@ -331,6 +362,7 @@ const PracticeSubCategoryManagement = ({ categoryId: propCategoryId }) => {
       chapterId: "",
       topicId: "",
       subTopicId: "",
+      definitionId: "",
       orderNumber: "",
       duration: "",
       maximumMarks: "",
@@ -342,6 +374,7 @@ const PracticeSubCategoryManagement = ({ categoryId: propCategoryId }) => {
     setChapters([]);
     setTopics([]);
     setSubTopics([]);
+    setDefinitions([]);
     setFormError(null);
   };
 
@@ -377,6 +410,7 @@ const PracticeSubCategoryManagement = ({ categoryId: propCategoryId }) => {
         chapterId: formData.chapterId || null,
         topicId: formData.topicId || null,
         subTopicId: formData.subTopicId || null,
+        definitionId: formData.definitionId || null,
         duration: formData.duration.trim() || "",
         maximumMarks: parseFloat(formData.maximumMarks) || 0,
         numberOfQuestions: parseInt(formData.numberOfQuestions) || 0,
@@ -443,6 +477,7 @@ const PracticeSubCategoryManagement = ({ categoryId: propCategoryId }) => {
       chapterId: subCategory.chapterId?._id || subCategory.chapterId || "",
       topicId: subCategory.topicId?._id || subCategory.topicId || "",
       subTopicId: subCategory.subTopicId?._id || subCategory.subTopicId || "",
+      definitionId: subCategory.definitionId?._id || subCategory.definitionId || "",
       orderNumber: subCategory.orderNumber?.toString() || "",
       duration: subCategory.duration || "",
       maximumMarks: subCategory.maximumMarks || "",
@@ -466,7 +501,13 @@ const PracticeSubCategoryManagement = ({ categoryId: propCategoryId }) => {
                     if (subCategory.topicId?._id || subCategory.topicId) {
                       fetchSubTopics(
                         subCategory.topicId?._id || subCategory.topicId
-                      );
+                      ).then(() => {
+                        if (subCategory.subTopicId?._id || subCategory.subTopicId) {
+                          fetchDefinitions(
+                            subCategory.subTopicId?._id || subCategory.subTopicId
+                          );
+                        }
+                      });
                     }
                   });
                 }
@@ -665,8 +706,8 @@ const PracticeSubCategoryManagement = ({ categoryId: propCategoryId }) => {
                 </div>
               )}
 
-              {/* Row 1: Unit, Chapter, Topic, Subtopic */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Row 1: Unit, Chapter, Topic, Subtopic, Definition */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                 <div className="space-y-1.5">
                   <label
                     htmlFor="unitId"
@@ -761,6 +802,30 @@ const PracticeSubCategoryManagement = ({ categoryId: propCategoryId }) => {
                     {subTopics.map((subTopic) => (
                       <option key={subTopic._id} value={subTopic._id}>
                         {subTopic.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="definitionId"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Definition
+                  </label>
+                  <select
+                    id="definitionId"
+                    name="definitionId"
+                    value={formData.definitionId}
+                    onChange={handleFormChange}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm transition-all"
+                    disabled={isFormLoading || !formData.subTopicId}
+                  >
+                    <option value="">Select a definition</option>
+                    {definitions.map((definition) => (
+                      <option key={definition._id} value={definition._id}>
+                        {definition.name}
                       </option>
                     ))}
                   </select>
