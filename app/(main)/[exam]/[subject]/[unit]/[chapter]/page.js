@@ -7,6 +7,7 @@ import NavigationClient from "../../../../components/NavigationClient";
 import ChaptersSectionClient from "../../../../components/ChaptersSectionClient";
 import UnitProgressClient from "../../../../components/UnitProgressClient";
 import ProgressTracker from "../../../../components/ProgressTracker";
+import ChapterCompletionTracker from "../../../../components/ChapterCompletionTracker";
 import {
   fetchExamById,
   fetchSubjectsByExam,
@@ -141,6 +142,12 @@ const ChapterPage = async ({ params }) => {
         chapterId={chapter._id}
         itemType="chapter"
         itemId={chapter._id}
+      />
+      {/* Chapter Completion Tracker - Shows congratulations when chapter is completed */}
+      <ChapterCompletionTracker
+        chapterId={chapter._id}
+        chapterName={chapter.name}
+        unitId={unit._id}
       />
       <div className="space-y-4">
         {/* Compact Premium Educational Header */}

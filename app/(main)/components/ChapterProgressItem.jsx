@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { FaCheck, FaEye } from "react-icons/fa";
 import CongratulationsModal from "./CongratulationsModal";
@@ -26,58 +26,25 @@ const ChapterProgressItem = ({
   const [showCongratulations, setShowCongratulations] = useState(false);
   const [congratulationsShown, setCongratulationsShown] = useState(false);
   const prevProgressRef = useRef(initialProgress);
-  const hasCheckedCompletionRef = useRef(false);
-  const isCheckingRef = useRef(false);
   
-  // Initialize: Check if already completed on mount (prevent showing on page load if already completed)
-  useEffect(() => {
-    if (!hasCheckedCompletionRef.current && !isCheckingRef.current && unitId) {
-      isCheckingRef.current = true;
-      checkChapterCongratulationsShown(chapter._id, unitId).then((hasShown) => {
-        setCongratulationsShown(hasShown);
-        // If already shown before OR if progress is already 100% on mount, set prevProgress to 100
-        // This prevents showing modal when navigating back to a completed chapter
-        // IMPORTANT: Once shown, NEVER show again, even on page reload or revisit
-        if (hasShown || initialProgress === 100) {
-          prevProgressRef.current = 100;
-          // If already shown, ensure we don't show again
-          if (hasShown) {
-            setShowCongratulations(false);
-          }
-        } else {
-          prevProgressRef.current = initialProgress;
-        }
-        hasCheckedCompletionRef.current = true;
-        isCheckingRef.current = false;
-      });
-    }
-  }, [chapter._id, unitId, initialProgress]);
-
   // Sync with prop changes (from database updates)
-  useEffect(() => {
-    if (!hasCheckedCompletionRef.current || !unitId) return;
-    
-    const prevProgress = prevProgressRef.current;
+  React.useEffect(() => {
     setLocalProgress(initialProgress);
     setIsCompleted(initialIsCompleted);
-    
-    // Only show congratulations if:
-    // 1. Progress is exactly 100%
-    // 2. Previous progress was less than 100% (just completed)
-    // 3. We haven't shown the modal for this completion yet
-    if (initialProgress === 100 && prevProgress < 100 && !congratulationsShown) {
-      setShowCongratulations(true);
-      // Mark as shown in database
-      markChapterCongratulationsShown(chapter._id, unitId).then((success) => {
-        if (success) {
-          setCongratulationsShown(true);
+    prevProgressRef.current = initialProgress;
+  }, [initialProgress, initialIsCompleted]);
+  
+  // Check if congratulations were already shown (prevent duplicate)
+  React.useEffect(() => {
+    if (unitId && chapter._id) {
+      checkChapterCongratulationsShown(chapter._id, unitId).then((hasShown) => {
+        setCongratulationsShown(hasShown);
+        if (hasShown) {
+          setShowCongratulations(false);
         }
       });
     }
-    
-    // Update previous progress reference
-    prevProgressRef.current = initialProgress;
-  }, [initialProgress, initialIsCompleted, chapter._id, unitId, congratulationsShown]);
+  }, [chapter._id, unitId]);
 
   const weightage = chapter.weightage ?? "20%";
   const engagement = chapter.engagement ?? "2.2K";
@@ -101,54 +68,55 @@ const ChapterProgressItem = ({
   const progressPercent = Math.min(100, Math.max(0, localProgress));
   const progressLabel = Math.round(progressPercent);
 
-  const handleSliderChange = useCallback((e) => {
+  const handleSliderChange = useCallback(async (e) => {
     e.stopPropagation();
     const newProgress = parseInt(e.target.value);
-    const prevProgress = localProgress;
+    const prevProgress = prevProgressRef.current;
     setLocalProgress(newProgress);
     setIsCompleted(newProgress === 100);
+    prevProgressRef.current = newProgress;
     
-    // Show congratulations only if:
+    // Show congratulations when progress reaches 100% via slider
+    // Only show if:
     // 1. Progress just reached exactly 100% (wasn't 100% before)
     // 2. We haven't shown the modal for this completion yet
     if (newProgress === 100 && prevProgress < 100 && !congratulationsShown && unitId) {
       setShowCongratulations(true);
-      // Mark as shown in database
-      markChapterCongratulationsShown(chapter._id, unitId).then((success) => {
-        if (success) {
-          setCongratulationsShown(true);
-        }
-      });
+      // Mark as shown in database to prevent duplicate
+      const success = await markChapterCongratulationsShown(chapter._id, unitId);
+      if (success) {
+        setCongratulationsShown(true);
+      }
     }
     
     if (onProgressChange) {
       onProgressChange(chapter._id, newProgress, newProgress === 100);
     }
-  }, [chapter._id, onProgressChange, localProgress, congratulationsShown, unitId]);
+  }, [chapter._id, onProgressChange, congratulationsShown, unitId]);
 
-  const handleMarkAsDone = useCallback((e) => {
+  const handleMarkAsDone = useCallback(async (e) => {
     e.stopPropagation();
     const checked = e.target.checked;
     
     if (checked) {
       // Mark as done
-      const prevProgress = localProgress;
+      const prevProgress = prevProgressRef.current;
       setLocalProgress(100);
       setIsCompleted(true);
+      prevProgressRef.current = 100;
       
-      // Show congratulations only if:
+      // Show congratulations when "mark as done" is checked
+      // Only show if:
       // 1. Previous progress was less than 100% (just completed)
       // 2. We haven't shown the modal for this completion yet
       if (prevProgress < 100 && !congratulationsShown && unitId) {
         setShowCongratulations(true);
-        // Mark as shown in database
-        markChapterCongratulationsShown(chapter._id, unitId).then((success) => {
-          if (success) {
-            setCongratulationsShown(true);
-          }
-        });
+        // Mark as shown in database to prevent duplicate
+        const success = await markChapterCongratulationsShown(chapter._id, unitId);
+        if (success) {
+          setCongratulationsShown(true);
+        }
       }
-      prevProgressRef.current = 100;
       
       if (onMarkAsDone) {
         onMarkAsDone(chapter._id);
@@ -157,12 +125,14 @@ const ChapterProgressItem = ({
       // Reset if unchecked
       setLocalProgress(0);
       setIsCompleted(false);
+      prevProgressRef.current = 0;
+      // Reset congratulations shown flag when unchecked
       setCongratulationsShown(false);
       if (onReset) {
         onReset(chapter._id);
       }
     }
-  }, [chapter._id, onMarkAsDone, onReset, localProgress, congratulationsShown, unitId]);
+  }, [chapter._id, onMarkAsDone, onReset, congratulationsShown, unitId]);
 
   const handleMouseDown = useCallback((e) => {
     e.stopPropagation();
@@ -328,11 +298,12 @@ const ChapterProgressItem = ({
         </div>
       </div>
 
-      {/* Congratulations Modal */}
+      {/* Congratulations Modal - Shows when "mark as done" is checked */}
       <CongratulationsModal
         isOpen={showCongratulations}
         onClose={() => setShowCongratulations(false)}
         chapterName={chapter.name}
+        type="chapter"
       />
     </div>
   );

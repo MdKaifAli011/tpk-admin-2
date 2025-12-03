@@ -254,25 +254,7 @@ const UnitProgressClient = ({ unitId, unitName, initialProgress = 0 }) => {
         prevProgressRef.current = newProgress;
       } else {
         // Also recalculate if event doesn't have unitId (might be from chapters)
-        const newProgress = await calculateProgress();
-        if (newProgress !== null) {
-          // Check if we've already shown congratulations for this completion
-          const hasShownCompletion = localStorage.getItem(completionKey) === "true";
-          const wasCompleted = prevProgressRef.current === 100;
-          const isNowCompleted = newProgress === 100;
-          
-          // Show congratulations only if:
-          // 1. Progress just reached exactly 100% (wasn't 100% before)
-          // 2. We haven't shown the modal for this completion yet
-          if (isNowCompleted && !wasCompleted && !hasShownCompletion) {
-            setShowCongratulations(true);
-            localStorage.setItem(completionKey, "true");
-          } else if (newProgress < 100) {
-            // Reset completion flag if progress drops below 100%
-            localStorage.removeItem(completionKey);
-          }
-          prevProgressRef.current = newProgress;
-        }
+        await calculateProgress();
       }
     };
 
