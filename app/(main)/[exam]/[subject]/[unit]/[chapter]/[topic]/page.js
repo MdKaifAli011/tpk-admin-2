@@ -175,28 +175,38 @@ const TopicPage = async ({ params }) => {
         itemId={topic._id}
       />
       <div className="space-y-4">
-        {/* Header */}
-        <section className="bg-linear-to-b from-purple-50/40 via-white to-purple-50/30 border border-purple-100 rounded-xl p-4 sm:p-5">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-            <div className="flex-1">
-              <div className="flex items-center gap-2.5 mb-1.5">
-                <FaFileAlt className="text-xl text-indigo-600" />
-                <div>
-                  <h1 className="text-xl sm:text-2xl font-bold text-indigo-900">
-                    {topic.name}
-                  </h1>
-                  <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                    {fetchedExam.name} &gt; {subject.name} &gt; {unit.name} &gt;{" "}
-                    {chapter.name} &gt; {topic.name}
-                  </p>
-                </div>
-              </div>
-            </div>
+        {/* Compact Premium Educational Header */}
+<section
+  className="
+    rounded-xl
+    p-3 sm:p-4
+    bg-gradient-to-br from-indigo-50 via-white to-purple-50
+    border border-indigo-100/60
+    shadow-[0_2px_12px_rgba(120,90,200,0.08)]
+  "
+>
+  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2.5">
 
-            {/* Progress */}
-            <UnitProgressClient unitId={unit._id} unitName={unit.name} initialProgress={0} />
-          </div>
-        </section>
+    {/* Title + Breadcrumb */}
+    <div className="flex-1 leading-tight">
+      <h1 className="text-lg sm:text-xl font-bold text-indigo-900">
+        {topic.name}
+      </h1>
+
+      <p className="text-[10px] sm:text-xs text-gray-600 mt-0.5">
+        {fetchedExam.name} &gt; {subject.name} &gt; {unit.name} &gt; {chapter.name} &gt; {topic.name}
+      </p>
+    </div>
+
+    {/* Progress Component */}
+    <UnitProgressClient
+      unitId={unit._id}
+      unitName={unit.name}
+      initialProgress={0}
+    />
+  </div>
+</section>
+
 
         {/* Tabs */}
         <TabsClient

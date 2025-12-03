@@ -92,30 +92,42 @@ const SubjectPage = async ({ params }) => {
   return (
     <MainLayout>
       <div className="space-y-4">
-        {/* Header */}
-        <section className="bg-linear-to-b from-purple-50/40 via-white to-purple-50/30 border border-purple-100 rounded-xl p-4 sm:p-5">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-            <div className="flex-1 w-full">
-              <div className="flex items-center gap-2.5 mb-1.5">
-                <FaGraduationCap className="text-xl text-indigo-600" />
-                <h1 className="text-xl sm:text-2xl font-bold text-indigo-900">
-                  {subject.name}
-                </h1>
-              </div>
-              <p className="text-xs sm:text-sm text-gray-600 ml-0 md:ml-9">
-                {fetchedExam.name} &gt; {subject.name}
-              </p>
-            </div>
+        {/* Premium Educational Header */}
+<section
+  className="
+    rounded-xl
+    p-3 sm:p-4
 
-            {/* Progress */}
-            <SubjectProgressClient
-              subjectId={subject._id}
-              subjectName={subject.name}
-              unitIds={fetchedUnits.map((unit) => unit._id)}
-              initialProgress={0}
-            />
-          </div>
-        </section>
+    /* Premium Educational Background */
+    bg-gradient-to-br from-indigo-50 via-white to-purple-50
+    border border-indigo-100/60
+
+    shadow-[0_2px_12px_rgba(100,70,200,0.08)]
+  "
+>
+  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2.5">
+
+    {/* Title + Breadcrumb */}
+    <div className="flex-1 w-full leading-tight">
+      <h1 className="text-lg sm:text-xl font-bold text-indigo-900">
+        {subject.name}
+      </h1>
+
+      <p className="text-[10px] sm:text-xs text-gray-600 mt-0.5">
+        {fetchedExam.name} &gt; {subject.name}
+      </p>
+    </div>
+
+    {/* Progress Component */}
+    <SubjectProgressClient
+      subjectId={subject._id}
+      subjectName={subject.name}
+      unitIds={fetchedUnits.map((unit) => unit._id)}
+      initialProgress={0}
+    />
+  </div>
+</section>
+
 
         {/* Tabs */}
         <TabsClient

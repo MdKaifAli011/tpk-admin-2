@@ -77,34 +77,39 @@ const ExamPage = async ({ params }) => {
   return (
     <MainLayout>
       <div className="space-y-4">
-        {/* Header */}
-        <section className="bg-linear-to-b from-purple-50/40 via-white to-purple-50/30 border border-purple-100 rounded-xl p-4 sm:p-5">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-indigo-900 mb-1">
-                {exam.name} Exam Preparation
-              </h1>
-              <p className="text-xs sm:text-sm text-gray-600">
-                Prepare with expert guidance and resources for your {exam.name}{" "}
-                exam.
-              </p>
-            </div>
+      <section
+  className="rounded-xl p-3 sm:p-4 bg-gradient-to-br from-indigo-50 via-white to-purple-50 border border-indigo-100/60 shadow-[0_2px_12px_rgba(120,90,200,0.08)]"
+>
+  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2.5">
 
-            {/* Progress */}
-            <div className="text-right">
-              <p className="text-xs text-gray-500 mb-1.5">My Preparation</p>
-              <div className="flex items-center gap-2.5">
-                <span className="font-semibold text-sm text-gray-700">0%</span>
-                <div className="w-24 sm:w-28 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-blue-500 transition-all duration-300"
-                    style={{ width: "0%" }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+    <div className="leading-tight">
+      <h1 className="text-lg sm:text-xl font-bold text-indigo-900">
+        {exam.name} Preparation
+      </h1>
+
+      <p className="text-[10px] sm:text-xs text-gray-600 mt-0.5">
+        Smart study tools for your {exam.name} exam.
+      </p>
+    </div>
+
+    <div className="text-right">
+      <p className="text-[10px] text-gray-500 mb-1">Progress</p>
+
+      <div className="flex items-center gap-2">
+        <span className="font-semibold text-sm text-gray-700">0%</span>
+
+        <div className="w-20 sm:w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+          <div
+            className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-300"
+            style={{ width: "0%" }}
+          ></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
 
         {/* Tabs */}
         <TabsClient
