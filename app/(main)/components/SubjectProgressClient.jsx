@@ -106,6 +106,12 @@ const SubjectProgressClient = ({ subjectId, subjectName, unitIds = [], initialPr
               return; // Don't show modal on initial load
             }
             
+            // CRITICAL: Only check for modal if initialization is complete
+            // This prevents race condition where modal shows before async check completes
+            if (!isInitializedRef.current) {
+              return; // Don't check for modal until initialization is done
+            }
+
             // Check if we've already shown congratulations for this completion
             const wasCompleted = prevProgressRef.current === 100;
             const isNowCompleted = dbProgress === 100;
@@ -113,7 +119,8 @@ const SubjectProgressClient = ({ subjectId, subjectName, unitIds = [], initialPr
             // Show congratulations only if:
             // 1. Progress just reached exactly 100% (wasn't 100% before)
             // 2. We haven't shown the modal for this completion yet
-            if (isNowCompleted && !wasCompleted && !congratulationsShown) {
+            // 3. Initialization is complete (prevents showing on page visit)
+            if (isNowCompleted && !wasCompleted && !congratulationsShown && isInitializedRef.current) {
               setShowCongratulations(true);
               // Mark as shown in database
               markSubjectCongratulationsShown(subjectId).then((success) => {
@@ -181,6 +188,12 @@ const SubjectProgressClient = ({ subjectId, subjectName, unitIds = [], initialPr
           return; // Don't show modal on initial load
         }
         
+        // CRITICAL: Only check for modal if initialization is complete
+        // This prevents race condition where modal shows before async check completes
+        if (!isInitializedRef.current) {
+          return; // Don't check for modal until initialization is done
+        }
+
         // Check if we've already shown congratulations for this completion
         const wasCompleted = prevProgressRef.current === 100;
         const isNowCompleted = subjectProgress === 100;
@@ -188,7 +201,8 @@ const SubjectProgressClient = ({ subjectId, subjectName, unitIds = [], initialPr
         // Show congratulations only if:
         // 1. Progress just reached exactly 100% (wasn't 100% before)
         // 2. We haven't shown the modal for this completion yet
-        if (isNowCompleted && !wasCompleted && !congratulationsShown) {
+        // 3. Initialization is complete (prevents showing on page visit)
+        if (isNowCompleted && !wasCompleted && !congratulationsShown && isInitializedRef.current) {
           setShowCongratulations(true);
           // Mark as shown in database
           markSubjectCongratulationsShown(subjectId).then((success) => {

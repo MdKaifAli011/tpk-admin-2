@@ -26,7 +26,15 @@ const ChapterProgressItem = ({
   const [showCongratulations, setShowCongratulations] = useState(false);
   const [congratulationsShown, setCongratulationsShown] = useState(false);
   const prevProgressRef = useRef(initialProgress);
+  const isInitializedRef = useRef(false);
   
+  // Reset initialization flag when chapter or unit changes
+  React.useEffect(() => {
+    isInitializedRef.current = false;
+    setCongratulationsShown(false);
+    setShowCongratulations(false);
+  }, [chapter._id, unitId]);
+
   // Sync with prop changes (from database updates)
   React.useEffect(() => {
     setLocalProgress(initialProgress);
@@ -35,14 +43,19 @@ const ChapterProgressItem = ({
   }, [initialProgress, initialIsCompleted]);
   
   // Check if congratulations were already shown (prevent duplicate)
+  // CRITICAL: This must complete before allowing modal to show
   React.useEffect(() => {
     if (unitId && chapter._id) {
+      isInitializedRef.current = false;
       checkChapterCongratulationsShown(chapter._id, unitId).then((hasShown) => {
         setCongratulationsShown(hasShown);
+        isInitializedRef.current = true; // Mark as initialized
         if (hasShown) {
           setShowCongratulations(false);
         }
       });
+    } else {
+      isInitializedRef.current = true; // If no unitId/chapterId, mark as initialized
     }
   }, [chapter._id, unitId]);
 
@@ -80,7 +93,8 @@ const ChapterProgressItem = ({
     // Only show if:
     // 1. Progress just reached exactly 100% (wasn't 100% before)
     // 2. We haven't shown the modal for this completion yet
-    if (newProgress === 100 && prevProgress < 100 && !congratulationsShown && unitId) {
+    // 3. Initialization is complete (prevents showing on page visit)
+    if (newProgress === 100 && prevProgress < 100 && !congratulationsShown && unitId && isInitializedRef.current) {
       setShowCongratulations(true);
       // Mark as shown in database to prevent duplicate
       const success = await markChapterCongratulationsShown(chapter._id, unitId);
@@ -109,7 +123,8 @@ const ChapterProgressItem = ({
       // Only show if:
       // 1. Previous progress was less than 100% (just completed)
       // 2. We haven't shown the modal for this completion yet
-      if (prevProgress < 100 && !congratulationsShown && unitId) {
+      // 3. Initialization is complete (prevents showing on page visit)
+      if (prevProgress < 100 && !congratulationsShown && unitId && isInitializedRef.current) {
         setShowCongratulations(true);
         // Mark as shown in database to prevent duplicate
         const success = await markChapterCongratulationsShown(chapter._id, unitId);
