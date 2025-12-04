@@ -73,21 +73,24 @@ export const fetchExams = async (options = {}) => {
     } else {
       // Client-side: use axios (for active exams, no auth needed)
       // For inactive/all, axios will automatically include token if available
-      const response = await api.get(
-        `/exam?page=${page}&limit=${limit}&status=${status}`,
-        {
+      const response = await api
+        .get(`/exam?page=${page}&limit=${limit}&status=${status}`, {
           // Don't send auth header for active exams (public access)
           ...(status === STATUS.ACTIVE ? { headers: {} } : {}),
-        }
-      ).catch((error) => {
-        // If axios fails, try with fetch (no auth)
-        if (status === STATUS.ACTIVE) {
-          return fetch(`${baseUrl || ''}/api/exam?page=${page}&limit=${limit}&status=${status}`)
-            .then(res => res.json())
-            .catch(() => ({ success: false, data: [] }));
-        }
-        throw error;
-      });
+        })
+        .catch((error) => {
+          // If axios fails, try with fetch (no auth)
+          if (status === STATUS.ACTIVE) {
+            return fetch(
+              `${
+                baseUrl || ""
+              }/api/exam?page=${page}&limit=${limit}&status=${status}`
+            )
+              .then((res) => res.json())
+              .catch(() => ({ success: false, data: [] }));
+          }
+          throw error;
+        });
 
       if (response.data?.success && response.data?.data) {
         const exams = response.data.data || [];
@@ -1700,6 +1703,83 @@ export const fetchDefinitionDetailsById = async (definitionId) => {
     };
   }
 };
+
+// Save student test result
+export async function saveTestResult(resultData) {
+  const isServer = typeof window === "undefined";
+
+  if (isServer) {
+    return null;
+  }
+
+  try {
+    const token = localStorage.getItem("student_token");
+    if (!token) {
+      return { success: false, message: "Not authenticated" };
+    }
+
+    const response = await api.post("/student/test-results", resultData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.data.success) {
+      return { success: true, data: response.data.data };
+    }
+    return { success: false, message: response.data.message };
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to save test result",
+    };
+  }
+}
+
+// Fetch student test results
+export async function fetchStudentTestResults(testId = null) {
+  const isServer = typeof window === "undefined";
+
+  if (isServer) {
+    return null;
+  }
+
+  try {
+    const token = localStorage.getItem("student_token");
+    if (!token) {
+      return null;
+    }
+
+    const url = testId
+      ? `/student/test-results?testId=${testId}`
+      : "/student/test-results";
+
+    const response = await api.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.data.success) {
+      const data = response.data.data;
+      if (data === null || data === undefined) {
+        return null;
+      }
+      if (Array.isArray(data)) {
+        return data.length > 0 ? data[0] : null;
+      }
+      return data;
+    }
+    return null;
+  } catch (error) {
+    return null;
+  }
+}
 
 // Re-export slug utilities for backward compatibility
 export const createSlug = createSlugUtil;

@@ -19,8 +19,11 @@ import {
   fetchPracticeCategories,
   fetchPracticeTestById,
   fetchPracticeTestQuestions,
+  saveTestResult,
+  fetchStudentTestResults,
 } from "../lib/api";
 import LoadingState from "./LoadingState";
+import TestSubmissionRegistrationModal from "./TestSubmissionRegistrationModal";
 import { logger } from "@/utils/logger";
 
 const PracticeTestList = ({
@@ -51,8 +54,109 @@ const PracticeTestList = ({
   const [isLoadingTest, setIsLoadingTest] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
 
+  // Authentication and registration state
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+  const [pendingTestResults, setPendingTestResults] = useState(null);
+  const [studentScores, setStudentScores] = useState({}); // testId -> best score
+
   const timerIntervalRef = useRef(null);
   const startTimeRef = useRef(null);
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = () => {
+      if (typeof window === "undefined") return false;
+      const token = localStorage.getItem("student_token");
+      const nowAuthenticated = !!token;
+      setIsAuthenticated(nowAuthenticated);
+      return nowAuthenticated;
+    };
+
+    checkAuth();
+
+    // Listen for storage changes (login/logout)
+    const handleStorageChange = (e) => {
+      if (e.key === "student_token") {
+        checkAuth();
+      }
+    };
+
+    // Listen for custom login event
+    const handleLoginEvent = () => {
+      checkAuth();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("student-login", handleLoginEvent);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("student-login", handleLoginEvent);
+    };
+  }, []);
+
+  // Fetch student scores when authenticated and tests are loaded
+  const fetchStudentScores = React.useCallback(async () => {
+    if (!isAuthenticated || practiceTests.length === 0) {
+      setStudentScores({});
+      return;
+    }
+
+    try {
+      const scorePromises = practiceTests.map(async (test) => {
+        const testId = String(test._id || test.id);
+        if (!testId || testId === "undefined" || testId === "null") {
+          return null;
+        }
+        try {
+          const result = await fetchStudentTestResults(testId);
+          if (result && result.totalMarks !== undefined) {
+            return {
+              testId,
+              score: {
+                totalMarks: result.totalMarks,
+                maximumMarks: result.maximumMarks,
+                percentage: result.percentage,
+              },
+            };
+          }
+        } catch (error) {
+          // Silently fail for individual test
+        }
+        return null;
+      });
+
+      const results = await Promise.all(scorePromises);
+      const scoresMap = {};
+      results.forEach((item) => {
+        if (item) {
+          scoresMap[item.testId] = item.score;
+        }
+      });
+
+      setStudentScores(scoresMap);
+    } catch (error) {
+      // Silently fail
+    }
+  }, [isAuthenticated, practiceTests]);
+
+  // Fetch scores when authenticated and tests change
+  useEffect(() => {
+    if (isAuthenticated && practiceTests.length > 0) {
+      fetchStudentScores();
+    } else {
+      setStudentScores({});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, practiceTests.length]);
+
+  // Close registration modal if user logs in from another tab
+  useEffect(() => {
+    if (isAuthenticated && showRegistrationModal) {
+      setShowRegistrationModal(false);
+    }
+  }, [isAuthenticated, showRegistrationModal]);
 
   useEffect(() => {
     const loadPracticeData = async () => {
@@ -267,6 +371,18 @@ const PracticeTestList = ({
         }
 
         setPracticeTests(tests);
+
+        // Fetch scores after tests are loaded (if authenticated)
+        // This ensures scores are fetched after practiceTests state is updated
+        if (typeof window !== "undefined") {
+          const token = localStorage.getItem("student_token");
+          if (token && tests.length > 0) {
+            // Use setTimeout to ensure state is updated before fetching
+            setTimeout(() => {
+              fetchStudentScores();
+            }, 100);
+          }
+        }
 
         // Group tests by category - Only show categories that have subcategories (papers/tests)
         // If a category has no subcategories, don't show it
@@ -519,18 +635,159 @@ const PracticeTestList = ({
 
   // Submit test (called after confirmation) and calculate results
   const handleSubmitTest = React.useCallback(
-    (autoSubmit = false) => {
+    async (autoSubmit = false) => {
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current);
       }
 
       setShowSubmitModal(false);
       const calculatedResults = calculateResults();
+      const testIdStr = String(selectedTest);
+
+      // If student is NOT logged in, show registration modal
+      if (!isAuthenticated && test && selectedTest) {
+        setPendingTestResults({
+          testId: testIdStr,
+          examId: examId || null,
+          subjectId: subjectId || null,
+          unitId: unitId || null,
+          chapterId: chapterId || null,
+          topicId: topicId || null,
+          subTopicId: subTopicId || null,
+          totalQuestions: calculatedResults.totalQuestions,
+          correctCount: calculatedResults.correctCount,
+          incorrectCount: calculatedResults.incorrectCount,
+          unansweredCount: calculatedResults.unansweredCount,
+          totalMarks: calculatedResults.totalMarks,
+          maximumMarks: calculatedResults.maximumMarks,
+          percentage: calculatedResults.percentage,
+          timeTaken: calculatedResults.timeTaken,
+          answers: answers,
+          questionResults: calculatedResults.questionResults,
+          startedAt: startTimeRef.current
+            ? new Date(startTimeRef.current)
+            : new Date(),
+        });
+        setShowRegistrationModal(true);
+        return;
+      }
+
+      // If authenticated, proceed normally
       setResults(calculatedResults);
       setIsTestSubmitted(true);
       setIsTestStarted(false);
+
+      // Save results to database if student is authenticated
+      if (isAuthenticated && test && selectedTest) {
+        try {
+          const resultData = {
+            testId: testIdStr,
+            examId: examId || null,
+            subjectId: subjectId || null,
+            unitId: unitId || null,
+            chapterId: chapterId || null,
+            topicId: topicId || null,
+            subTopicId: subTopicId || null,
+            totalQuestions: calculatedResults.totalQuestions,
+            correctCount: calculatedResults.correctCount,
+            incorrectCount: calculatedResults.incorrectCount,
+            unansweredCount: calculatedResults.unansweredCount,
+            totalMarks: calculatedResults.totalMarks,
+            maximumMarks: calculatedResults.maximumMarks,
+            percentage: calculatedResults.percentage,
+            timeTaken: calculatedResults.timeTaken,
+            answers: answers,
+            questionResults: calculatedResults.questionResults,
+            startedAt: startTimeRef.current
+              ? new Date(startTimeRef.current)
+              : new Date(),
+          };
+
+          const saveResult = await saveTestResult(resultData);
+          if (saveResult.success && saveResult.data) {
+            // Update score immediately with saved data
+            setStudentScores((prev) => ({
+              ...prev,
+              [testIdStr]: {
+                totalMarks: saveResult.data.totalMarks,
+                maximumMarks: saveResult.data.maximumMarks,
+                percentage: saveResult.data.percentage,
+              },
+            }));
+          }
+        } catch (error) {
+          logger.error("Error saving test result:", error);
+        }
+      }
     },
-    [calculateResults]
+    [
+      calculateResults,
+      isAuthenticated,
+      test,
+      selectedTest,
+      examId,
+      subjectId,
+      unitId,
+      chapterId,
+      topicId,
+      subTopicId,
+      answers,
+      fetchStudentScores,
+    ]
+  );
+
+  // Handle registration success - save results and show them
+  const handleRegistrationSuccess = React.useCallback(
+    async (token) => {
+      setShowRegistrationModal(false);
+
+      if (typeof window !== "undefined") {
+        const storedToken = localStorage.getItem("student_token");
+        if (storedToken) {
+          setIsAuthenticated(true);
+        }
+      }
+
+      // Show results first
+      if (pendingTestResults) {
+        setResults({
+          totalQuestions: pendingTestResults.totalQuestions,
+          correctCount: pendingTestResults.correctCount,
+          incorrectCount: pendingTestResults.incorrectCount,
+          unansweredCount: pendingTestResults.unansweredCount,
+          totalMarks: pendingTestResults.totalMarks,
+          maximumMarks: pendingTestResults.maximumMarks,
+          percentage: pendingTestResults.percentage,
+          questionResults: pendingTestResults.questionResults,
+          timeTaken: pendingTestResults.timeTaken,
+        });
+        setIsTestSubmitted(true);
+        setIsTestStarted(false);
+      }
+
+      // Save pending test results to database
+      if (pendingTestResults) {
+        try {
+          const saveResult = await saveTestResult(pendingTestResults);
+          if (saveResult.success && saveResult.data) {
+            const testIdStr = String(pendingTestResults.testId);
+            // Update score with saved data
+            setStudentScores((prev) => ({
+              ...prev,
+              [testIdStr]: {
+                totalMarks: saveResult.data.totalMarks,
+                maximumMarks: saveResult.data.maximumMarks,
+                percentage: saveResult.data.percentage,
+              },
+            }));
+          }
+        } catch (error) {
+          // Silently fail
+        }
+        setPendingTestResults(null);
+      }
+    },
+    [pendingTestResults]
   );
 
   // Timer effect to submit test automatically if time is up
@@ -566,8 +823,17 @@ const PracticeTestList = ({
     setIsTestSubmitted(false);
     setResults(null);
     setMarkedForReview(new Set());
+    setShowRegistrationModal(false);
+    setPendingTestResults(null);
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
+    }
+
+    // Refresh scores when going back to list
+    if (isAuthenticated && practiceTests.length > 0) {
+      setTimeout(() => {
+        fetchStudentScores();
+      }, 300);
     }
   };
 
@@ -910,7 +1176,6 @@ const PracticeTestList = ({
               </p>
             </div>
 
-           
             {/* STATS GRID — FULLY RESPONSIVE */}
             <div
               className="
@@ -1045,6 +1310,35 @@ const PracticeTestList = ({
 
     return (
       <div className="space-y-2">
+        {/* Registration Modal */}
+        {!isAuthenticated && (
+          <TestSubmissionRegistrationModal
+            isOpen={showRegistrationModal && !isAuthenticated}
+            onClose={() => {
+              setShowRegistrationModal(false);
+              // If user closes without registering, show results anyway
+              if (pendingTestResults) {
+                setResults({
+                  totalQuestions: pendingTestResults.totalQuestions,
+                  correctCount: pendingTestResults.correctCount,
+                  incorrectCount: pendingTestResults.incorrectCount,
+                  unansweredCount: pendingTestResults.unansweredCount,
+                  totalMarks: pendingTestResults.totalMarks,
+                  maximumMarks: pendingTestResults.maximumMarks,
+                  percentage: pendingTestResults.percentage,
+                  questionResults: pendingTestResults.questionResults,
+                  timeTaken: pendingTestResults.timeTaken,
+                });
+                setIsTestSubmitted(true);
+                setIsTestStarted(false);
+                setPendingTestResults(null);
+              }
+            }}
+            onRegistrationSuccess={handleRegistrationSuccess}
+            testName={test?.name}
+          />
+        )}
+
         {/* Submit Confirmation Modal */}
         {showSubmitModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-60 h-screen">
@@ -1450,27 +1744,73 @@ const PracticeTestList = ({
 
                     {/* Col 6 */}
                     <td className="px-3 py-2 text-right w-[13%]">
-                      <button
-                        onClick={() => setSelectedTest(test._id)}
-                        className="
-                        px-4 py-1.5
-                        bg-blue-600 
-                        hover:bg-blue-700 
-                        text-white 
-                        text-xs font-semibold 
-                        rounded-md 
-                         
-                        hover:shadow
-                        transition-all
-                      "
-                      >
-                        Start
-                      </button>
+                      {(() => {
+                        const testId = String(test._id || test.id);
+                        const score = studentScores[testId];
+                        const hasScore =
+                          score &&
+                          score.totalMarks !== undefined &&
+                          score.totalMarks !== null &&
+                          !isNaN(score.totalMarks) &&
+                          score.maximumMarks !== undefined &&
+                          score.maximumMarks !== null;
+
+                        return (
+                          <button
+                            onClick={() => setSelectedTest(test._id)}
+                            className={`
+                            px-4 py-1.5
+                            text-white 
+                            text-xs font-semibold 
+                            rounded-md 
+                            hover:shadow
+                            transition-all
+                            ${
+                              hasScore
+                                ? "bg-green-600 hover:bg-green-700"
+                                : "bg-blue-600 hover:bg-blue-700"
+                            }
+                          `}
+                          >
+                            {hasScore ? "Retake" : "Start"}
+                          </button>
+                        );
+                      })()}
                     </td>
 
-                    {/* Col 7 */}
+                    {/* Col 7 - My Score */}
                     <td className="px-4 py-2 text-right text-sm font-bold w-[13%]">
-                      <span className="text-gray-500">NA</span>
+                      {(() => {
+                        const testId = String(test._id || test.id);
+                        const score = studentScores[testId];
+
+                        if (
+                          score &&
+                          score.totalMarks !== undefined &&
+                          score.totalMarks !== null &&
+                          !isNaN(score.totalMarks) &&
+                          score.maximumMarks !== undefined &&
+                          score.maximumMarks !== null
+                        ) {
+                          return (
+                            <div className="flex flex-col items-end gap-0.5">
+                              <span className="text-indigo-600 font-bold text-sm">
+                                {parseFloat(score.totalMarks).toFixed(1)}/
+                                {score.maximumMarks}
+                              </span>
+                              <span className="text-xs text-gray-500 font-normal">
+                                {parseFloat(score.percentage || 0).toFixed(1)}%
+                              </span>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <span className="text-gray-500 font-normal text-sm">
+                            NA
+                          </span>
+                        );
+                      })()}
                     </td>
                   </tr>
                 ))}
@@ -1505,24 +1845,70 @@ const PracticeTestList = ({
 
                 {/* Button + Score */}
                 <div className="mt-3 flex items-center justify-between">
-                  <button
-                    onClick={() => setSelectedTest(test._id)}
-                    className="
-            px-4 py-1.5 
-            bg-blue-600 
-            text-white 
-            text-[11px]
-            font-semibold 
-            rounded-md 
-            hover:bg-blue-700 
-             
-            transition-all
-          "
-                  >
-                    Start
-                  </button>
+                  {(() => {
+                    const testId = String(test._id || test.id);
+                    const score = studentScores[testId];
+                    const hasScore =
+                      score &&
+                      score.totalMarks !== undefined &&
+                      score.totalMarks !== null &&
+                      !isNaN(score.totalMarks) &&
+                      score.maximumMarks !== undefined &&
+                      score.maximumMarks !== null;
 
-                  <div className="text-xs font-bold text-gray-500">NA</div>
+                    return (
+                      <button
+                        onClick={() => setSelectedTest(test._id)}
+                        className={`
+                px-4 py-1.5 
+                text-white 
+                text-[11px]
+                font-semibold 
+                rounded-md 
+                transition-all
+                ${
+                  hasScore
+                    ? "bg-green-600 hover:bg-green-700"
+                    : "bg-blue-600 hover:bg-blue-700"
+                }
+              `}
+                      >
+                        {hasScore ? "Retake" : "Start"}
+                      </button>
+                    );
+                  })()}
+
+                  {(() => {
+                    const testId = String(test._id || test.id);
+                    const score = studentScores[testId];
+
+                    if (
+                      score &&
+                      score.totalMarks !== undefined &&
+                      score.totalMarks !== null &&
+                      !isNaN(score.totalMarks) &&
+                      score.maximumMarks !== undefined &&
+                      score.maximumMarks !== null
+                    ) {
+                      return (
+                        <div className="text-right">
+                          <div className="text-xs font-bold text-indigo-600">
+                            {parseFloat(score.totalMarks).toFixed(1)}/
+                            {score.maximumMarks}
+                          </div>
+                          <div className="text-[10px] text-gray-500 font-normal">
+                            {parseFloat(score.percentage || 0).toFixed(1)}%
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="text-xs font-normal text-gray-500">
+                        NA
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             ))}

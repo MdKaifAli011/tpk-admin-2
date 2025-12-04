@@ -301,6 +301,26 @@ export const validateClassName = (className) => {
   return "";
 };
 
+export const validatePassword = (password) => {
+  if (!password) {
+    return "Password is required";
+  }
+  if (password.length < 6) {
+    return "Password must be at least 6 characters";
+  }
+  return "";
+};
+
+export const validateConfirmPassword = (password, confirmPassword) => {
+  if (!confirmPassword) {
+    return "Confirm password is required";
+  }
+  if (password !== confirmPassword) {
+    return "Passwords do not match";
+  }
+  return "";
+};
+
 export const validateForm = (formData, validateVerification) => {
   const errors = {};
 
