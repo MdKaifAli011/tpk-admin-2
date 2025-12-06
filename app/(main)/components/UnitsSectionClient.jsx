@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { FaBook } from "react-icons/fa";
 import UnitsListClient from "./UnitsListClient";
 
 const UnitsSectionClient = ({
@@ -25,13 +24,13 @@ const UnitsSectionClient = ({
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
           <div className="flex items-start gap-2">
-            <FaBook className="text-lg sm:text-xl text-indigo-600" />
             <div>
               <h2 className="text-base sm:text-lg font-semibold text-gray-900">
                 {examName} &gt; {subjectName} Units
               </h2>
               <p className="mt-1 text-xs sm:text-sm text-gray-500">
-                Review each unit, its weightage, and completion progress. Progress is calculated from chapters within each unit.
+                Review each unit, its weightage, and completion progress.
+                Progress is calculated from chapters within each unit.
               </p>
             </div>
           </div>
@@ -54,4 +53,3 @@ const UnitsSectionClient = ({
 };
 
 export default UnitsSectionClient;
-

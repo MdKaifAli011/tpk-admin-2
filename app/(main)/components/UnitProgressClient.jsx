@@ -342,11 +342,11 @@ const UnitProgressClient = ({ unitId, unitName, initialProgress = 0 }) => {
 
   return (
     <>
-      <div className="text-right">
-        <p className="text-xs text-gray-500 mb-1.5">Unit Progress</p>
-        <div className="flex items-center gap-2.5">
-          <span className="font-semibold text-sm text-gray-700">{progress}%</span>
-          <div className="w-24 sm:w-28 h-2 bg-gray-200 rounded-full overflow-hidden">
+      <div className="w-full sm:w-auto text-left sm:text-right">
+        <p className="text-[10px] sm:text-xs text-gray-500 mb-1 sm:mb-1.5 font-medium">Unit Progress</p>
+        <div className="flex items-center gap-2 sm:gap-2.5 flex-row sm:flex-row">
+          <span className="font-semibold text-xs sm:text-sm text-gray-700 whitespace-nowrap min-w-[2.5rem] sm:min-w-[3rem]">{progress}%</span>
+          <div className="flex-1 sm:flex-none w-full sm:w-24 md:w-28 h-1.5 sm:h-2 bg-gray-200 rounded-full overflow-hidden shadow-inner">
             <div
               className={`h-full transition-all duration-300 ${
                 progress >= 100

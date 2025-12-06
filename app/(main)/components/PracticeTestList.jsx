@@ -1683,10 +1683,10 @@ const PracticeTestList = ({
           <div className="overflow-x-auto hidden md:block">
             <table className="min-w-full table-fixed">
               {/* FIXED HEADER */}
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-blue-50 border-b border-gray-200">
                 <tr className="text-[11px] font-semibold text-gray-600 uppercase tracking-wide">
                   {/* Column 1 */}
-                  <th className="px-4 py-2 text-left w-[28%] text-sm text-blue-600">
+                  <th className="px-4 py-2 text-left w-[28%] text-sm text-blue-900">
                     {group.category.name}
                   </th>
 
@@ -1716,29 +1716,29 @@ const PracticeTestList = ({
                   <tr key={i} className="hover:bg-gray-50 transition-all">
                     {/* Col 1 */}
                     <td className="px-4 py-2 w-[28%]">
-                      <div className="text-sm font-semibold text-gray-900">
+                      <div className="text-[14px] font-medium text-black">
                         <span className="mr-1">{test.orderNumber}.</span>
                         {test.name}
                       </div>
                     </td>
 
                     {/* Col 2 */}
-                    <td className="px-3 py-2 text-center text-sm text-gray-700 w-[10%]">
+                    <td className="px-3 py-2 text-center text-[14px] text-gray-700 w-[10%]">
                       {test.numberOfQuestions || 0}
                     </td>
 
                     {/* Col 3 */}
-                    <td className="px-3 py-2 text-center text-sm text-gray-700 w-[12%]">
+                    <td className="px-3 py-2 text-center text-[14px] text-gray-700 w-[12%]">
                       {test.maximumMarks || 0}
                     </td>
 
                     {/* Col 4 */}
-                    <td className="px-3 py-2 text-center text-sm text-gray-700 w-[12%]">
+                    <td className="px-3 py-2 text-center text-[14px] text-gray-700 w-[12%]">
                       {test.duration || "N/A"}
                     </td>
 
                     {/* Col 5 */}
-                    <td className="px-3 py-2 text-center text-sm text-gray-500 w-[12%]">
+                    <td className="px-3 py-2 text-center text-[14px] text-gray-500 w-[12%]">
                       –
                     </td>
 
@@ -1824,13 +1824,13 @@ const PracticeTestList = ({
               <div key={i} className="px-4 py-3">
                 {/* Show category name ONLY for the first test */}
                 {i === 0 && (
-                  <div className="text-sm font-bold text-blue-600 mb-2">
+                  <div className="text-sm font-bold text-blue-900 mb-2">
                     {group.category.name}
                   </div>
                 )}
 
                 {/* Paper Name */}
-                <div className="text-sm font-semibold text-gray-900">
+                <div className="text-sm font-semibold text-black">
                   <span className=" mr-1">{test.orderNumber}.</span>
                   {test.name}
                 </div>

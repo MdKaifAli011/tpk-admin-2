@@ -114,38 +114,37 @@ const UnitPage = async ({ params }) => {
     <MainLayout>
       <div className="space-y-4">
         {/* Compact Premium Educational Header */}
-<section
-  className="
-    rounded-xl
-    p-3 sm:p-4
+        <section
+          className="
+            rounded-xl
+            p-3 sm:p-4
+            bg-gradient-to-br from-indigo-50 via-white to-purple-50
+            border border-indigo-100/60
+            shadow-[0_2px_12px_rgba(120,90,200,0.08)]
+          "
+        >
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-2.5">
+            {/* Title + Breadcrumb */}
+            <div className="flex-1 w-full sm:w-auto leading-tight min-w-0">
+              <h1 className="text-base sm:text-lg md:text-xl font-bold text-indigo-900 break-words">
+                {unit.name}
+              </h1>
 
-    /* Premium Educational Gradient */
-    bg-gradient-to-br from-indigo-50 via-white to-purple-50
-    border border-indigo-100/60
-    shadow-[0_2px_12px_rgba(120,90,200,0.08)]
-  "
->
-  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2.5">
+              <p className="text-[10px] sm:text-xs text-gray-600 mt-0.5 break-words line-clamp-2">
+                {fetchedExam.name} &gt; {subject.name} &gt; {unit.name}
+              </p>
+            </div>
 
-    {/* Title + Breadcrumb */}
-    <div className="flex-1 leading-tight">
-      <h1 className="text-lg sm:text-xl font-bold text-indigo-900">
-        {unit.name}
-      </h1>
-
-      <p className="text-[10px] sm:text-xs text-gray-600 mt-0.5">
-        {fetchedExam.name} &gt; {subject.name} &gt; {unit.name}
-      </p>
-    </div>
-
-    {/* Progress Component */}
-    <UnitProgressClient
-      unitId={unit._id}
-      unitName={unit.name}
-      initialProgress={0}
-    />
-  </div>
-</section>
+            {/* Progress Component */}
+            <div className="w-full sm:w-auto sm:shrink-0">
+              <UnitProgressClient
+                unitId={unit._id}
+                unitName={unit.name}
+                initialProgress={0}
+              />
+            </div>
+          </div>
+        </section>
 
         {/* Tabs */}
         <TabsClient

@@ -1,9 +1,6 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import MainLayout from "../../../../../../layout/MainLayout";
-import {
-  FaFileAlt,
-} from "react-icons/fa";
 import TabsClient from "../../../../../../components/TabsClient";
 import NavigationClient from "../../../../../../components/NavigationClient";
 import ChaptersSectionClient from "../../../../../../components/ChaptersSectionClient";
@@ -33,7 +30,7 @@ import {
   getPreviousSubtopic,
 } from "../../../../../../lib/hierarchicalNavigation";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 const SubTopicPage = async ({ params }) => {
@@ -68,10 +65,7 @@ const SubTopicPage = async ({ params }) => {
   const subject = fullSubjectData || foundSubject;
 
   // Fetch units for this subject
-  const fetchedUnits = await fetchUnitsBySubject(
-    foundSubject._id,
-    examIdValue
-  );
+  const fetchedUnits = await fetchUnitsBySubject(foundSubject._id, examIdValue);
 
   // Find unit by slug
   const foundUnit = findByIdOrSlug(fetchedUnits, unitSlug);
@@ -119,16 +113,17 @@ const SubTopicPage = async ({ params }) => {
   }
 
   // Fetch full subtopic data, details, and definitions in parallel
-  const [fullSubTopicData, subTopicDetails, fetchedDefinitions] = await Promise.all([
-    fetchSubTopicById(foundSubTopic._id),
-    fetchSubTopicDetailsById(foundSubTopic._id).catch(() => ({
-      content: "",
-      title: "",
-      metaDescription: "",
-      keywords: "",
-    })),
-    fetchDefinitionsBySubTopic(foundSubTopic._id).catch(() => []),
-  ]);
+  const [fullSubTopicData, subTopicDetails, fetchedDefinitions] =
+    await Promise.all([
+      fetchSubTopicById(foundSubTopic._id),
+      fetchSubTopicDetailsById(foundSubTopic._id).catch(() => ({
+        content: "",
+        title: "",
+        metaDescription: "",
+        keywords: "",
+      })),
+      fetchDefinitionsBySubTopic(foundSubTopic._id).catch(() => []),
+    ]);
 
   const subTopic = fullSubTopicData || foundSubTopic;
 
@@ -201,38 +196,39 @@ const SubTopicPage = async ({ params }) => {
         itemId={subTopic._id}
       />
       <div className="space-y-4">
-      {/* Compact Premium Educational Header */}
-<section
-  className="
-    rounded-xl
-    p-3 sm:p-4
-    bg-gradient-to-br from-indigo-50 via-white to-purple-50
-    border border-indigo-100/60
-    shadow-[0_2px_12px_rgba(120,90,200,0.08)]
-  "
->
-  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2.5">
+        {/* Compact Premium Educational Header */}
+        <section
+          className="
+            rounded-xl
+            p-3 sm:p-4
+            bg-gradient-to-br from-indigo-50 via-white to-purple-50
+            border border-indigo-100/60
+            shadow-[0_2px_12px_rgba(120,90,200,0.08)]
+          "
+        >
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-2.5">
+            {/* Title + Breadcrumb */}
+            <div className="flex-1 w-full sm:w-auto leading-tight min-w-0">
+              <h1 className="text-base sm:text-lg md:text-xl font-bold text-indigo-900 break-words">
+                {subTopic.name}
+              </h1>
 
-    {/* Title + Breadcrumb */}
-    <div className="flex-1 leading-tight">
-      <h1 className="text-lg sm:text-xl font-bold text-indigo-900">
-        {subTopic.name}
-      </h1>
+              <p className="text-[10px] sm:text-xs text-gray-600 mt-0.5 break-words line-clamp-2">
+                {fetchedExam.name} &gt; {subject.name} &gt; {unit.name} &gt;{" "}
+                {chapter.name} &gt; {topic.name} &gt; {subTopic.name}
+              </p>
+            </div>
 
-      <p className="text-[10px] sm:text-xs text-gray-600 mt-0.5">
-        {fetchedExam.name} &gt; {subject.name} &gt; {unit.name} &gt; {chapter.name} &gt; {topic.name} &gt; {subTopic.name}
-      </p>
-    </div>
-
-    {/* Progress Component */}
-    <UnitProgressClient
-      unitId={unit._id}
-      unitName={unit.name}
-      initialProgress={0}
-    />
-  </div>
-</section>
-
+            {/* Progress Component */}
+            <div className="w-full sm:w-auto sm:shrink-0">
+              <UnitProgressClient
+                unitId={unit._id}
+                unitName={unit.name}
+                initialProgress={0}
+              />
+            </div>
+          </div>
+        </section>
 
         {/* Tabs */}
         <TabsClient
@@ -275,7 +271,6 @@ const SubTopicPage = async ({ params }) => {
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
               <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
                 <div className="flex items-start gap-2">
-                  <FaFileAlt className="text-lg sm:text-xl text-indigo-600" />
                   <div>
                     <h2 className="text-base sm:text-lg font-semibold text-gray-900">
                       Definitions
@@ -289,7 +284,8 @@ const SubTopicPage = async ({ params }) => {
 
               <div className="divide-y divide-gray-100">
                 {fetchedDefinitions.map((definition, index) => {
-                  const definitionSlug = definition.slug || createSlug(definition.name);
+                  const definitionSlug =
+                    definition.slug || createSlug(definition.name);
                   return (
                     <a
                       key={definition._id}

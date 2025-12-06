@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, lazy, Suspense } from "react";
+import { FaChartLine } from "react-icons/fa";
 import { ExamCardSkeleton } from "./SkeletonLoader";
 
 // Lazy load tabs for code splitting - only load when needed
@@ -70,7 +71,10 @@ const TabsClient = ({
 
         case "Discussion Forum":
           return (
-            <DiscussionForumTab entityType={entityType} entityName={entityName} />
+            <DiscussionForumTab
+              entityType={entityType}
+              entityName={entityName}
+            />
           );
 
         case "Practice Test":
@@ -114,21 +118,55 @@ const TabsClient = ({
   return (
     <section className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
       {/* Tab Navigation */}
-      <nav className="flex  overflow-x-auto sm:overflow-visible border-b border-gray-200 bg-gray-50">
-        <div className="flex  min-w-max sm:min-w-0 w-full justify-start sm:justify-around">
+      <nav className="flex overflow-x-auto sm:overflow-visible border-b border-gray-200  bg-gradient-to-br from-indigo-50 via-white to-purple-50 scrollbar-hide">
+        <div className="flex min-w-max sm:min-w-0 w-full gap-4 sm:gap-6 md:gap-8 lg:gap-10 xl:gap-12 justify-around px-3 sm:px-4 md:px-6">
           {TABS.map((tab) => {
             const isActive = activeTab === tab;
+            const isPerformanceTab = tab === "Performance";
+
             return (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`relative px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium whitespace-nowrap transition-colors border-b-2 ${
+                className={`relative px-2.5 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-2.5 text-[10px] sm:text-xs md:text-sm font-semibold whitespace-nowrap transition-all duration-300 border-b-2 group overflow-hidden shrink-0 ${
                   isActive
-                    ? "text-indigo-600 border-indigo-600 bg-white"
+                    ? isPerformanceTab
+                      ? "text-emerald-700 border-emerald-600 bg-gradient-to-b from-emerald-50 via-white to-white shadow-sm"
+                      : "text-indigo-600 border-indigo-600 bg-white"
+                    : isPerformanceTab
+                    ? "text-emerald-600 hover:text-emerald-700 border-transparent bg-emerald-50/30 hover:bg-emerald-50/50"
                     : "text-gray-500 hover:text-gray-700 border-transparent"
                 }`}
               >
-                {tab}
+                {/* Background glow effect for Performance tab when active */}
+                {isPerformanceTab && isActive && (
+                  <span className="absolute inset-0 bg-emerald-100/30 rounded-t-lg z-0"></span>
+                )}
+
+                {/* Hover background effect for Performance tab when not active */}
+                {isPerformanceTab && !isActive && (
+                  <span className="absolute inset-0 bg-emerald-100/0 group-hover:bg-emerald-100/40 rounded-t-lg transition-all duration-300 z-0"></span>
+                )}
+
+                {/* Content wrapper with proper z-index */}
+                <span className="flex items-center gap-1.5 sm:gap-2 relative z-10">
+                  {isPerformanceTab && (
+                    <FaChartLine
+                      className={`text-xs sm:text-sm transition-all duration-300 ${
+                        isActive
+                          ? "text-emerald-600 animate-pulse"
+                          : "text-emerald-500 group-hover:scale-110 group-hover:rotate-[-5deg]"
+                      }`}
+                    />
+                  )}
+                  <span className="relative inline-block">
+                    {tab}
+                    {/* Premium underline animation for Performance tab when inactive */}
+                    {isPerformanceTab && !isActive && (
+                      <span className="absolute -bottom-0.5 left-0 w-0 h-[2px] bg-emerald-600 group-hover:w-full transition-all duration-300 rounded-full"></span>
+                    )}
+                  </span>
+                </span>
               </button>
             );
           })}
@@ -136,9 +174,33 @@ const TabsClient = ({
       </nav>
 
       {/* Tab Content */}
-      <div className=" text-gray-700 text-sm sm:text-base">
+      <div className="text-gray-700 text-sm sm:text-base">
         {renderTabContent()}
       </div>
+
+      {/* Custom scrollbar styling for mobile */}
+      <style jsx>{`
+        nav::-webkit-scrollbar {
+          height: 3px;
+        }
+        nav::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        nav::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 2px;
+        }
+        nav::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </section>
   );
 };

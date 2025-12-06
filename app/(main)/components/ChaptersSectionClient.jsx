@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { FaBook } from "react-icons/fa";
 import ChaptersListClient from "./ChaptersListClient";
 
 const ChaptersSectionClient = ({
@@ -20,7 +19,6 @@ const ChaptersSectionClient = ({
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="px-4 sm:px-6 py-4 border-b border-gray-100">
           <div className="flex items-start gap-2">
-            <FaBook className="text-lg sm:text-xl text-indigo-600" />
             <div>
               <h2 className="text-base sm:text-lg font-semibold text-gray-900">
                 {examName} &gt; {subjectName} &gt; {unitName} Chapters

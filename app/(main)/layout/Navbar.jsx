@@ -183,7 +183,7 @@ const Navbar = ({ onMenuToggle, isMenuOpen }) => {
       </div>
 
       {/* Main Navigation Bar - White */}
-      <div className="bg-white shadow-md w-full">
+      <div className="bg-white shadow-sm w-full">
         <div className="container mx-auto px-2.5 sm:px-3 md:px-4">
           <div className="flex items-center justify-between py-2 sm:py-2.5 md:py-3">
             {/* Left: Logo */}

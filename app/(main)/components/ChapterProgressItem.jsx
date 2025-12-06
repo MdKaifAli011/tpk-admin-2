@@ -169,14 +169,14 @@ const ChapterProgressItem = ({
         aria-label={isCompleted ? "Mark as incomplete" : "Mark as done"}
       />
       <div
-        className={`relative inline-flex items-center justify-center w-6 h-6 rounded border-2 transition-all duration-200 ${
+        className={`relative inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded border-2 transition-all duration-200 ${
           isCompleted
             ? "bg-emerald-500 border-emerald-500 shadow-md"
             : "bg-white border-gray-300 group-hover:border-emerald-400"
         }`}
       >
         {isCompleted && (
-          <FaCheck className="w-3.5 h-3.5 text-white" />
+          <FaCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" />
         )}
       </div>
     </label>
@@ -184,39 +184,39 @@ const ChapterProgressItem = ({
 
   return (
     <div
-      className={`block px-4 py-4 transition-colors hover:bg-gray-50 sm:px-6 ${
+      className={`block px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-4 transition-colors hover:bg-gray-50 active:bg-gray-100 ${
         isDragging ? "cursor-grabbing" : ""
       }`}
     >
-      <div className="flex flex-col gap-4 sm:grid sm:grid-cols-[minmax(0,1fr)_140px_180px] sm:items-center sm:gap-6">
+      <div className="flex flex-col gap-3 sm:gap-4 md:grid md:grid-cols-[minmax(0,1fr)_120px_200px] md:items-center md:gap-6">
         {/* Chapter Name Section */}
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-2 sm:gap-3">
           <span
-            className={`hidden sm:block w-1 self-stretch rounded-full ${indicatorColor}`}
+            className={`hidden md:block w-1 self-stretch rounded-full ${indicatorColor}`}
             aria-hidden="true"
           />
           <span
-            className={`block h-0.5 w-12 rounded-full ${indicatorColor} sm:hidden`}
+            className={`block h-0.5 w-8 sm:w-12 rounded-full ${indicatorColor} md:hidden`}
             aria-hidden="true"
           />
           <div className="min-w-0 flex-1">
             {href ? (
-              <Link href={href} className="block">
-                <p className="text-sm font-semibold text-gray-900 sm:text-base hover:text-indigo-600 transition-colors">
+              <Link href={href} className="block group/link">
+                <p className="text-sm sm:text-base md:text-base font-semibold text-gray-900 group-hover/link:text-indigo-600 transition-colors break-words line-clamp-2">
                   {chapter.name}
                 </p>
               </Link>
             ) : (
-              <p className="text-sm font-semibold text-gray-900 sm:text-base">
+              <p className="text-sm sm:text-base md:text-base font-semibold text-gray-900 break-words line-clamp-2">
                 {chapter.name}
               </p>
             )}
-            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 sm:text-sm">
-              <span className="font-medium text-emerald-600">
+            <div className="mt-1.5 sm:mt-2 flex flex-wrap items-center gap-x-3 sm:gap-x-4 gap-y-1 text-[10px] sm:text-xs md:text-sm text-gray-500">
+              <span className="font-medium text-emerald-600 whitespace-nowrap">
                 Weightage: {weightage}
               </span>
-              <span className="inline-flex items-center gap-1">
-                <FaEye className="text-gray-400" />
+              <span className="inline-flex items-center gap-1 whitespace-nowrap">
+                <FaEye className="text-gray-400 text-[10px] sm:text-xs" />
                 {engagement}
               </span>
             </div>
@@ -224,16 +224,16 @@ const ChapterProgressItem = ({
         </div>
 
         {/* Status Section */}
-        <div className="flex items-center justify-start sm:justify-center" onClick={(e) => e.stopPropagation()}>
-          <div onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-start md:justify-center" onClick={(e) => e.stopPropagation()}>
+          <div onClick={(e) => e.stopPropagation()} className="flex-shrink-0">
             {statusMarkup}
           </div>
         </div>
 
         {/* Progress Section with Slider */}
-        <div className="flex w-full items-center gap-3 sm:w-auto sm:justify-end">
+        <div className="flex w-full items-center gap-2 sm:gap-3 md:w-auto md:justify-end">
           {/* Single Slider with Percentage Label */}
-          <div className="flex-1 sm:w-48" onClick={(e) => e.stopPropagation()}>
+          <div className="flex-1 sm:flex-1 md:w-48 lg:w-56" onClick={(e) => e.stopPropagation()}>
             <input
               type="range"
               min="0"
@@ -248,7 +248,7 @@ const ChapterProgressItem = ({
               onClick={(e) => e.stopPropagation()}
               onPointerDown={(e) => e.stopPropagation()}
               onPointerUp={(e) => e.stopPropagation()}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider pointer-events-auto"
+              className="w-full h-1.5 sm:h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider pointer-events-auto"
               style={{
                 background: `linear-gradient(to right, ${
                   progressPercent >= 100
@@ -269,8 +269,8 @@ const ChapterProgressItem = ({
             <style jsx>{`
               .slider::-webkit-slider-thumb {
                 appearance: none;
-                width: 18px;
-                height: 18px;
+                width: 16px;
+                height: 16px;
                 border-radius: 50%;
                 background: ${progressPercent >= 100
                   ? "#10b981"
@@ -281,14 +281,20 @@ const ChapterProgressItem = ({
                 border: 2px solid white;
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
                 transition: all 0.2s;
+              }
+              @media (min-width: 640px) {
+                .slider::-webkit-slider-thumb {
+                  width: 18px;
+                  height: 18px;
+                }
               }
               .slider::-webkit-slider-thumb:hover {
                 transform: scale(1.1);
                 box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
               }
               .slider::-moz-range-thumb {
-                width: 18px;
-                height: 18px;
+                width: 16px;
+                height: 16px;
                 border-radius: 50%;
                 background: ${progressPercent >= 100
                   ? "#10b981"
@@ -299,6 +305,12 @@ const ChapterProgressItem = ({
                 border: 2px solid white;
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
                 transition: all 0.2s;
+              }
+              @media (min-width: 640px) {
+                .slider::-moz-range-thumb {
+                  width: 18px;
+                  height: 18px;
+                }
               }
               .slider::-moz-range-thumb:hover {
                 transform: scale(1.1);
@@ -307,7 +319,7 @@ const ChapterProgressItem = ({
             `}</style>
           </div>
           {/* Percentage Label */}
-          <span className="min-w-[38px] text-right text-xs font-semibold text-gray-500">
+          <span className="min-w-[2.5rem] sm:min-w-[2.75rem] md:min-w-[3rem] text-right text-[10px] sm:text-xs font-semibold text-gray-500 whitespace-nowrap">
             {progressLabel}%
           </span>
         </div>
